@@ -14,7 +14,8 @@ export default function Orders() {
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
-    totalRecords: 0
+    totalRecords: 0,
+    hasMore: true
   });
   const router = useRouter();
   const params = useLocalSearchParams();
@@ -25,9 +26,9 @@ export default function Orders() {
     loadOrders();
   }, [params.source]);
 
-  const loadOrders = async (pageNo = 1) => {
+  const loadOrders = async (pageNo = 1, append = false) => {
     try {
-      setLoading(true);
+      if (pageNo === 1) setLoading(true);
       const response = await ordersApi.getOrders({
         source: params.source as string,
         pageNo,
@@ -84,11 +85,17 @@ export default function Orders() {
         register: apiOrder.register,
       }));
       
-      setOrders(transformedOrders);
+      if (append) {
+        setOrders(prev => [...prev, ...transformedOrders]);
+      } else {
+        setOrders(transformedOrders);
+      }
+      
       setPagination({
         currentPage: response.pageNo,
         totalPages: response.totalPages,
-        totalRecords: response.totalRecords
+        totalRecords: response.totalRecords,
+        hasMore: response.pageNo < response.totalPages
       });
     } catch (error) {
       console.error('Failed to load orders:', error);
@@ -122,16 +129,14 @@ export default function Orders() {
     router.push(`/picklist/location-selection?orderIds=${orderIds}`);
   };
 
-  const loadNextPage = () => {
-    if (pagination.currentPage < pagination.totalPages) {
-      loadOrders(pagination.currentPage + 1);
+  const loadMoreOrders = () => {
+    if (pagination.hasMore && !loading) {
+      loadOrders(pagination.currentPage + 1, true);
     }
   };
 
-  const loadPrevPage = () => {
-    if (pagination.currentPage > 1) {
-      loadOrders(pagination.currentPage - 1);
-    }
+  const handleEndReached = () => {
+    loadMoreOrders();
   };
 
   const filteredOrders = orders.filter(order =>
@@ -224,26 +229,18 @@ export default function Orders() {
         keyExtractor={(item) => item.id}
         style={styles.ordersList}
         contentContainerStyle={styles.ordersContent}
+        onEndReached={handleEndReached}
+        onEndReachedThreshold={0.1}
+        ListFooterComponent={
+          pagination.hasMore && !loading ? (
+            <View style={styles.loadingMore}>
+              <Text style={styles.loadingMoreText}>Loading more orders...</Text>
+            </View>
+          ) : null
+        }
       />
 
-      {pagination.totalPages > 1 && (
-        <View style={styles.paginationControls}>
-          <TouchableOpacity
-            style={[styles.paginationButton, pagination.currentPage === 1 && styles.disabledButton]}
-            onPress={loadPrevPage}
-            disabled={pagination.currentPage === 1}
-          >
-            <Text style={styles.paginationButtonText}>Previous</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.paginationButton, pagination.currentPage === pagination.totalPages && styles.disabledButton]}
-            onPress={loadNextPage}
-            disabled={pagination.currentPage === pagination.totalPages}
-          >
-            <Text style={styles.paginationButtonText}>Next</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+      
 
       {isPicklistMode && selectedOrders.length > 0 && (
         <View style={styles.bottomBar}>
@@ -385,26 +382,13 @@ const styles = StyleSheet.create({
     color: '#333',
     fontWeight: '600',
   },
-  paginationControls: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 16,
-    backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderTopColor: '#e9ecef',
+  loadingMore: {
+    padding: 20,
+    alignItems: 'center',
   },
-  paginationButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 6,
-  },
-  disabledButton: {
-    backgroundColor: '#ccc',
-  },
-  paginationButtonText: {
-    color: '#fff',
-    fontWeight: '600',
+  loadingMoreText: {
+    color: '#666',
+    fontSize: 14,
   },
   bottomBar: {
     flexDirection: 'row',

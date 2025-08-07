@@ -1,0 +1,98 @@
+{
+  "orderID" : "40006",
+  "date" : "2029-04-25T13:30:00+05:30",
+  "type" : "MANUAL",
+  "status" : "INITIATED",
+  "statusCode" : 100,
+  "paymentStatus" : "PAID",
+  "employeeID" : 2,
+  "subTotal" : 13.0,
+  "totalFees" : 0.00,
+  "customizationTotal" : 0.00,
+  "tax" : 0.65,
+  "amount" : 13.53,
+  "modifiedBy" : 2,
+  "modifiedDate" : "2024-01-03T15:12:29+05:30",
+  "items" : [ {
+    "orderItemID" : "1192003020945727488",
+    "itemID" : "3373",
+    "orderID" : 40006,
+    "upc" : "3373",
+    "name" : "POURING SPOUT-QT BOTTLE Z",
+    "sequence" : 1,
+    "orderQuantity" : 13.0,
+    "returnQuantity" : 0.0,
+    "unitPrice" : 1.0,
+    "costPrice" : 12.63,
+    "discount" : 0.12,
+    "tax" : 0.65,
+    "customizationTotal" : 0.00,
+    "status" : "INITIATED",
+    "amount" : 13.53,
+    "promotions" : [ {
+      "orderItemID" : 1192003020945727488,
+      "promotionID" : 161,
+      "type" : "Discount",
+      "amount" : 0.12
+    } ],
+    "taxes" : [ {
+      "orderItemID" : 1192003020945727488,
+      "taxID" : 1,
+      "amount" : 0.65,
+      "amount1" : 0.05000,
+      "amount2" : 0.00000,
+      "rate1" : 5.00,
+      "rate2" : 0.00
+    } ],
+    "department" : {
+      "departmentID" : 1,
+      "departmentName" : "DEFAULT",
+      "id" : 1
+    },
+    "category" : {
+      "categoryID" : 1,
+      "description" : "DEFAULT",
+      "id" : 1
+    },
+    "subCategory" : {
+      "subCategoryID" : 34,
+      "description" : "DEFAULT",
+      "id" : 34
+    },
+    "statusCode" : 100,
+    "id" : 1192003020945727488,
+    "appliedPromotions" : [ ],
+    "isTaxIncluded" : false,
+    "validateQOH" : false
+  } ],
+  "billingAddress" : {
+    "addressID" : 1192040278688112640,
+    "id" : 1192040278688112640
+  },
+  "deliveryAddress" : {
+    "addressID" : 1192040278931382272,
+    "id" : 1192040278931382272
+  },
+  "registerID" : 1,
+  "employee" : {
+    "employeeID" : 2,
+    "name" : "Financial",
+    "userID" : 2,
+    "id" : 2
+  },
+  "createTransaction" : true,
+  "store" : {
+    "storeID" : 1,
+    "name" : "Fly LLC",
+    "id" : 1
+  },
+  "register" : {
+    "id" : 1,
+    "registerID" : 1,
+    "name" : "POS1"
+  },
+  "netDiscount" : 0.12,
+  "isTaxExempt" : false,
+  "totalItemQuantity" : 13.0,
+  "id" : 40006
+}

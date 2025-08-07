@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, RefreshControl, ActivityIndicator } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { usePaginatedOrders } from '../hooks/usePaginatedOrders';
@@ -22,6 +22,7 @@ export default function OrdersScreen() {
   });
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
   const [isPicklistMode, setIsPicklistMode] = useState(false);
+  const [searchText, setSearchText] = useState('');
 
   useEffect(() => {
     setIsPicklistMode(params.mode === 'picklist');

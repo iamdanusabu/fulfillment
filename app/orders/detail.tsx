@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -32,33 +31,35 @@ export default function OrderDetail() {
 
   const renderOrderItem = ({ item }: { item: OrderItem }) => (
     <View style={styles.itemCard}>
-      <View style={styles.itemInfo}>
-        <Text style={styles.productName}>{item.name || item.productName}</Text>
-        <Text style={styles.productId}>SKU: {item.itemID || item.productId}</Text>
-        <Text style={styles.productId}>UPC: {item.upc}</Text>
+      <View style={styles.itemHeader}>
+        <Text style={styles.itemName}>{item.name || item.productName}</Text>
+        <Text style={styles.itemPrice}>${(item.unitPrice || 0).toFixed(2)}</Text>
       </View>
-      <View style={styles.itemPricing}>
-        <Text style={styles.unitPrice}>Unit Price: ${item.unitPrice.toFixed(2)}</Text>
-        <Text style={styles.quantity}>Qty: {item.orderQuantity || item.quantity}</Text>
-        <Text style={styles.itemAmount}>Amount: ${item.amount.toFixed(2)}</Text>
-        {item.discount > 0 && (
-          <Text style={styles.discount}>Discount: ${item.discount.toFixed(2)}</Text>
-        )}
+      <View style={styles.itemDetails}>
+        <Text style={styles.itemDetail}>SKU: {item.itemID || item.productId}</Text>
+        <Text style={styles.itemDetail}>UPC: {item.upc}</Text>
+        <Text style={styles.itemDetail}>Quantity: {item.orderQuantity || item.quantity}</Text>
+        <Text style={styles.itemDetail}>Status: {item.status}</Text>
+        <Text style={styles.itemDetail}>Amount: ${(item.amount || 0).toFixed(2)}</Text>
+        {item.discount > 0 && <Text style={styles.itemDetail}>Discount: ${(item.discount || 0).toFixed(2)}</Text>}
+        {item.tax > 0 && <Text style={styles.itemDetail}>Tax: ${(item.tax || 0).toFixed(2)}</Text>}
       </View>
     </View>
   );
 
+  const customerInfo = typeof order?.customer === 'object' ? order.customer : null;
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <Text>Loading order details...</Text>
+        <Text>Loading order detail...</Text>
       </View>
     );
   }
 
   if (!order) {
     return (
-      <View style={styles.errorContainer}>
+      <View style={styles.loadingContainer}>
         <Text>Order not found</Text>
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <Text style={styles.backButtonText}>Go Back</Text>
@@ -76,48 +77,101 @@ export default function OrderDetail() {
         <Text style={styles.title}>Order Details</Text>
       </View>
 
-      <View style={styles.orderSummary}>
-        <Text style={styles.orderNumber}>Order ID: {order.orderID}</Text>
-        <Text style={styles.externalOrderId}>External Order ID: {order.externalOrderID}</Text>
-        <Text style={styles.customer}>
-          {typeof order.customer === 'string' ? order.customer : order.customer.name}
-        </Text>
-        <View style={styles.orderMeta}>
-          <Text style={styles.source}>Source: {order.source}</Text>
-          <Text style={styles.status}>Status: {order.status}</Text>
-          <Text style={styles.paymentStatus}>Payment: {order.paymentStatus}</Text>
+      <View style={styles.content}>
+        {/* Order Summary */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Order Summary</Text>
+          <View style={styles.summaryCard}>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Order ID:</Text>
+              <Text style={styles.summaryValue}>{order.orderID}</Text>
+            </View>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Order Number:</Text>
+              <Text style={styles.summaryValue}>{order.orderNumber}</Text>
+            </View>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Status:</Text>
+              <Text style={[styles.summaryValue, styles.statusText]}>{order.status}</Text>
+            </View>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Payment Status:</Text>
+              <Text style={[styles.summaryValue, styles.paymentText]}>{order.paymentStatus}</Text>
+            </View>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Type:</Text>
+              <Text style={styles.summaryValue}>{order.type}</Text>
+            </View>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Date:</Text>
+              <Text style={styles.summaryValue}>
+                {new Date(order.date).toLocaleDateString()} at {new Date(order.date).toLocaleTimeString()}
+              </Text>
+            </View>
+          </View>
         </View>
-        <View style={styles.orderAmounts}>
-          <Text style={styles.amount}>Subtotal: ${order.subTotal.toFixed(2)}</Text>
-          <Text style={styles.amount}>Tax: ${order.tax.toFixed(2)}</Text>
-          <Text style={styles.amount}>Discount: ${order.netDiscount.toFixed(2)}</Text>
-          <Text style={styles.totalAmount}>Total: ${order.amount.toFixed(2)}</Text>
-        </View>
-        <Text style={styles.createdAt}>
-          Created: {new Date(order.date).toLocaleDateString()} at {new Date(order.date).toLocaleTimeString()}
-        </Text>
-      </View>
 
-      {typeof order.customer === 'object' && (
-        <View style={styles.customerSection}>
+        {/* Customer Information */}
+        <View style={styles.section}>
           <Text style={styles.sectionTitle}>Customer Information</Text>
-          <Text style={styles.customerDetail}>Name: {order.customer.name}</Text>
-          <Text style={styles.customerDetail}>Email: {order.customer.email}</Text>
-          <Text style={styles.customerDetail}>Phone: {order.customer.countryCode} {order.customer.mobilePhone}</Text>
-          <Text style={styles.customerDetail}>
-            Address: {order.customer.address}, {order.customer.city}, {order.customer.state} {order.customer.zipCode}
-          </Text>
+          <View style={styles.customerCard}>
+            {customerInfo ? (
+              <>
+                <Text style={styles.customerName}>{customerInfo.name}</Text>
+                <Text style={styles.customerDetail}>Email: {customerInfo.email}</Text>
+                <Text style={styles.customerDetail}>Phone: {customerInfo.countryCode} {customerInfo.mobilePhone}</Text>
+                <Text style={styles.customerDetail}>
+                  Address: {customerInfo.address}, {customerInfo.city}, {customerInfo.state} {customerInfo.zipCode}
+                </Text>
+                <Text style={styles.customerDetail}>Country: {customerInfo.country}</Text>
+              </>
+            ) : (
+              <Text style={styles.customerName}>{order.customer as string}</Text>
+            )}
+          </View>
         </View>
-      )}
 
-      <View style={styles.itemsSection}>
-        <Text style={styles.sectionTitle}>Items ({order.items.length})</Text>
-        <FlatList
-          data={order.items}
-          renderItem={renderOrderItem}
-          keyExtractor={(item) => item.id}
-          scrollEnabled={false}
-        />
+        {/* Order Items */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Order Items ({order.items.length})</Text>
+          <FlatList
+            data={order.items}
+            renderItem={renderOrderItem}
+            keyExtractor={(item) => item.id}
+            scrollEnabled={false}
+          />
+        </View>
+
+        {/* Pricing Summary */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Pricing Summary</Text>
+          <View style={styles.pricingCard}>
+            <View style={styles.pricingRow}>
+              <Text style={styles.pricingLabel}>Subtotal:</Text>
+              <Text style={styles.pricingValue}>${(order.subTotal || 0).toFixed(2)}</Text>
+            </View>
+            {order.netDiscount > 0 && (
+              <View style={styles.pricingRow}>
+                <Text style={styles.pricingLabel}>Discount:</Text>
+                <Text style={[styles.pricingValue, styles.discountText]}>-${(order.netDiscount || 0).toFixed(2)}</Text>
+              </View>
+            )}
+            <View style={styles.pricingRow}>
+              <Text style={styles.pricingLabel}>Tax:</Text>
+              <Text style={styles.pricingValue}>${(order.tax || 0).toFixed(2)}</Text>
+            </View>
+            {order.totalFees > 0 && (
+              <View style={styles.pricingRow}>
+                <Text style={styles.pricingLabel}>Fees:</Text>
+                <Text style={styles.pricingValue}>${(order.totalFees || 0).toFixed(2)}</Text>
+              </View>
+            )}
+            <View style={[styles.pricingRow, styles.totalRow]}>
+              <Text style={styles.totalLabel}>Total:</Text>
+              <Text style={styles.totalValue}>${(order.amount || 0).toFixed(2)}</Text>
+            </View>
+          </View>
+        </View>
       </View>
     </ScrollView>
   );
@@ -133,11 +187,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -148,135 +197,146 @@ const styles = StyleSheet.create({
   },
   backIconButton: {
     marginRight: 16,
+    padding: 4,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#333',
   },
-  orderSummary: {
-    backgroundColor: '#fff',
-    padding: 20,
-    marginBottom: 16,
+  content: {
+    padding: 16,
   },
-  orderNumber: {
-    fontSize: 20,
+  section: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 4,
-  },
-  externalOrderId: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
-  },
-  customer: {
-    fontSize: 16,
-    color: '#333',
-    fontWeight: '600',
     marginBottom: 12,
   },
-  orderMeta: {
+  summaryCard: {
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+  },
+  summaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f8f9fa',
   },
-  source: {
-    fontSize: 12,
-    color: '#666',
-  },
-  status: {
-    fontSize: 12,
-    color: '#666',
-  },
-  createdAt: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 8,
-  },
-  paymentStatus: {
-    fontSize: 12,
-    color: '#666',
-  },
-  orderAmounts: {
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
-  },
-  amount: {
+  summaryLabel: {
     fontSize: 14,
     color: '#666',
-    marginBottom: 2,
+    fontWeight: '500',
   },
-  totalAmount: {
+  summaryValue: {
+    fontSize: 14,
+    color: '#333',
+    fontWeight: '600',
+  },
+  statusText: {
+    color: '#007AFF',
+  },
+  paymentText: {
+    color: '#28a745',
+  },
+  customerCard: {
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+  },
+  customerName: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#333',
-    marginTop: 4,
-  },
-  customerSection: {
-    backgroundColor: '#fff',
-    padding: 20,
-    marginBottom: 16,
+    marginBottom: 8,
   },
   customerDetail: {
     fontSize: 14,
     color: '#666',
     marginBottom: 4,
   },
-  itemsSection: {
-    backgroundColor: '#fff',
-    padding: 20,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 16,
-  },
   itemCard: {
+    backgroundColor: '#fff',
+    padding: 16,
+    marginBottom: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+  },
+  itemHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    marginBottom: 8,
   },
-  itemInfo: {
+  itemName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
     flex: 1,
   },
-  productName: {
-    fontSize: 14,
+  itemPrice: {
+    fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: '#007AFF',
   },
-  productId: {
-    fontSize: 12,
+  itemDetails: {
+    gap: 4,
+  },
+  itemDetail: {
+    fontSize: 14,
     color: '#666',
-    marginTop: 2,
   },
-  itemPricing: {
-    alignItems: 'flex-end',
+  pricingCard: {
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
   },
-  unitPrice: {
-    fontSize: 12,
+  pricingRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 6,
+  },
+  pricingLabel: {
+    fontSize: 14,
     color: '#666',
-    marginBottom: 2,
   },
-  quantity: {
+  pricingValue: {
     fontSize: 14,
     color: '#333',
-    marginBottom: 2,
+    fontWeight: '500',
   },
-  itemAmount: {
-    fontSize: 14,
-    fontWeight: '600',
+  discountText: {
+    color: '#dc3545',
+  },
+  totalRow: {
+    borderTopWidth: 2,
+    borderTopColor: '#e9ecef',
+    paddingTop: 12,
+    marginTop: 8,
+  },
+  totalLabel: {
+    fontSize: 16,
     color: '#333',
-    marginBottom: 2,
+    fontWeight: 'bold',
   },
-  discount: {
-    fontSize: 12,
-    color: '#e74c3c',
+  totalValue: {
+    fontSize: 16,
+    color: '#333',
+    fontWeight: 'bold',
   },
   backButton: {
     backgroundColor: '#007AFF',

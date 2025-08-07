@@ -150,8 +150,10 @@ export default function Orders() {
     >
       <View style={styles.orderHeader}>
         <View style={styles.orderInfo}>
-          <Text style={styles.orderNumber}>#{item.orderNumber}</Text>
-          <Text style={styles.customer}>{item.customer}</Text>
+          <Text style={styles.orderNumber}>Order ID: {item.orderID}</Text>
+          <Text style={styles.orderDate}>
+            {new Date(item.date).toLocaleDateString()} at {new Date(item.date).toLocaleTimeString()}
+          </Text>
         </View>
         {isPicklistMode && (
           <View style={styles.checkboxContainer}>
@@ -167,15 +169,19 @@ export default function Orders() {
         )}
       </View>
       
-      <View style={styles.orderDetails}>
-        <Text style={styles.source}>Source: {item.source}</Text>
-        <Text style={styles.status}>Status: {item.status}</Text>
-        <Text style={styles.itemCount}>{item.items.length} items</Text>
+      <View style={styles.customerSection}>
+        <Text style={styles.customer}>Customer: {item.customer}</Text>
       </View>
       
-      <View style={styles.orderMeta}>
-        <Text style={styles.amount}>Amount: ${item.amount.toFixed(2)}</Text>
-        <Text style={styles.paymentStatus}>Payment: {item.paymentStatus}</Text>
+      <View style={styles.orderDetails}>
+        <View style={styles.detailRow}>
+          <Text style={styles.itemCount}>{item.items.length} items</Text>
+          <Text style={styles.source}>Source: {item.source}</Text>
+        </View>
+        <View style={styles.detailRow}>
+          <Text style={styles.amount}>Amount: ${item.amount.toFixed(2)}</Text>
+          <Text style={styles.status}>Status: {item.status}</Text>
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -326,7 +332,7 @@ const styles = StyleSheet.create({
   orderHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginBottom: 8,
   },
   orderInfo: {
@@ -337,18 +343,29 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
   },
-  customer: {
-    fontSize: 14,
+  orderDate: {
+    fontSize: 12,
     color: '#666',
     marginTop: 2,
+  },
+  customerSection: {
+    marginBottom: 8,
+  },
+  customer: {
+    fontSize: 14,
+    color: '#333',
+    fontWeight: '500',
   },
   checkboxContainer: {
     padding: 4,
   },
   orderDetails: {
+    gap: 4,
+  },
+  detailRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    alignItems: 'center',
   },
   source: {
     fontSize: 12,
@@ -356,24 +373,17 @@ const styles = StyleSheet.create({
   },
   status: {
     fontSize: 12,
-    color: '#666',
+    color: '#007AFF',
+    fontWeight: '500',
   },
   itemCount: {
     fontSize: 12,
     color: '#666',
   },
-  orderMeta: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
   amount: {
     fontSize: 12,
     color: '#333',
     fontWeight: '600',
-  },
-  paymentStatus: {
-    fontSize: 12,
-    color: '#666',
   },
   paginationControls: {
     flexDirection: 'row',

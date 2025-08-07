@@ -61,7 +61,7 @@ export default function OrderDetail() {
     return (
       <View style={styles.loadingContainer}>
         <Text>Order not found</Text>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.push('/orders')}>
           <Text style={styles.backButtonText}>Go Back</Text>
         </TouchableOpacity>
       </View>
@@ -71,7 +71,7 @@ export default function OrderDetail() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backIconButton}>
+        <TouchableOpacity onPress={() => router.push('/orders')} style={styles.backIconButton}>
           <MaterialIcons name="arrow-back" size={24} color="#333" />
         </TouchableOpacity>
         <Text style={styles.title}>Order Details</Text>

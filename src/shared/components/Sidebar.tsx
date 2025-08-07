@@ -1,8 +1,8 @@
-
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter, usePathname } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -41,6 +41,11 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
     }
   };
 
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem('accessToken');
+    router.push('/login');
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -63,6 +68,13 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
           </TouchableOpacity>
         ))}
       </View>
+
+      <View style={styles.bottomSection}>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <MaterialIcons name="logout" size={20} color="#dc3545" />
+          <Text style={styles.logoutText}>Logout</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -74,6 +86,7 @@ const styles = StyleSheet.create({
     borderRightWidth: 1,
     borderRightColor: '#e9ecef',
     paddingVertical: 20,
+    justifyContent: 'space-between', // Added to push logout to bottom
   },
   menuItems: {
     flex: 1,
@@ -96,6 +109,25 @@ const styles = StyleSheet.create({
   },
   activeMenuText: {
     color: '#007AFF',
+    fontWeight: '600',
+  },
+  bottomSection: {
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#e9ecef',
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    backgroundColor: '#ffebee',
+    borderRadius: 6,
+  },
+  logoutText: {
+    marginLeft: 8,
+    color: '#dc3545',
+    fontSize: 16,
     fontWeight: '600',
   },
 });

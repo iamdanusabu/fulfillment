@@ -1,19 +1,31 @@
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getConfig } from '../../environments';
 
 class TokenService {
-  private token: string | null = null;
-
   async getToken(): Promise<string | null> {
-    return this.token;
+    try {
+      return await AsyncStorage.getItem('access_token');
+    } catch (error) {
+      console.error('Error getting token:', error);
+      return null;
+    }
   }
 
-  setToken(token: string) {
-    this.token = token;
+  async setToken(token: string) {
+    try {
+      await AsyncStorage.setItem('access_token', token);
+    } catch (error) {
+      console.error('Error setting token:', error);
+    }
   }
 
-  clearToken() {
-    this.token = null;
+  async clearToken() {
+    try {
+      await AsyncStorage.multiRemove(['access_token', 'refresh_token', 'token_expires_in']);
+    } catch (error) {
+      console.error('Error clearing token:', error);
+    }
   }
 }
 

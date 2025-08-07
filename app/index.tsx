@@ -2,17 +2,33 @@
 import { useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { View, Text, StyleSheet } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Index() {
   const router = useRouter();
 
   useEffect(() => {
-    // Use a small delay to ensure the root layout is mounted
-    const timer = setTimeout(() => {
-      router.replace('/dashboard');
-    }, 100);
+    const checkAuth = async () => {
+      try {
+        const token = await AsyncStorage.getItem('access_token');
+        
+        // Use a small delay to ensure the root layout is mounted
+        setTimeout(() => {
+          if (token) {
+            router.replace('/dashboard');
+          } else {
+            router.replace('/login');
+          }
+        }, 100);
+      } catch (error) {
+        console.error('Error checking auth:', error);
+        setTimeout(() => {
+          router.replace('/login');
+        }, 100);
+      }
+    };
 
-    return () => clearTimeout(timer);
+    checkAuth();
   }, [router]);
 
   // Show a loading state while navigating

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
-import { ordersApi } from '../api/ordersApi';
+import { ordersApi, transformOrder } from '../api/ordersApi';
 import { Order, OrderItem } from '../../../shared/types';
 
 export default function OrderDetailScreen() {
@@ -21,8 +21,12 @@ export default function OrderDetailScreen() {
   const loadOrderDetail = async () => {
     try {
       setLoading(true);
-      const orderData = await ordersApi.getOrderById(params.orderId as string);
-      setOrder(orderData);
+      const fetcher = ordersApi.createSingleOrderFetcher(params.orderId as string);
+      const response = await fetcher.fetchPage();
+      if (response.data && response.data.length > 0) {
+        const transformedOrder = transformOrder(response.data[0]);
+        setOrder(transformedOrder);
+      }
     } catch (error) {
       console.error('Failed to load order detail:', error);
     } finally {

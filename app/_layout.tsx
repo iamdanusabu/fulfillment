@@ -81,6 +81,7 @@ export default function RootLayout() {
             <Stack.Screen name="dashboard" />
             <Stack.Screen name="orders" />
             <Stack.Screen name="picklist" />
+            <Stack.Screen name="settings" />
           </Stack>
         </View>
       </View>

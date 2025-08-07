@@ -32,6 +32,12 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
       route: '/picklist/',
       isActive: pathname.startsWith('/picklist')
     },
+    { 
+      title: 'Settings', 
+      icon: 'settings', 
+      route: '/settings',
+      isActive: pathname === '/settings'
+    },
   ];
 
   const handleNavigation = (route: string) => {

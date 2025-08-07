@@ -1,7 +1,6 @@
 import { PaginatedFetcher } from '../../../shared/services/paginatedFetcher';
 import { Order } from '../../../shared/types';
 import { getConfig } from '../../../environments';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface GetOrdersParams {
   source?: string;
@@ -79,31 +78,20 @@ export const ordersApi = {
   // Get single order by ID
   async getOrderById(orderId: string) {
     try {
+      const { fetchWithToken } = await import('../../../shared/services/fetchWithToken');
       const config = getConfig();
-      const response = await fetch(`${config.endpoints.orders}/${orderId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${await AsyncStorage.getItem('access_token')}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
       
-      // Handle direct object response or array response
-      if (data) {
-        // If response is an array, get first item
-        if (Array.isArray(data) && data.length > 0) {
-          return transformOrder(data[0]);
-        }
-        // If response is a direct object
-        else if (!Array.isArray(data)) {
-          return transformOrder(data);
-        }
+      // Use the same endpoint structure as curl command with pagination params
+      const url = `${config.endpoints.orders}/${orderId}?pageNo=1&pageSize=1`;
+      const data = await fetchWithToken(url);
+      
+      // Handle paginated response structure
+      if (data && data.data && Array.isArray(data.data) && data.data.length > 0) {
+        return transformOrder(data.data[0]);
+      }
+      // Handle direct object response
+      else if (data && !Array.isArray(data)) {
+        return transformOrder(data);
       }
 
       throw new Error('Order not found');

@@ -10,7 +10,7 @@ const COMMON_ENDPOINTS = {
 };
 
 export const DEV_CONFIG = {
-  baseURL: "https://www.betaaccount.retailcloud.com",
+  baseURL: "https://betaaccount.retailcloud.com",
   grantType: "password",
   clientId: "rc-cportal-beta",
   clientSecret: "secret",

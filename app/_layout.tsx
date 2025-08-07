@@ -1,32 +1,64 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, useWindowDimensions } from 'react-native';
-import { Stack } from 'expo-router';
+import { Stack, usePathname } from 'expo-router';
 import { Sidebar } from '../src/shared/components/Sidebar';
 import { Header } from '../src/shared/components/Header';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function RootLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const { width } = useWindowDimensions();
+  const pathname = usePathname();
   const isTablet = width >= 768;
+
+  useEffect(() => {
+    checkAuthStatus();
+  }, [pathname]);
+
+  const checkAuthStatus = async () => {
+    try {
+      const token = await AsyncStorage.getItem('access_token');
+      setIsAuthenticated(!!token);
+    } catch (error) {
+      console.error('Error checking auth status:', error);
+      setIsAuthenticated(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
+  const showSidebarAndHeader = isAuthenticated && pathname !== '/login' && pathname !== '/';
+  const showSidebar = showSidebarAndHeader && (sidebarOpen || isTablet);
+
+  if (isLoading) {
+    return <View style={styles.container} />;
+  }
+
   return (
     <View style={styles.container}>
-      <Header title="OrderUp" onMenuToggle={toggleSidebar} />
+      {showSidebarAndHeader && (
+        <Header title="OrderUp" onMenuToggle={toggleSidebar} />
+      )}
       
       <View style={styles.content}>
-        <Sidebar isOpen={sidebarOpen || isTablet} onToggle={toggleSidebar} />
+        {showSidebarAndHeader && (
+          <Sidebar isOpen={showSidebar} onToggle={toggleSidebar} />
+        )}
         
         <View style={[
           styles.mainContent,
-          { marginLeft: (sidebarOpen || isTablet) ? 0 : 0 }
+          { flex: showSidebarAndHeader ? 1 : 1 }
         ]}>
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="index" />
+            <Stack.Screen name="login" />
             <Stack.Screen name="dashboard" />
             <Stack.Screen name="orders" />
             <Stack.Screen name="picklist" />
@@ -34,7 +66,7 @@ export default function RootLayout() {
         </View>
       </View>
       
-      {sidebarOpen && !isTablet && (
+      {showSidebar && !isTablet && (
         <View style={styles.overlay} onTouchEnd={toggleSidebar} />
       )}
     </View>

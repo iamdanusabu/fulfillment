@@ -42,8 +42,10 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
   };
 
   const handleLogout = async () => {
-    await AsyncStorage.removeItem('accessToken');
-    router.push('/login');
+    await AsyncStorage.removeItem('access_token');
+    await AsyncStorage.removeItem('refresh_token');
+    await AsyncStorage.removeItem('token_expires_in');
+    router.replace('/login');
   };
 
   if (!isOpen) return null;

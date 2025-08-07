@@ -62,24 +62,6 @@ const transformOrder = (apiOrder: any): Order => ({
 });
 
 export const ordersApi = {
-  async getOrders({ source, pageNo = 1 }: GetOrdersParams): Promise<GetOrdersResponse> {
-    const params = new URLSearchParams();
-    if (source) params.append('source', source);
-    params.append('pageNo', pageNo.toString());
-
-    const config = getConfig();
-    const url = `${config.endpoints.orders}?${params.toString()}`;
-    const response = await fetchWithToken(url);
-
-    // Transform the API response to match our Order interface
-    const transformedOrders = response.data.map(transformOrder);
-
-    return {
-      ...response,
-      orders: transformedOrders,
-    };
-  },
-
   async getOrderById(orderId: string): Promise<Order> {
     const config = getConfig();
     const response = await fetchWithToken(`${config.endpoints.orders}/${orderId}`);

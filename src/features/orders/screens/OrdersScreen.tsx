@@ -1,61 +1,33 @@
-
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
-import { ordersApi } from '../api/ordersApi';
+import { usePaginatedOrders } from '../hooks/usePaginatedOrders';
 import { Order } from '../../../shared/types';
 
 export default function OrdersScreen() {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchText, setSearchText] = useState('');
-  const [pagination, setPagination] = useState({
-    currentPage: 1,
-    totalPages: 1,
-    totalRecords: 0,
-    hasMore: true
-  });
-  const router = useRouter();
   const params = useLocalSearchParams();
-  
-  const isPicklistMode = params.mode === 'picklist';
+  const router = useRouter();
+  const { 
+    orders, 
+    loading, 
+    hasMore, 
+    totalRecords,
+    loadMore, 
+    refresh 
+  } = usePaginatedOrders({ 
+    source: params.source as string 
+  });
+  const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
+  const [isPicklistMode, setIsPicklistMode] = useState(false);
 
   useEffect(() => {
-    loadOrders();
-  }, [params.source]);
-
-  const loadOrders = async (pageNo = 1, append = false) => {
-    try {
-      if (pageNo === 1) setLoading(true);
-      const response = await ordersApi.getOrders({
-        source: params.source as string,
-        pageNo,
-      });
-      
-      if (append) {
-        setOrders(prev => [...prev, ...response.orders]);
-      } else {
-        setOrders(response.orders);
-      }
-      
-      setPagination({
-        currentPage: response.pageNo,
-        totalPages: response.totalPages,
-        totalRecords: response.totalRecords,
-        hasMore: response.pageNo < response.totalPages
-      });
-    } catch (error) {
-      console.error('Failed to load orders:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    setIsPicklistMode(params.mode === 'picklist');
+  }, [params.mode]);
 
   const toggleOrderSelection = (orderId: string) => {
     if (!isPicklistMode) return;
-    
+
     setSelectedOrders(prev => 
       prev.includes(orderId) 
         ? prev.filter(id => id !== orderId)
@@ -73,19 +45,15 @@ export default function OrdersScreen() {
 
   const proceedToLocationSelection = () => {
     if (selectedOrders.length === 0) return;
-    
+
     const orderIds = selectedOrders.join(',');
     router.push(`/picklist/location-selection?orderIds=${orderIds}`);
   };
 
-  const loadMoreOrders = () => {
-    if (pagination.hasMore && !loading) {
-      loadOrders(pagination.currentPage + 1, true);
-    }
-  };
-
   const handleEndReached = () => {
-    loadMoreOrders();
+    if (hasMore && !loading) {
+      loadMore();
+    }
   };
 
   const filteredOrders = orders.filter(order =>
@@ -122,11 +90,11 @@ export default function OrdersScreen() {
           <MaterialIcons name="chevron-right" size={24} color="#ccc" />
         )}
       </View>
-      
+
       <View style={styles.customerSection}>
         <Text style={styles.customer}>Customer: {item.customer}</Text>
       </View>
-      
+
       <View style={styles.orderDetails}>
         <View style={styles.detailRow}>
           <Text style={styles.itemCount}>{item.items.length} items</Text>
@@ -140,7 +108,7 @@ export default function OrdersScreen() {
     </TouchableOpacity>
   );
 
-  if (loading) {
+  if (loading && orders.length === 0) {
     return (
       <View style={styles.loadingContainer}>
         <Text>Loading orders...</Text>
@@ -180,16 +148,30 @@ export default function OrdersScreen() {
         contentContainerStyle={styles.ordersContent}
         onEndReached={handleEndReached}
         onEndReachedThreshold={0.1}
-        ListFooterComponent={
-          pagination.hasMore && !loading ? (
-            <View style={styles.loadingMore}>
-              <Text style={styles.loadingMoreText}>Loading more orders...</Text>
-            </View>
-          ) : null
+        refreshControl={
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={refresh}
+          />
         }
+        ListFooterComponent={() => (
+          <View style={styles.footer}>
+            {hasMore && (
+              <TouchableOpacity
+                style={styles.loadMoreButton}
+                onPress={loadMore}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#007AFF" />
+                ) : (
+                  <Text style={styles.loadMoreText}>Load More</Text>
+                )}
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
       />
-
-      
 
       {isPicklistMode && selectedOrders.length > 0 && (
         <View style={styles.bottomBar}>
@@ -331,12 +313,18 @@ const styles = StyleSheet.create({
     color: '#333',
     fontWeight: '600',
   },
-  loadingMore: {
+  footer: {
     padding: 20,
     alignItems: 'center',
   },
-  loadingMoreText: {
-    color: '#666',
+  loadMoreButton: {
+    padding: 10,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#007AFF',
+  },
+  loadMoreText: {
+    color: '#007AFF',
     fontSize: 14,
   },
   bottomBar: {

@@ -8,6 +8,57 @@ interface UsePaginatedOrdersOptions {
   pageSize?: number;
 }
 
+// Transform raw API order data to our Order type
+const transformOrder = (apiOrder: any): Order => ({
+  id: apiOrder.orderID.toString(),
+  orderID: apiOrder.orderID,
+  orderNumber: apiOrder.externalOrderID || apiOrder.orderID.toString(),
+  source: apiOrder.source,
+  status: apiOrder.status,
+  customer: apiOrder.customer?.name || apiOrder.employee?.name || 'Unknown Customer',
+  items: apiOrder.items?.map((item: any) => ({
+    id: item.orderItemID.toString(),
+    productId: item.itemID,
+    productName: item.name,
+    quantity: item.orderQuantity,
+    pickedQuantity: item.returnQuantity || 0,
+    orderItemID: item.orderItemID,
+    itemID: item.itemID,
+    orderID: item.orderID,
+    upc: item.upc,
+    name: item.name,
+    sequence: item.sequence,
+    orderQuantity: item.orderQuantity,
+    returnQuantity: item.returnQuantity,
+    unitPrice: item.unitPrice,
+    costPrice: item.costPrice,
+    discount: item.discount,
+    tax: item.tax,
+    customizationTotal: item.customizationTotal,
+    status: item.status,
+    batch: item.batch,
+    amount: item.amount,
+  })) || [],
+  createdAt: apiOrder.date,
+  date: apiOrder.date,
+  type: apiOrder.type,
+  paymentStatus: apiOrder.paymentStatus,
+  employeeID: apiOrder.employeeID,
+  subTotal: apiOrder.subTotal,
+  totalFees: apiOrder.totalFees,
+  customizationTotal: apiOrder.customizationTotal,
+  tax: apiOrder.tax,
+  amount: apiOrder.amount,
+  registerID: apiOrder.registerID,
+  externalOrderKey: apiOrder.externalOrderKey,
+  netDiscount: apiOrder.netDiscount,
+  isTaxExempt: apiOrder.isTaxExempt,
+  totalItemQuantity: apiOrder.totalItemQuantity,
+  employee: apiOrder.employee,
+  store: apiOrder.store,
+  register: apiOrder.register,
+});
+
 export const usePaginatedOrders = (options: UsePaginatedOrdersOptions = {}) => {
   const { source, pageSize = 20 } = options;
   const config = getConfig();
@@ -17,7 +68,7 @@ export const usePaginatedOrders = (options: UsePaginatedOrdersOptions = {}) => {
     initialParams.source = source;
   }
 
-  const paginatedState = usePaginatedFetcher<Order>(
+  const paginatedState = usePaginatedFetcher<any>(
     config.endpoints.orders,
     {
       pageSize,
@@ -25,8 +76,11 @@ export const usePaginatedOrders = (options: UsePaginatedOrdersOptions = {}) => {
     }
   );
 
+  // Transform the raw data to Order objects
+  const transformedOrders = paginatedState.data.map(transformOrder);
+
   return {
-    orders: paginatedState.data,
+    orders: transformedOrders,
     loading: paginatedState.loading,
     error: paginatedState.error,
     hasMore: paginatedState.hasMore,

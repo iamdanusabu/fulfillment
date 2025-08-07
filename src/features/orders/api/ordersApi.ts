@@ -1,4 +1,3 @@
-
 import { PaginatedFetcher } from '../../../shared/services/paginatedFetcher';
 import { Order } from '../../../shared/types';
 import { getConfig } from '../../../environments';
@@ -80,7 +79,7 @@ export const ordersApi = {
   async getOrderById(orderId: string) {
     const fetcher = this.createSingleOrderFetcher(orderId);
     const response = await fetcher.fetchPage();
-    
+
     // Handle direct object response (not in array)
     if (response.data) {
       // If response.data is an array, get first item
@@ -92,7 +91,7 @@ export const ordersApi = {
         return transformOrder(response.data);
       }
     }
-    
+
     throw new Error('Order not found');
   },
 };

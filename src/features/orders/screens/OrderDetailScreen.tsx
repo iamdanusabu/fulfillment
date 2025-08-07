@@ -38,13 +38,32 @@ export default function OrderDetailScreen() {
         <Text style={styles.itemPrice}>${(item.unitPrice || 0).toFixed(2)}</Text>
       </View>
       <View style={styles.itemDetails}>
-        <Text style={styles.itemDetail}>SKU: {item.itemID || item.productId}</Text>
-        <Text style={styles.itemDetail}>UPC: {item.upc}</Text>
+        <Text style={styles.itemDetail}>Item ID: {item.itemID || item.productId}</Text>
+        <Text style={styles.itemDetail}>Order Item ID: {item.orderItemID}</Text>
+        {item.upc && <Text style={styles.itemDetail}>UPC: {item.upc}</Text>}
         <Text style={styles.itemDetail}>Quantity: {item.orderQuantity || item.quantity}</Text>
+        {item.returnQuantity && item.returnQuantity > 0 && (
+          <Text style={styles.itemDetail}>Return Quantity: {item.returnQuantity}</Text>
+        )}
         <Text style={styles.itemDetail}>Status: {item.status}</Text>
-        <Text style={styles.itemDetail}>Amount: ${(item.amount || 0).toFixed(2)}</Text>
-        {item.discount > 0 && <Text style={styles.itemDetail}>Discount: ${(item.discount || 0).toFixed(2)}</Text>}
-        {item.tax > 0 && <Text style={styles.itemDetail}>Tax: ${(item.tax || 0).toFixed(2)}</Text>}
+        {item.sequence && <Text style={styles.itemDetail}>Sequence: {item.sequence}</Text>}
+        {item.batch && <Text style={styles.itemDetail}>Batch: {item.batch}</Text>}
+        <View style={styles.itemPricing}>
+          <Text style={styles.itemDetail}>Unit Price: ${(item.unitPrice || 0).toFixed(2)}</Text>
+          {item.costPrice && item.costPrice > 0 && (
+            <Text style={styles.itemDetail}>Cost Price: ${(item.costPrice || 0).toFixed(2)}</Text>
+          )}
+          <Text style={styles.itemDetail}>Amount: ${(item.amount || 0).toFixed(2)}</Text>
+          {item.discount && item.discount > 0 && (
+            <Text style={[styles.itemDetail, styles.discountText]}>Discount: -${(item.discount || 0).toFixed(2)}</Text>
+          )}
+          {item.tax && item.tax > 0 && (
+            <Text style={styles.itemDetail}>Tax: ${(item.tax || 0).toFixed(2)}</Text>
+          )}
+          {item.customizationTotal && item.customizationTotal > 0 && (
+            <Text style={styles.itemDetail}>Customization: ${(item.customizationTotal || 0).toFixed(2)}</Text>
+          )}
+        </View>
       </View>
     </View>
   );
@@ -92,6 +111,16 @@ export default function OrderDetailScreen() {
               <Text style={styles.summaryLabel}>Order Number:</Text>
               <Text style={styles.summaryValue}>{order.orderNumber}</Text>
             </View>
+            {order.externalOrderKey && (
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>External Order Key:</Text>
+                <Text style={styles.summaryValue}>{order.externalOrderKey}</Text>
+              </View>
+            )}
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Source:</Text>
+              <Text style={styles.summaryValue}>{order.source}</Text>
+            </View>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Status:</Text>
               <Text style={[styles.summaryValue, styles.statusText]}>{order.status}</Text>
@@ -110,6 +139,28 @@ export default function OrderDetailScreen() {
                 {new Date(order.date).toLocaleDateString()} at {new Date(order.date).toLocaleTimeString()}
               </Text>
             </View>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Total Items:</Text>
+              <Text style={styles.summaryValue}>{order.totalItemQuantity || order.items.length}</Text>
+            </View>
+            {order.employeeID && (
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>Employee ID:</Text>
+                <Text style={styles.summaryValue}>{order.employeeID}</Text>
+              </View>
+            )}
+            {order.registerID && (
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>Register ID:</Text>
+                <Text style={styles.summaryValue}>{order.registerID}</Text>
+              </View>
+            )}
+            {order.isTaxExempt && (
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>Tax Exempt:</Text>
+                <Text style={styles.summaryValue}>Yes</Text>
+              </View>
+            )}
           </View>
         </View>
 
@@ -133,6 +184,51 @@ export default function OrderDetailScreen() {
           </View>
         </View>
 
+        {/* Employee Information */}
+        {order.employee && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Employee Information</Text>
+            <View style={styles.customerCard}>
+              <Text style={styles.customerName}>{order.employee.name}</Text>
+              <Text style={styles.customerDetail}>Employee ID: {order.employee.id}</Text>
+              {order.employee.email && (
+                <Text style={styles.customerDetail}>Email: {order.employee.email}</Text>
+              )}
+            </View>
+          </View>
+        )}
+
+        {/* Store Information */}
+        {order.store && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Store Information</Text>
+            <View style={styles.customerCard}>
+              <Text style={styles.customerName}>{order.store.name}</Text>
+              <Text style={styles.customerDetail}>Store ID: {order.store.id}</Text>
+              {order.store.address && (
+                <Text style={styles.customerDetail}>Address: {order.store.address}</Text>
+              )}
+              {order.store.phone && (
+                <Text style={styles.customerDetail}>Phone: {order.store.phone}</Text>
+              )}
+            </View>
+          </View>
+        )}
+
+        {/* Register Information */}
+        {order.register && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Register Information</Text>
+            <View style={styles.customerCard}>
+              <Text style={styles.customerName}>Register #{order.register.id}</Text>
+              <Text style={styles.customerDetail}>Name: {order.register.name}</Text>
+              {order.register.location && (
+                <Text style={styles.customerDetail}>Location: {order.register.location}</Text>
+              )}
+            </View>
+          </View>
+        )}
+
         {/* Order Items */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Order Items ({order.items.length})</Text>
@@ -152,7 +248,13 @@ export default function OrderDetailScreen() {
               <Text style={styles.pricingLabel}>Subtotal:</Text>
               <Text style={styles.pricingValue}>${(order.subTotal || 0).toFixed(2)}</Text>
             </View>
-            {order.netDiscount > 0 && (
+            {order.customizationTotal && order.customizationTotal > 0 && (
+              <View style={styles.pricingRow}>
+                <Text style={styles.pricingLabel}>Customizations:</Text>
+                <Text style={styles.pricingValue}>${(order.customizationTotal || 0).toFixed(2)}</Text>
+              </View>
+            )}
+            {order.netDiscount && order.netDiscount > 0 && (
               <View style={styles.pricingRow}>
                 <Text style={styles.pricingLabel}>Discount:</Text>
                 <Text style={[styles.pricingValue, styles.discountText]}>-${(order.netDiscount || 0).toFixed(2)}</Text>
@@ -162,7 +264,7 @@ export default function OrderDetailScreen() {
               <Text style={styles.pricingLabel}>Tax:</Text>
               <Text style={styles.pricingValue}>${(order.tax || 0).toFixed(2)}</Text>
             </View>
-            {order.totalFees > 0 && (
+            {order.totalFees && order.totalFees > 0 && (
               <View style={styles.pricingRow}>
                 <Text style={styles.pricingLabel}>Fees:</Text>
                 <Text style={styles.pricingValue}>${(order.totalFees || 0).toFixed(2)}</Text>
@@ -323,6 +425,12 @@ const styles = StyleSheet.create({
   },
   discountText: {
     color: '#dc3545',
+  },
+  itemPricing: {
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#f8f9fa',
   },
   totalRow: {
     borderTopWidth: 2,

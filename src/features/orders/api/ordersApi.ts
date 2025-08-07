@@ -1,4 +1,6 @@
+
 import { fetchWithToken } from '../../../shared/services/fetchWithToken';
+import { PaginatedFetcher } from '../../../shared/services/paginatedFetcher';
 import { Order, PaginatedResponse } from '../../../shared/types';
 import { getConfig } from '../../../environments';
 
@@ -67,4 +69,16 @@ export const ordersApi = {
     const response = await fetchWithToken(`${config.endpoints.orders}/${orderId}`);
     return transformOrder(response);
   },
+
+  // Create a paginated fetcher for orders
+  createPaginatedOrdersFetcher(params: GetOrdersParams = {}) {
+    const config = getConfig();
+    return new PaginatedFetcher<any>(config.endpoints.orders, {
+      pageSize: 20,
+      initialParams: params,
+    });
+  },
 };
+
+// Export the transform function for use in hooks
+export { transformOrder };

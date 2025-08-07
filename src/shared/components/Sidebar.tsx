@@ -14,30 +14,10 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
   const pathname = usePathname();
 
   const menuItems = [
-    { 
-      title: 'Dashboard', 
-      icon: 'dashboard', 
-      route: '/dashboard',
-      isActive: pathname === '/dashboard'
-    },
-    { 
-      title: 'Orders', 
-      icon: 'receipt-long', 
-      route: '/orders',
-      isActive: pathname === '/orders' || pathname.startsWith('/orders/')
-    },
-    { 
-      title: 'Picklists', 
-      icon: 'inventory', 
-      route: '/picklist/',
-      isActive: pathname.startsWith('/picklist')
-    },
-    { 
-      title: 'Settings', 
-      icon: 'settings', 
-      route: '/settings',
-      isActive: pathname === '/settings'
-    },
+    { title: 'Dashboard', icon: 'dashboard', route: '/(tabs)/dashboard', isActive: pathname === '/(tabs)/dashboard' },
+    { title: 'Orders', icon: 'shopping-cart', route: '/(tabs)/orders', isActive: pathname === '/(tabs)/orders' },
+    { title: 'Picklists', icon: 'list-alt', route: '/(tabs)/picklist', isActive: pathname === '/(tabs)/picklist' },
+    { title: 'Settings', icon: 'settings', route: '/(tabs)/settings', isActive: pathname === '/(tabs)/settings' },
   ];
 
   const handleNavigation = (route: string) => {

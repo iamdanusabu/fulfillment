@@ -1,36 +1,6 @@
-const COMMON_ENDPOINTS = {
-  token: "/goauth/oauth/token",
-  orders: "/console/transactions/orders",
-  locations: "/api/locations",
-  simulateFulfillment: "/api/fulfillment/simulate",
-  fulfillment: "/api/fulfillment",
-  finalize: "/api/fulfillment/finalize",
-  dashboard: "/api/dashboard",
-};
-
-export const DEV_CONFIG = {
-  baseURL: "https://betaaccount.retailcloud.com",
-  grantType: "password",
-  clientId: "rc-cportal-beta",
-  clientSecret: "secret",
-  endpoints: COMMON_ENDPOINTS,
-};
-
-export const UAT_CONFIG = {
-  baseURL: "https://www.uataccount.retailcloud.com",
-  grantType: "password",
-  clientId: "rc-app-uat",
-  clientSecret: "secret",
-  endpoints: COMMON_ENDPOINTS,
-};
-
-export const PROD_CONFIG = {
-  baseURL: "https://www.console.retailcloud.com",
-  grantType: "password",
-  clientId: "rc-app-live",
-  clientSecret: "secret",
-  endpoints: COMMON_ENDPOINTS,
-};
+import { DEV_CONFIG } from './dev';
+import { UAT_CONFIG } from './uat';
+import { PROD_CONFIG } from './prod';
 
 export const getConfig = () => {
   const env = process.env.NODE_ENV || "development";
@@ -43,3 +13,5 @@ export const getConfig = () => {
       return DEV_CONFIG;
   }
 };
+
+export { DEV_CONFIG, UAT_CONFIG, PROD_CONFIG };

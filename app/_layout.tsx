@@ -1,11 +1,14 @@
+
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import { Stack, usePathname } from 'expo-router';
 import { Sidebar } from '../src/shared/components/Sidebar';
-import { Header } from '../src/shared/components/Header';
+import { AppToolbar } from '../src/components/layout/AppToolbar';
+import { ThemeProvider } from '../src/contexts/ThemeContext';
+import { StoreProvider } from '../src/contexts/StoreContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function RootLayout() {
+function RootLayoutContent() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -51,7 +54,6 @@ export default function RootLayout() {
     }
   }, []);
 
-
   if (isLoading) {
     return <View style={styles.container} />;
   }
@@ -59,11 +61,10 @@ export default function RootLayout() {
   return (
     <View style={styles.container}>
       {showSidebarAndHeader && (
-        <Header
-            title="OrderUp"
-            onMenuToggle={toggleSidebar}
-            sidebarOpen={sidebarOpen}
-          />
+        <AppToolbar
+          onMenuToggle={toggleSidebar}
+          showMenuButton={!isTablet}
+        />
       )}
 
       <View style={styles.content}>
@@ -90,6 +91,16 @@ export default function RootLayout() {
         <View style={styles.overlay} onTouchEnd={toggleSidebar} />
       )}
     </View>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <StoreProvider>
+      <ThemeProvider>
+        <RootLayoutContent />
+      </ThemeProvider>
+    </StoreProvider>
   );
 }
 

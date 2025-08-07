@@ -1,6 +1,6 @@
 const COMMON_ENDPOINTS = {
   token: "/goauth/oauth/token",
-  orders: "/api/orders",
+  orders: "/console/transactions/orders",
   locations: "/api/locations",
   simulateFulfillment: "/api/fulfillment/simulate",
   fulfillment: "/api/fulfillment",

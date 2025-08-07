@@ -7,6 +7,38 @@ export interface Order {
   customer: string;
   items: OrderItem[];
   createdAt: string;
+  orderID: string;
+  externalOrderID?: string;
+  date: string;
+  type: string;
+  paymentStatus: string;
+  employeeID: number;
+  subTotal: number;
+  totalFees: number;
+  customizationTotal: number;
+  tax: number;
+  amount: number;
+  registerID: number;
+  externalOrderKey?: number;
+  netDiscount: number;
+  isTaxExempt: boolean;
+  totalItemQuantity: number;
+  employee?: {
+    employeeID: number;
+    name: string;
+    userID: number;
+    id: number;
+  };
+  store?: {
+    storeID: number;
+    name: string;
+    id: number;
+  };
+  register?: {
+    id: number;
+    registerID: number;
+    name: string;
+  };
 }
 
 export interface OrderItem {
@@ -15,6 +47,22 @@ export interface OrderItem {
   productName: string;
   quantity: number;
   pickedQuantity?: number;
+  orderItemID: string;
+  itemID: string;
+  orderID: number;
+  upc: string;
+  name: string;
+  sequence: number;
+  orderQuantity: number;
+  returnQuantity: number;
+  unitPrice: number;
+  costPrice: number;
+  discount: number;
+  tax: number;
+  customizationTotal: number;
+  status: string;
+  batch: number;
+  amount: number;
 }
 
 export interface Location {

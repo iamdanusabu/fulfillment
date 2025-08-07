@@ -11,6 +11,11 @@ export default function Orders() {
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState('');
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalRecords: 0
+  });
   const router = useRouter();
   const params = useLocalSearchParams();
   
@@ -20,13 +25,71 @@ export default function Orders() {
     loadOrders();
   }, [params.source]);
 
-  const loadOrders = async () => {
+  const loadOrders = async (pageNo = 1) => {
     try {
       setLoading(true);
       const response = await ordersApi.getOrders({
         source: params.source as string,
+        pageNo,
       });
-      setOrders(response.data);
+      
+      // Transform the API response to match our Order interface
+      const transformedOrders = response.data.map((apiOrder: any) => ({
+        id: apiOrder.orderID.toString(),
+        orderID: apiOrder.orderID,
+        orderNumber: apiOrder.externalOrderID || apiOrder.orderID.toString(),
+        source: apiOrder.source,
+        status: apiOrder.status,
+        customer: apiOrder.customer?.name || apiOrder.employee?.name || 'Unknown Customer',
+        items: apiOrder.items?.map((item: any) => ({
+          id: item.orderItemID.toString(),
+          productId: item.itemID,
+          productName: item.name,
+          quantity: item.orderQuantity,
+          pickedQuantity: item.returnQuantity || 0,
+          orderItemID: item.orderItemID,
+          itemID: item.itemID,
+          orderID: item.orderID,
+          upc: item.upc,
+          name: item.name,
+          sequence: item.sequence,
+          orderQuantity: item.orderQuantity,
+          returnQuantity: item.returnQuantity,
+          unitPrice: item.unitPrice,
+          costPrice: item.costPrice,
+          discount: item.discount,
+          tax: item.tax,
+          customizationTotal: item.customizationTotal,
+          status: item.status,
+          batch: item.batch,
+          amount: item.amount,
+        })) || [],
+        createdAt: apiOrder.date,
+        date: apiOrder.date,
+        type: apiOrder.type,
+        paymentStatus: apiOrder.paymentStatus,
+        employeeID: apiOrder.employeeID,
+        subTotal: apiOrder.subTotal,
+        totalFees: apiOrder.totalFees,
+        customizationTotal: apiOrder.customizationTotal,
+        tax: apiOrder.tax,
+        amount: apiOrder.amount,
+        registerID: apiOrder.registerID,
+        externalOrderKey: apiOrder.externalOrderKey,
+        netDiscount: apiOrder.netDiscount,
+        isTaxExempt: apiOrder.isTaxExempt,
+        totalItemQuantity: apiOrder.totalItemQuantity,
+        employee: apiOrder.employee,
+        store: apiOrder.store,
+        register: apiOrder.register,
+      }));
+      
+      setOrders(transformedOrders);
+      setPagination({
+        currentPage: response.pageNo,
+        totalPages: response.totalPages,
+        totalRecords: response.totalRecords
+      });
     } catch (error) {
       console.error('Failed to load orders:', error);
     } finally {
@@ -59,9 +122,22 @@ export default function Orders() {
     router.push(`/picklist/location-selection?orderIds=${orderIds}`);
   };
 
+  const loadNextPage = () => {
+    if (pagination.currentPage < pagination.totalPages) {
+      loadOrders(pagination.currentPage + 1);
+    }
+  };
+
+  const loadPrevPage = () => {
+    if (pagination.currentPage > 1) {
+      loadOrders(pagination.currentPage - 1);
+    }
+  };
+
   const filteredOrders = orders.filter(order =>
     order.orderNumber.toLowerCase().includes(searchText.toLowerCase()) ||
-    order.customer.toLowerCase().includes(searchText.toLowerCase())
+    order.customer.toLowerCase().includes(searchText.toLowerCase()) ||
+    order.source.toLowerCase().includes(searchText.toLowerCase())
   );
 
   const renderOrderItem = ({ item }: { item: Order }) => (
@@ -96,6 +172,11 @@ export default function Orders() {
         <Text style={styles.status}>Status: {item.status}</Text>
         <Text style={styles.itemCount}>{item.items.length} items</Text>
       </View>
+      
+      <View style={styles.orderMeta}>
+        <Text style={styles.amount}>Amount: ${item.amount.toFixed(2)}</Text>
+        <Text style={styles.paymentStatus}>Payment: {item.paymentStatus}</Text>
+      </View>
     </TouchableOpacity>
   );
 
@@ -116,6 +197,9 @@ export default function Orders() {
         {params.source && (
           <Text style={styles.subtitle}>Filtered by: {params.source}</Text>
         )}
+        <Text style={styles.pagination}>
+          Page {pagination.currentPage} of {pagination.totalPages} ({pagination.totalRecords} total)
+        </Text>
       </View>
 
       <View style={styles.searchContainer}>
@@ -135,6 +219,25 @@ export default function Orders() {
         style={styles.ordersList}
         contentContainerStyle={styles.ordersContent}
       />
+
+      {pagination.totalPages > 1 && (
+        <View style={styles.paginationControls}>
+          <TouchableOpacity
+            style={[styles.paginationButton, pagination.currentPage === 1 && styles.disabledButton]}
+            onPress={loadPrevPage}
+            disabled={pagination.currentPage === 1}
+          >
+            <Text style={styles.paginationButtonText}>Previous</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.paginationButton, pagination.currentPage === pagination.totalPages && styles.disabledButton]}
+            onPress={loadNextPage}
+            disabled={pagination.currentPage === pagination.totalPages}
+          >
+            <Text style={styles.paginationButtonText}>Next</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {isPicklistMode && selectedOrders.length > 0 && (
         <View style={styles.bottomBar}>
@@ -177,6 +280,11 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 14,
     color: '#666',
+    marginTop: 4,
+  },
+  pagination: {
+    fontSize: 12,
+    color: '#999',
     marginTop: 4,
   },
   searchContainer: {
@@ -240,6 +348,7 @@ const styles = StyleSheet.create({
   orderDetails: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginBottom: 8,
   },
   source: {
     fontSize: 12,
@@ -252,6 +361,40 @@ const styles = StyleSheet.create({
   itemCount: {
     fontSize: 12,
     color: '#666',
+  },
+  orderMeta: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  amount: {
+    fontSize: 12,
+    color: '#333',
+    fontWeight: '600',
+  },
+  paymentStatus: {
+    fontSize: 12,
+    color: '#666',
+  },
+  paginationControls: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 16,
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#e9ecef',
+  },
+  paginationButton: {
+    backgroundColor: '#007AFF',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 6,
+  },
+  disabledButton: {
+    backgroundColor: '#ccc',
+  },
+  paginationButtonText: {
+    color: '#fff',
+    fontWeight: '600',
   },
   bottomBar: {
     flexDirection: 'row',

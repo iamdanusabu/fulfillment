@@ -80,9 +80,19 @@ export const ordersApi = {
   async getOrderById(orderId: string) {
     const fetcher = this.createSingleOrderFetcher(orderId);
     const response = await fetcher.fetchPage();
-    if (response.data && response.data.length > 0) {
-      return transformOrder(response.data[0]);
+    
+    // Handle direct object response (not in array)
+    if (response.data) {
+      // If response.data is an array, get first item
+      if (Array.isArray(response.data) && response.data.length > 0) {
+        return transformOrder(response.data[0]);
+      }
+      // If response.data is a direct object
+      else if (!Array.isArray(response.data)) {
+        return transformOrder(response.data);
+      }
     }
+    
     throw new Error('Order not found');
   },
 };

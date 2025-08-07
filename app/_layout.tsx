@@ -34,9 +34,9 @@ export default function RootLayout() {
   };
 
   const showSidebarAndHeader = isAuthenticated && pathname !== '/login' && pathname !== '/';
-  const showSidebar = showSidebarAndHeader && (sidebarOpen || isTablet);
+  const showSidebar = showSidebarAndHeader && sidebarOpen;
 
-  // Effect to handle sidebar visibility based on screen size
+  // Effect to handle initial sidebar visibility based on screen size
   useEffect(() => {
     const updateLayout = () => {
       const isLarge = window.innerWidth >= 768;
@@ -85,7 +85,7 @@ export default function RootLayout() {
         </View>
       </View>
 
-      {showSidebar && !isTablet && (
+      {showSidebar && width < 768 && (
         <View style={styles.overlay} onTouchEnd={toggleSidebar} />
       )}
     </View>

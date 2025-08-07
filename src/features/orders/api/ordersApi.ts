@@ -1,6 +1,7 @@
 import { PaginatedFetcher } from '../../../shared/services/paginatedFetcher';
 import { Order } from '../../../shared/types';
 import { getConfig } from '../../../environments';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface GetOrdersParams {
   source?: string;
@@ -77,22 +78,39 @@ export const ordersApi = {
 
   // Get single order by ID
   async getOrderById(orderId: string) {
-    const fetcher = this.createSingleOrderFetcher(orderId);
-    const response = await fetcher.fetchPage();
+    try {
+      const config = getConfig();
+      const response = await fetch(`${config.endpoints.orders}/${orderId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${await AsyncStorage.getItem('access_token')}`,
+        },
+      });
 
-    // Handle direct object response (not in array)
-    if (response.data) {
-      // If response.data is an array, get first item
-      if (Array.isArray(response.data) && response.data.length > 0) {
-        return transformOrder(response.data[0]);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-      // If response.data is a direct object
-      else if (!Array.isArray(response.data)) {
-        return transformOrder(response.data);
+
+      const data = await response.json();
+      
+      // Handle direct object response or array response
+      if (data) {
+        // If response is an array, get first item
+        if (Array.isArray(data) && data.length > 0) {
+          return transformOrder(data[0]);
+        }
+        // If response is a direct object
+        else if (!Array.isArray(data)) {
+          return transformOrder(data);
+        }
       }
+
+      throw new Error('Order not found');
+    } catch (error) {
+      console.error('Error fetching order by ID:', error);
+      throw error;
     }
-
-    throw new Error('Order not found');
   },
 };
 

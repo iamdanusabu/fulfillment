@@ -1,0 +1,295 @@
+## Architecture Requirements
+
+### 1. Folder Structure
+```
+src/
+├── components/
+│   └── layout/
+│       ├── AppToolbar.tsx
+│       ├── index.ts
+│       └── useTabTitle.ts
+├── contexts/
+│   ├── StoreContext.tsx
+│   └── ThemeContext.tsx
+├── environments/
+│   ├── dev/ (base url is www.betaaccount.retailcloud.com)
+│   │   └── index.ts
+│   ├── uat/ base url is www.uataccount.retailcloud.com)
+│   │   └── index.ts
+│   ├── prod/ base url is www.console.retailcloud.com)
+│   │   └── index.ts
+│   └── index.ts
+├── features/
+│   ├── auth/
+│   │   ├── api/
+│   │   │   └── authApi.ts
+│   │   ├── hooks/
+│   │   │   └── useAuth.ts
+│   │   └── screens/
+│   │       └── LoginScreen.tsx
+│   ├── dashboard/
+│   │   ├── api/
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   └── screens/
+├── navigation/
+│   ├── RootNavigator.tsx
+│   ├── DashboardTabs.tsx
+│   └── _layout.tsx
+├── offline/
+│   ├── db/
+│   │   ├── index.ts
+│   │   ├── schema.ts
+│   │   ├── migrations.ts
+│   │   └── types.ts
+│   ├── network/
+│   │   └── networkMonitor.ts
+│   ├── storage/
+│   │   └── offlineStorage.ts
+│   └── sync/
+│       ├── engine.ts
+│       ├── queue.ts
+│       └── log.ts
+├── shared/
+│   ├── api/
+│   │   └── globalSearchApi.ts
+│   ├── assets/
+│   │   ├── fonts/
+│   │   └── images/
+│   ├── components/
+│   │   ├── CustomModal.tsx
+│   │   ├── GlobalSearch.tsx
+│   │   ├── LoadingOverlay.tsx
+│   │   ├── Toast.tsx
+│   │   └── index.ts
+│   ├── constants/
+│   │   ├── colors.ts
+│   │   ├── fonts.ts
+│   │   ├── storage.ts
+│   │   └── env.ts
+│   ├── hooks/
+│   │   ├── useDebounce.ts
+│   │   ├── useToast.ts
+│   │   └── index.ts
+│   ├── services/
+│   │   ├── fetchWithToken.ts
+│   │   ├── globalFetch.ts
+│   │   ├── token.ts
+│   │   ├── auth.ts
+│   │   └── http.ts
+│   ├── types/
+│   │   ├── api.ts
+│   │   ├── auth.ts
+│   │   ├── dashboard.ts
+│   │   └── index.ts
+│   └── utils/
+│       ├── paginatedFetcher.ts
+│       ├── bigintParser.ts
+│       ├── dataFilters.ts
+│       ├── clearAllData.ts
+│       └── index.ts
+└── stores/
+    ├── userStore.ts
+    └── settingsStore.ts
+```
+
+### 2. Core Tech Stack
+- **Framework**: React Native 0.79+ with Expo SDK 53+
+- **Navigation**: React Navigation v7 with TypeScript
+- **State Management**: Zustand + React Context
+- **Database**: WatermelonDB for offline-first architecture
+- **HTTP Client**: Custom fetch wrappers with token management
+- **TypeScript**: Strict mode enabled
+
+### 3. API Architecture
+
+#### Paginated Fetcher
+Centralized pagination utility for consistent API responses:
+```typescript
+// src/shared/utils/paginatedFetcher.ts
+export type PaginatedResponse<T> = {
+  totalRecords: number;
+  totalPages: number;
+  pageNo: number;
+  nextPageURL: string | null;
+  data: T[];
+};
+```
+
+#### Fetch with Token
+Authenticated HTTP client with automatic token management:
+```typescript
+// src/shared/services/fetchWithToken.ts
+export const fetchWithToken = async (url: string, options: RequestInit = {}) => {
+  const token = await tokenService.getToken();
+  // Automatic token refresh on 401
+  // BigInt parsing support
+  // Error handling and logging
+};
+```
+
+#### Global Fetch
+Base HTTP client with error handling and response parsing:
+```typescript
+// src/shared/services/globalFetch.ts
+export const globalFetch = async (url: string, options: RequestInit = {}) => {
+  // Network error handling
+  // Automatic JSON parsing with BigInt support
+  // Standardized response format
+};
+```
+
+### 4. Global Modal System
+Centralized modal management for consistent UI:
+```typescript
+// src/shared/components/CustomModal.tsx
+interface CustomModalProps {
+  visible: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
+}
+// Tablet-optimized responsive design
+// Keyboard handling
+// Hardware acceleration
+```
+
+### 5. Global Error Handler
+Comprehensive error management system:
+```typescript
+// src/shared/services/errorHandler.ts
+export class GlobalErrorHandler {
+  // HTTP error categorization
+  // Network error detection
+  // User-friendly error messages
+  // Error logging and reporting
+}
+```
+
+### 6. Environment Configuration
+Multi-environment setup with type safety:
+```typescript
+// src/environments/dev/index.ts
+export const DEV_CONFIG = {
+  baseURL: 'https://dev-api.example.com',
+  grantType: 'password',
+  clientId: 'app-dev',
+  clientSecret: 'secret'
+};
+```
+
+### 7. Offline-First Architecture
+- SQLite database with WatermelonDB
+- Network detection and sync management
+- Local storage for critical data
+- Conflict resolution strategies
+
+### 8. Component Architecture
+
+#### Layout Components
+- AppToolbar with global search and store selector
+- Tab-based navigation with dynamic titles
+- Responsive design for tablets
+
+#### Feature Components
+- Modular component organization by feature
+- Shared component library
+- Consistent styling and theming
+
+### 9. Hook Patterns
+- Custom hooks for data fetching
+- State management hooks
+- Debounced search and updates
+- Cache management hooks
+
+### 10. Type Safety
+- Strict TypeScript configuration
+- Comprehensive type definitions
+- API response typing
+- Component prop validation
+
+
+#### Development Environment
+```typescript
+// src/environments/dev/index.ts
+export const DEV_CONFIG = {
+  baseURL: 'https://betaaccount.retailcloud.com',
+  grantType: 'password',
+  clientId: 'rc-app-beta',
+  clientSecret: 'secret',
+};
+```
+
+#### UAT Environment
+```typescript
+// src/environments/uat/index.ts
+export const UAT_CONFIG = {
+  baseURL: 'https://uat-platform.retailcloud.com',
+  grantType: 'password',
+  clientId: 'rc-app-uat',
+  clientSecret: 'secret',
+};
+```
+
+#### Production Environment
+```typescript
+// src/environments/prod/index.ts
+export const PROD_CONFIG = {
+  baseURL: 'https://account.retailcloud.com',
+  grantType: 'password',
+  clientId: 'rc-app-live',
+  clientSecret: 'secret',
+};
+```
+
+#### Common Endpoints Configuration
+```typescript
+// src/environments/index.ts
+const COMMON_ENDPOINTS = {
+  token: '/goauth/oauth/token',
+…
+};
+```
+
+
+## Implementation Priorities
+
+1. **Core Infrastructure**
+   - Environment configuration
+   - Fetch utilities and error handling
+   - Modal and toast systems
+   - Navigation structure
+
+2. **Authentication System**
+   - Multi-environment login
+   - Token management and refresh
+   - Secure storage integration
+
+3. **Data Layer**
+   - API client configuration
+   - Offline database setup
+   - Sync engine implementation
+
+4. **Feature Development**
+   - Dashboard with store selector
+   - Customer management (CRM)
+   - Product catalog
+   - Cart management
+
+5. **UI/UX Polish**
+   - Responsive design optimization
+   - Loading states and error boundaries
+   - Performance optimizations
+
+## Key Architecture Benefits
+
+- **Scalability**: Modular feature-based organization
+- **Maintainability**: Centralized services and utilities
+- **Type Safety**: Comprehensive TypeScript integration
+- **Performance**: Optimized for tablet usage
+- **Offline Support**: Robust data synchronization
+- **Error Resilience**: Global error handling and recovery
+- **Developer Experience**: Consistent patterns and conventions
+
+This template provides a robust foundation for enterprise React Native applications with modern development practices and production-ready architecture.
+
+

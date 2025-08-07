@@ -1,0 +1,53 @@
+orderup/
+│
+├── app/                             # Expo Router entry point (if used)
+│
+├── src/
+│   ├── assets/                      # Icons, logos, fonts
+│   ├── constants/                   # Static values (roles, order status)
+│   ├── config/                      # 🟢 Environment handling & base URLs
+│   │   ├── env.ts                   # Exposes current environment & config
+│   │   └── endpoints.ts             # Full list of base URLs per env
+│   │
+│   ├── lib/
+│   │   ├── api/                     # API clients (axios/fetch)
+│   │   │   ├── client.ts           # Axios instance with dynamic base URL
+│   │   │   ├── orders.api.ts       # Order API integration
+│   │   │   ├── picklist.api.ts     # Picklist API integration
+│   │   │   └── ...                 # Add more API files per module
+│   │   ├── notifications/          # Push setup, handlers
+│   │   ├── pagination/             # Custom paginated hooks
+│   │   └── utils/                  # Shared helpers
+│   │
+│   ├── hooks/                      # useOrders, usePicklist, useEnv
+│   │
+│   ├── store/                      # Global state management (Zustand)
+│   │
+│   ├── components/
+│   │   ├── common/                 # Buttons, inputs, loaders
+│   │   ├── orders/                 # OrderCard, OrderHeader
+│   │   ├── picklist/               # PickItem, PickStatusBar
+│   │   └── qr/                     # QR scanner/preview
+│   │
+│   ├── features/
+│   │   ├── auth/                   # Login/Profile
+│   │   ├── dashboard/              # Main dashboard & notification center
+│   │   ├── orders/                 # Order listing & detail view
+│   │   ├── picklists/              # Batch creation, assignment
+│   │   ├── picking/                # Location-based checklist
+│   │   ├── packing/                # Sorting & mark ready
+│   │   └── fulfillment/            # QR code scan & final handoff
+│   │
+│   ├── navigation/                 # Navigation stacks/tabs
+│   ├── types/                      # All shared types/interfaces
+│   └── localization/               # (Optional) i18n support
+│
+├── .env                            # Shared .env file
+├── .env.prod                       # 🌐 Production
+├── .env.beta                       # 🔵 Beta
+├── .env.uat                        # 🧪 UAT
+├── .env.staging                    # 🟡 Staging
+│
+├── app.config.ts                   # Expo config with env injection
+├── package.json
+└── README.md

@@ -1,0 +1,234 @@
+1. Add the New Endpoint
+First, add your new endpoint to the 
+COMMON_ENDPOINTS
+ object in src/environments/index.ts:
+typescript
+const COMMON_ENDPOINTS = {
+  // ... existing endpoints
+  myNewEndpoint: '/console/your/new/endpoint',
+};
+2. Create an API Service File
+Create a new file in the appropriate feature's 
+api
+ directory (or use an existing one). For example, for a user-related API, you might create 
+src/features/user/api/userApi.ts
+:
+typescript
+import { API_CONFIG } from '@/src/environments';
+import { fetchWithToken } from '@/src/shared/services/fetchWithToken';
+
+export const getMyNewResource = async (id: string) => {
+  try {
+    const url = `${API_CONFIG.baseURL}${API_CONFIG.endpoints.myNewEndpoint}/${id}`;
+    const response = await fetchWithToken(url);
+    
+    if (response.error) {
+      throw new Error(response.error);
+    }
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching resource:', error);
+    throw error;
+  }
+};
+3. Using the API in Components
+Import and use your new API function in your React components:
+typescript
+import { getMyNewResource } from '@/features/user/api/userApi';
+
+// Inside your component
+const fetchData = async () => {
+  try {
+    const data = await getMyNewResource('123');
+    // Handle the data
+  } catch (error) {
+    // Handle errors
+  }
+};
+Key Patterns to Follow
+Error Handling: Always handle API errors appropriately
+Type Safety: Use TypeScript interfaces for request/response types
+Token Management: The fetchWithToken utility automatically handles authentication
+Environment Configuration: All environment-specific settings are managed through the config system
+Common API Patterns in mPower
+GET Requests:
+typescript
+const response = await fetchWithToken(url);
+POST/PUT Requests:
+typescript
+const response = await fetchWithToken(url, {
+  method: 'POST', // or 'PUT'
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify(payload),
+});
+Query Parameters:
+typescript
+const params = new URLSearchParams({ 
+  page: '1',
+  limit: '10',
+  search: 'query'
+});
+const url = `${baseUrl}?${params.toString()}`;
+
+Basic Usage
+typescript
+import { paginatedFetcher, PaginatedResponse } from '@/src/shared/utils/paginatedFetcher';
+import { API_CONFIG } from '@/src/environments';
+
+interface YourDataType {
+  id: string;
+  // ... other fields
+}
+
+export const getPaginatedData = async (page: number = 1, limit: number = 20): Promise<PaginatedResponse<YourDataType>> => {
+  const url = ${API_CONFIG.baseURL}${API_CONFIG.endpoints.yourEndpoint}?pageNo=${page}&limit=${limit};
+  return await paginatedFetcher<YourDataType>(url);
+};
+With Query Parameters
+For more complex queries, use 
+URLSearchParams
+:
+typescript
+export const searchData = async (
+  query: string,
+  filters: Record<string, string | number | boolean> = {},
+  page: number = 1,
+  limit: number = 20
+): Promise<PaginatedResponse<YourDataType>> => {
+  const params = new URLSearchParams({
+    search: query,
+    pageNo: page.toString(),
+    limit: limit.toString(),
+    ...Object.fromEntries(
+      Object.entries(filters)
+        .filter(([_, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => [key, String(value)])
+    )
+  });
+
+  const url = `${API_CONFIG.baseURL}${API_CONFIG.endpoints.yourEndpoint}?${params.toString()}`;
+  return await paginatedFetcher<YourDataType>(url);
+};
+In a React Component
+Here's how to use the paginated API in a React component:
+typescript
+import { useState, useEffect } from 'react';
+import { PaginatedResponse } from '@/src/shared/utils/paginatedFetcher';
+import { YourDataType, getPaginatedData } from '@/features/yourFeature/api/yourApi';
+
+const YourComponent = () => {
+  const [data, setData] = useState<YourDataType[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 20,
+    totalPages: 1,
+    totalRecords: 0,
+  });
+
+  const fetchData = async (page: number = 1) => {
+    try {
+      setLoading(true);
+      const response = await getPaginatedData(page, pagination.limit);
+      
+      setData(response.data);
+      setPagination(prev => ({
+        ...prev,
+        page,
+        totalPages: response.totalPages,
+        totalRecords: response.totalRecords,
+      }));
+    } catch (err) {
+      setError(err as Error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData(1);
+  }, []);
+
+  // Render your component with pagination controls
+  return (
+    <div>
+      {loading && <div>Loading...</div>}
+      {error && <div>Error: {error.message}</div>}
+      
+      {/* Your data list */}
+      <div>
+        {data.map(item => (
+          <div key={item.id}>{/* Render your item */}</div>
+        ))}
+      </div>
+      
+      {/* Pagination controls */}
+      <div>
+        <button 
+          onClick={() => fetchData(pagination.page - 1)} 
+          disabled={pagination.page <= 1}
+        >
+          Previous
+        </button>
+        
+        <span>Page {pagination.page} of {pagination.totalPages}</span>
+        
+        <button 
+          onClick={() => fetchData(pagination.page + 1)} 
+          disabled={pagination.page >= pagination.totalPages}
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+};
+Handling the Response
+The paginatedFetcher returns a 
+PaginatedResponse<T>
+ with the following structure:
+typescript
+{
+  totalRecords: number;  // Total number of records
+  totalPages: number;    // Total number of pages
+  pageNo: number;        // Current page number
+  nextPageURL: string | null;  // URL for the next page, if available
+  data: T[];             // Array of items for the current page
+}
+Error Handling
+The paginatedFetcher automatically handles errors and throws them with status information:
+typescript
+try {
+  const response = await paginatedFetcher<YourDataType>(url);
+  // Handle successful response
+} catch (error) {
+  console.error('API Error:', error.message);
+  if ('status' in error) {
+    console.error('Status:', error.status);
+  }
+  // Handle the error in your UI
+}
+Caching and Deduplication
+For better performance, you can implement request deduplication using a simple cache:
+typescript
+const ongoingRequests: Record<string, Promise<PaginatedResponse<any>>> = {};
+
+export const getCachedPaginatedData = async <T>(
+  url: string
+): Promise<PaginatedResponse<T>> => {
+  if (ongoingRequests[url]) {
+    return ongoingRequests[url];
+  }
+\
+  const request = paginatedFetcher<T>(url)
+    .finally(() => {
+      delete ongoingRequests[url];
+    });
+
+  ongoingRequests[url] = request;
+  return request;
+};

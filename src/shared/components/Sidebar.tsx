@@ -32,18 +32,14 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
       route: '/picklist/',
       isActive: pathname.startsWith('/picklist')
     },
-    { 
-      title: 'Settings', 
-      icon: 'settings', 
-      route: '/settings',
-      isActive: pathname === '/settings' || pathname.startsWith('/settings/')
-    },
   ];
 
   const handleNavigation = (route: string) => {
     router.push(route);
-    // Auto-close sidebar after navigation on all devices
-    onToggle();
+    // Auto-close on mobile only
+    if (window?.innerWidth && window.innerWidth < 768) {
+      onToggle();
+    }
   };
 
   const handleLogout = async () => {

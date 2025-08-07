@@ -24,19 +24,19 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
       title: 'Orders', 
       icon: 'receipt-long', 
       route: '/orders',
-      isActive: pathname === '/orders'
+      isActive: pathname === '/orders' || pathname.startsWith('/orders/')
     },
     { 
       title: 'Picklists', 
       icon: 'inventory', 
-      route: '/picklist',
+      route: '/picklist/',
       isActive: pathname.startsWith('/picklist')
     },
   ];
 
   const handleNavigation = (route: string) => {
     router.push(route);
-    if (window.innerWidth < 768) {
+    if (window?.innerWidth && window.innerWidth < 768) {
       onToggle();
     }
   };

@@ -1,41 +1,133 @@
-
 import { fetchWithToken } from '../../../shared/services/fetchWithToken';
 import { Order, PaginatedResponse } from '../../../shared/types';
 
+interface GetOrdersParams {
+  source?: string;
+  pageNo?: number;
+}
+
+interface GetOrdersResponse extends PaginatedResponse<Order> {
+  orders: Order[];
+}
+
 export const ordersApi = {
-  async getOrders(params: {
-    pageNo?: number;
-    limit?: number;
-    source?: string;
-    status?: string;
-    paymentStatus?: string;
-    hasFulfilmentJob?: boolean;
-    expand?: string;
-    pagination?: boolean;
-  } = {}): Promise<PaginatedResponse<Order>> {
-    const defaultParams = {
-      source: 'Shopify,Tapin2,Breakaway,bigcommerce,Ecwid,PHONE ORDER,DELIVERY,BAR TAB,TIKT,TABLE,OTHER,MANUAL,FanVista,QSR',
-      limit: 20,
-      pageNo: 1,
-      expand: 'item,bin,location_hint,payment',
-      pagination: true,
-      hasFulfilmentJob: false,
-      status: 'Initiated,Sent for Processing',
-      paymentStatus: 'PAID,UNPAID',
-      ...params
+  async getOrders({ source, pageNo = 1 }: GetOrdersParams): Promise<GetOrdersResponse> {
+    const params = new URLSearchParams();
+    if (source) params.append('source', source);
+    params.append('pageNo', pageNo.toString());
+
+    const url = `/console/transactions/orders?${params.toString()}`;
+    const response = await fetchWithToken(url);
+
+    // Transform the API response to match our Order interface
+    const transformedOrders = response.data.map((apiOrder: any) => ({
+      id: apiOrder.orderID.toString(),
+      orderID: apiOrder.orderID,
+      orderNumber: apiOrder.externalOrderID || apiOrder.orderID.toString(),
+      source: apiOrder.source,
+      status: apiOrder.status,
+      customer: apiOrder.customer?.name || apiOrder.employee?.name || 'Unknown Customer',
+      items: apiOrder.items?.map((item: any) => ({
+        id: item.orderItemID.toString(),
+        productId: item.itemID,
+        productName: item.name,
+        quantity: item.orderQuantity,
+        pickedQuantity: item.returnQuantity || 0,
+        orderItemID: item.orderItemID,
+        itemID: item.itemID,
+        orderID: item.orderID,
+        upc: item.upc,
+        name: item.name,
+        sequence: item.sequence,
+        orderQuantity: item.orderQuantity,
+        returnQuantity: item.returnQuantity,
+        unitPrice: item.unitPrice,
+        costPrice: item.costPrice,
+        discount: item.discount,
+        tax: item.tax,
+        customizationTotal: item.customizationTotal,
+        status: item.status,
+        batch: item.batch,
+        amount: item.amount,
+      })) || [],
+      createdAt: apiOrder.date,
+      date: apiOrder.date,
+      type: apiOrder.type,
+      paymentStatus: apiOrder.paymentStatus,
+      employeeID: apiOrder.employeeID,
+      subTotal: apiOrder.subTotal,
+      totalFees: apiOrder.totalFees,
+      customizationTotal: apiOrder.customizationTotal,
+      tax: apiOrder.tax,
+      amount: apiOrder.amount,
+      registerID: apiOrder.registerID,
+      externalOrderKey: apiOrder.externalOrderKey,
+      netDiscount: apiOrder.netDiscount,
+      isTaxExempt: apiOrder.isTaxExempt,
+      totalItemQuantity: apiOrder.totalItemQuantity,
+      employee: apiOrder.employee,
+      store: apiOrder.store,
+      register: apiOrder.register,
+    }));
+
+    return {
+      ...response,
+      orders: transformedOrders,
     };
-    
-    const searchParams = new URLSearchParams();
-    Object.entries(defaultParams).forEach(([key, value]) => {
-      if (value !== undefined) {
-        searchParams.append(key, value.toString());
-      }
-    });
-    
-    return await fetchWithToken(`/console/transactions/orders?${searchParams.toString()}`);
   },
 
   async getOrderById(orderId: string): Promise<Order> {
-    return await fetchWithToken(`/console/transactions/orders/${orderId}?expand=customization,item`);
-  }
+    const response = await fetchWithToken(`/console/transactions/orders/${orderId}`);
+
+    // Transform single order response
+    return {
+      id: response.orderID.toString(),
+      orderID: response.orderID,
+      orderNumber: response.externalOrderID || response.orderID.toString(),
+      source: response.source,
+      status: response.status,
+      customer: response.customer || response.employee?.name || 'Unknown Customer',
+      items: response.items?.map((item: any) => ({
+        id: item.orderItemID.toString(),
+        productId: item.itemID,
+        productName: item.name,
+        quantity: item.orderQuantity,
+        pickedQuantity: item.returnQuantity || 0,
+        orderItemID: item.orderItemID,
+        itemID: item.itemID,
+        orderID: item.orderID,
+        upc: item.upc,
+        name: item.name,
+        sequence: item.sequence,
+        orderQuantity: item.orderQuantity,
+        returnQuantity: item.returnQuantity,
+        unitPrice: item.unitPrice,
+        costPrice: item.costPrice,
+        discount: item.discount,
+        tax: item.tax,
+        customizationTotal: item.customizationTotal,
+        status: item.status,
+        batch: item.batch,
+        amount: item.amount,
+      })) || [],
+      createdAt: response.date,
+      date: response.date,
+      type: response.type,
+      paymentStatus: response.paymentStatus,
+      employeeID: response.employeeID,
+      subTotal: response.subTotal,
+      totalFees: response.totalFees,
+      customizationTotal: response.customizationTotal,
+      tax: response.tax,
+      amount: response.amount,
+      registerID: response.registerID,
+      externalOrderKey: response.externalOrderKey,
+      netDiscount: response.netDiscount,
+      isTaxExempt: response.isTaxExempt,
+      totalItemQuantity: response.totalItemQuantity,
+      employee: response.employee,
+      store: response.store,
+      register: response.register,
+    };
+  },
 };

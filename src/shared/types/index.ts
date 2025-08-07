@@ -1,14 +1,12 @@
-
 export interface Order {
   id: string;
-  orderNumber?: string;
+  orderID: number;
+  orderNumber: string;
   source: string;
   status: string;
-  customer: string | Customer;
+  customer: string | object;
   items: OrderItem[];
-  createdAt?: string;
-  orderID: string;
-  externalOrderID?: string;
+  createdAt: string;
   date: string;
   type: string;
   paymentStatus: string;
@@ -19,34 +17,13 @@ export interface Order {
   tax: number;
   amount: number;
   registerID: number;
-  externalOrderKey?: number;
+  externalOrderKey: string;
   netDiscount: number;
   isTaxExempt: boolean;
   totalItemQuantity: number;
-  employee?: {
-    employeeID: number;
-    name: string;
-    userID: number;
-    id: number;
-  };
-  store?: {
-    storeID: number;
-    name: string;
-    id: number;
-  };
-  register?: {
-    id: number;
-    registerID: number;
-    name: string;
-  };
-  billingAddress?: Address;
-  deliveryAddress?: Address;
-  statusCode?: number;
-  modifiedBy?: number;
-  modifiedDate?: string;
-  transactions?: string[];
-  metadata?: any;
-  createTransaction?: boolean;
+  employee: any;
+  store: any;
+  register: any;
 }
 
 export interface Customer {

@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getConfig } from '../../../environments';
+import { authApi } from '../api/authApi';
 
 export default function LoginScreen() {
   const [domain, setDomain] = useState('');
@@ -29,41 +29,18 @@ export default function LoginScreen() {
     setLoading(true);
     
     try {
-      const config = getConfig();
-      const credentials = btoa(`${config.clientId}:${config.clientSecret}`);
+      const response = await authApi.login({ domain, username, password });
       
-      const formData = new URLSearchParams();
-      formData.append('grant_type', 'password');
-      formData.append('username', username);
-      formData.append('password', password);
-      formData.append('domain', domain);
-      formData.append('scope', 'write');
-
-      const response = await fetch(`${config.baseURL}${config.endpoints.token}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': `Basic ${credentials}`,
-        },
-        body: formData.toString(),
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.access_token) {
-        // Store the token in AsyncStorage
-        await AsyncStorage.setItem('access_token', data.access_token);
-        await AsyncStorage.setItem('refresh_token', data.refresh_token);
-        await AsyncStorage.setItem('token_expires_in', data.expires_in.toString());
-        
-        // Navigate to dashboard
-        router.replace('/dashboard');
-      } else {
-        Alert.alert('Login Failed', data.error_description || 'Invalid credentials');
-      }
+      // Store the token in AsyncStorage
+      await AsyncStorage.setItem('access_token', response.access_token);
+      await AsyncStorage.setItem('refresh_token', response.refresh_token);
+      await AsyncStorage.setItem('token_expires_in', response.expires_in.toString());
+      
+      // Navigate to dashboard
+      router.replace('/dashboard');
     } catch (error) {
       console.error('Login error:', error);
-      Alert.alert('Error', 'Failed to connect to server');
+      Alert.alert('Login Failed', error instanceof Error ? error.message : 'Failed to connect to server');
     } finally {
       setLoading(false);
     }

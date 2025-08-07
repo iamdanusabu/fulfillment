@@ -4,6 +4,7 @@ import { DashboardStats } from '../../../shared/types';
 
 export const dashboardApi = {
   async getStats(): Promise<DashboardStats> {
-    return await fetchWithToken('/api/dashboard');
-  }
+    const response = await fetchWithToken('/api/dashboard');
+    return response;
+  },
 };

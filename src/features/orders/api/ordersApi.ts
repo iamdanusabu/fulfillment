@@ -1,5 +1,6 @@
 import { fetchWithToken } from '../../../shared/services/fetchWithToken';
 import { Order, PaginatedResponse } from '../../../shared/types';
+import { getConfig } from '../../../environments';
 
 interface GetOrdersParams {
   source?: string;
@@ -16,7 +17,8 @@ export const ordersApi = {
     if (source) params.append('source', source);
     params.append('pageNo', pageNo.toString());
 
-    const url = `/console/transactions/orders?${params.toString()}`;
+    const config = getConfig();
+    const url = `${config.endpoints.orders}?${params.toString()}`;
     const response = await fetchWithToken(url);
 
     // Transform the API response to match our Order interface
@@ -77,7 +79,8 @@ export const ordersApi = {
   },
 
   async getOrderById(orderId: string): Promise<Order> {
-    const response = await fetchWithToken(`/console/transactions/orders/${orderId}`);
+    const config = getConfig();
+    const response = await fetchWithToken(`${config.endpoints.orders}/${orderId}`);
 
     // Transform single order response
     return {

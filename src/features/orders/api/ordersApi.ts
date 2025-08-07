@@ -1,4 +1,3 @@
-
 import { fetchWithToken } from '../../../shared/services/fetchWithToken';
 import { PaginatedFetcher } from '../../../shared/services/paginatedFetcher';
 import { Order, PaginatedResponse } from '../../../shared/types';

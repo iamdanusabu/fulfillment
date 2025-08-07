@@ -75,9 +75,8 @@ export const ordersApi = {
       pageSize: 1,
     });
   },
-};
 
-// Get single order by ID
+  // Get single order by ID
   async getOrderById(orderId: string) {
     const fetcher = this.createSingleOrderFetcher(orderId);
     const response = await fetcher.fetchPage();

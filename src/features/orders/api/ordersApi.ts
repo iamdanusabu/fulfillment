@@ -1,15 +1,11 @@
-import { fetchWithToken } from '../../../shared/services/fetchWithToken';
+
 import { PaginatedFetcher } from '../../../shared/services/paginatedFetcher';
-import { Order, PaginatedResponse } from '../../../shared/types';
+import { Order } from '../../../shared/types';
 import { getConfig } from '../../../environments';
 
 interface GetOrdersParams {
   source?: string;
   pageNo?: number;
-}
-
-interface GetOrdersResponse extends PaginatedResponse<Order> {
-  orders: Order[];
 }
 
 const transformOrder = (apiOrder: any): Order => ({
@@ -63,18 +59,20 @@ const transformOrder = (apiOrder: any): Order => ({
 });
 
 export const ordersApi = {
-  async getOrderById(orderId: string): Promise<Order> {
-    const config = getConfig();
-    const response = await fetchWithToken(`${config.endpoints.orders}/${orderId}`);
-    return transformOrder(response);
-  },
-
   // Create a paginated fetcher for orders
   createPaginatedOrdersFetcher(params: GetOrdersParams = {}) {
     const config = getConfig();
     return new PaginatedFetcher<any>(config.endpoints.orders, {
       pageSize: 20,
       initialParams: params,
+    });
+  },
+
+  // Create a paginated fetcher for a single order
+  createSingleOrderFetcher(orderId: string) {
+    const config = getConfig();
+    return new PaginatedFetcher<any>(`${config.endpoints.orders}/${orderId}`, {
+      pageSize: 1,
     });
   },
 };

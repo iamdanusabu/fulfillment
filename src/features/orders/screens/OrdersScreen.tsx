@@ -42,7 +42,7 @@ export default function OrdersScreen() {
     if (isPicklistMode) {
       toggleOrderSelection(order.id);
     } else {
-      router.push(`/orders/detail?orderId=${order.id}`);
+      router.push(`/orders/detail?orderId=${order.orderID}`);
     }
   };
 

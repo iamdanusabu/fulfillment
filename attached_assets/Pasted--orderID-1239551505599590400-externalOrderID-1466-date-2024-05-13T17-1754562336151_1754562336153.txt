@@ -1,0 +1,494 @@
+{
+    "orderID": "1239551505599590400",
+    "externalOrderID": "1466",
+    "date": "2024-05-13T17:45:03+05:30",
+    "type": "ONLINE",
+    "customer": {
+        "customerNumber": "2023/13/27/25/1",
+        "name": "Ann James",
+        "firstName": "Ann",
+        "lastName": "James",
+        "address": "2702 Clayton Road",
+        "city": "Concord",
+        "state": "California",
+        "country": "United States",
+        "zipCode": "94519",
+        "email": "athulya@retailcloud.com",
+        "countryCode": "+1",
+        "mobilePhone": "7025695515",
+        "id": "2023/13/27/25/1"
+    },
+    "status": "INITIATED",
+    "statusCode": 100,
+    "paymentStatus": "PAID",
+    "employeeID": 1,
+    "subTotal": 112.93,
+    "totalFees": 0.00,
+    "customizationTotal": 0.00,
+    "tax": 8.07,
+    "amount": 85.85,
+    "modifiedBy": 1,
+    "modifiedDate": "2024-05-13T17:45:20+05:30",
+    "items": [
+        {
+            "orderItemID": "1239551505775751168",
+            "itemID": "Acer101",
+            "orderID": 1239551505599590400,
+            "upc": "Acer101",
+            "name": "Acer Inter 5i",
+            "sequence": 1,
+            "orderQuantity": 1.0,
+            "returnQuantity": 0.0,
+            "unitPrice": 112.93,
+            "costPrice": 100.0,
+            "discount": 30.25,
+            "tax": 8.07,
+            "customizationTotal": 0.00,
+            "status": "INITIATED",
+            "batch": 1,
+            "amount": 112.93,
+            "promotions": [
+                {
+                    "orderItemID": 1239551505775751168,
+                    "promotionID": 144,
+                    "type": "Discount",
+                    "amount": 30.25
+                }
+            ],
+            "taxes": [
+                {
+                    "orderItemID": 1239551505775751168,
+                    "taxID": 12,
+                    "amount": 8.07,
+                    "amount1": 8.07000,
+                    "amount2": 0.00000,
+                    "rate1": 0.00,
+                    "rate2": 0.00
+                }
+            ],
+            "department": {
+                "departmentID": 1,
+                "departmentName": "DEFAULT",
+                "id": 1
+            },
+            "category": {
+                "categoryID": 1,
+                "description": "DEFAULT",
+                "id": 1
+            },
+            "subCategory": {
+                "subCategoryID": 1,
+                "description": "General Category",
+                "id": 1
+            },
+            "metadata": {
+                "externalOrderItemID": "\"14956141084991\""
+            },
+            "statusCode": 100,
+            "item": {
+                "merchant": {
+                    "domain": "FLY",
+                    "merchantID": 1161032,
+                    "id": 1161032
+                },
+                "itemID": "Acer101",
+                "upc": "Acer101",
+                "name": "Acer Inter 5i",
+                "categoryID": 1,
+                "category": {
+                    "categoryID": 1,
+                    "description": "DEFAULT",
+                    "status": "Active",
+                    "serializationLevel": 0,
+                    "id": 1,
+                    "discountExcluded": false
+                },
+                "colorID": 18,
+                "color": {
+                    "colorID": 18,
+                    "description": "Brown",
+                    "status": "Active",
+                    "id": 18,
+                    "discountExcluded": false
+                },
+                "costPrice": 100.0,
+                "sellingPrice": 122.21,
+                "departmentID": 1,
+                "department": {
+                    "departmentID": 1,
+                    "departmentName": "DEFAULT",
+                    "status": "Active",
+                    "serializationLevel": 0,
+                    "id": 1,
+                    "discountExcluded": false
+                },
+                "itemStatus": "Active",
+                "maximumLevel": 0.0,
+                "minimumLevel": 0.0,
+                "modifiedTime": "2024-08-09 10:16:23",
+                "discountExcluded": false,
+                "poMeasure": 1,
+                "serializationLevel": 0,
+                "subCategoryID": 1,
+                "subcategory": {
+                    "subCategoryID": 1,
+                    "description": "General Category",
+                    "status": "Active",
+                    "serializationLevel": 0,
+                    "id": 1,
+                    "discountExcluded": false
+                },
+                "supplierCode": "zzz999",
+                "tax": {
+                    "taxID": 1,
+                    "description": "Sales Tax",
+                    "taxRate1": 8.5,
+                    "taxRate2": 0.0,
+                    "compounded": false,
+                    "tax1": {
+                        "rate": {
+                            "value": 8.5,
+                            "type": "Percentage"
+                        },
+                        "minimumAmount": 110.0,
+                        "maximumAmount": 200.0,
+                        "applyOn": "Amount Over"
+                    },
+                    "tax2": {
+                        "rate": {
+                            "value": 0.0,
+                            "type": "Percentage"
+                        },
+                        "minimumAmount": 0.0,
+                        "maximumAmount": 0.0,
+                        "applyOn": "Full Amount"
+                    },
+                    "tax3": {
+                        "rate": {
+                            "value": 0.00000,
+                            "type": "Percentage"
+                        },
+                        "minimumAmount": 0.00000,
+                        "maximumAmount": 0.00000,
+                        "applyOn": "Full Amount"
+                    },
+                    "tax4": {
+                        "rate": {
+                            "value": 0.00000,
+                            "type": "Percentage"
+                        },
+                        "minimumAmount": 0.00000,
+                        "maximumAmount": 0.00000,
+                        "applyOn": "Full Amount"
+                    },
+                    "tax5": {
+                        "rate": {
+                            "value": 0.00000,
+                            "type": "Percentage"
+                        },
+                        "minimumAmount": 0.00000,
+                        "maximumAmount": 0.00000,
+                        "applyOn": "Full Amount"
+                    },
+                    "tax6": {
+                        "rate": {
+                            "value": 0.00000,
+                            "type": "Percentage"
+                        },
+                        "minimumAmount": 0.00000,
+                        "maximumAmount": 0.00000,
+                        "applyOn": "Full Amount"
+                    },
+                    "id": 1
+                },
+                "taxID": 1,
+                "taxIncluded": false,
+                "typeID": 1,
+                "type": {
+                    "typeID": 1,
+                    "id": 1,
+                    "name": "Store Item"
+                },
+                "vendor": {
+                    "vendorID": 1,
+                    "vendorCode": "zzz999",
+                    "vendorName": "Zack",
+                    "status": "Active",
+                    "id": 1,
+                    "code": "zzz999"
+                },
+                "consignment": false,
+                "licensee": false,
+                "productName": "Acer Inter 5i",
+                "productID": "Acer101",
+                "ecommerceEnabled": false,
+                "uom": {
+                    "id": 1,
+                    "measureID": 1,
+                    "description": "DEFAULT",
+                    "purchaseUnit": 0.00000,
+                    "salesUnit": 0.00000,
+                    "noOfUnits": 1.00000
+                },
+                "customizationEnabled": false,
+                "appCommerceEnabled": false,
+                "id": "Acer101",
+                "modifiedOn": "2024-08-09T15:46:23+05:30",
+                "unitCost": 100.00,
+                "isPackageComponent": false,
+                "enableAutoReplenishment": true,
+                "reportingMode": "GENERIC",
+                "ecommerceName": "Acer Inter 5i"
+            },
+            "externalOrderItemID": "14956141084991",
+            "id": 1239551505775751168,
+            "appliedPromotions": [],
+            "isTaxIncluded": false,
+            "validateQOH": false
+        },
+        {
+            "orderItemID": "1239551505813499904",
+            "itemID": "Shipping",
+            "orderID": 1239551505599590400,
+            "upc": "Shipping",
+            "name": "Shipping",
+            "sequence": 2,
+            "orderQuantity": 1.0,
+            "returnQuantity": 0.0,
+            "unitPrice": 4.9,
+            "costPrice": 0.0,
+            "discount": 4.9,
+            "tax": 0.0,
+            "customizationTotal": 0.00,
+            "status": "INITIATED",
+            "batch": 1,
+            "amount": 4.9,
+            "promotions": [
+                {
+                    "orderItemID": 1239551505813499904,
+                    "promotionID": 144,
+                    "type": "Discount",
+                    "amount": 4.9
+                }
+            ],
+            "department": {
+                "departmentID": 1,
+                "departmentName": "DEFAULT",
+                "id": 1
+            },
+            "category": {
+                "categoryID": 1,
+                "description": "DEFAULT",
+                "id": 1
+            },
+            "subCategory": {
+                "subCategoryID": 1,
+                "description": "General Category",
+                "id": 1
+            },
+            "statusCode": 100,
+            "item": {
+                "merchant": {
+                    "domain": "FLY",
+                    "merchantID": 1161032,
+                    "id": 1161032
+                },
+                "itemID": "Shipping",
+                "upc": "Shipping",
+                "name": "Shipping",
+                "categoryID": 1,
+                "category": {
+                    "categoryID": 1,
+                    "description": "DEFAULT",
+                    "status": "Active",
+                    "serializationLevel": 0,
+                    "id": 1,
+                    "discountExcluded": false
+                },
+                "colorID": 18,
+                "color": {
+                    "colorID": 18,
+                    "description": "Brown",
+                    "status": "Active",
+                    "id": 18,
+                    "discountExcluded": false
+                },
+                "costPrice": 0.0,
+                "sellingPrice": 1.01,
+                "departmentID": 1,
+                "department": {
+                    "departmentID": 1,
+                    "departmentName": "DEFAULT",
+                    "status": "Active",
+                    "serializationLevel": 0,
+                    "id": 1,
+                    "discountExcluded": false
+                },
+                "itemStatus": "Active",
+                "maximumLevel": 0.0,
+                "minimumLevel": 0.0,
+                "modifiedTime": "2024-08-09 10:20:19",
+                "discountExcluded": false,
+                "serializationLevel": 0,
+                "subCategoryID": 1,
+                "subcategory": {
+                    "subCategoryID": 1,
+                    "description": "General Category",
+                    "status": "Active",
+                    "serializationLevel": 0,
+                    "id": 1,
+                    "discountExcluded": false
+                },
+                "supplierCode": "zzz999",
+                "tax": {
+                    "taxID": 1,
+                    "description": "Sales Tax",
+                    "taxRate1": 8.5,
+                    "taxRate2": 0.0,
+                    "compounded": false,
+                    "tax1": {
+                        "rate": {
+                            "value": 8.5,
+                            "type": "Percentage"
+                        },
+                        "minimumAmount": 110.0,
+                        "maximumAmount": 200.0,
+                        "applyOn": "Amount Over"
+                    },
+                    "tax2": {
+                        "rate": {
+                            "value": 0.0,
+                            "type": "Percentage"
+                        },
+                        "minimumAmount": 0.0,
+                        "maximumAmount": 0.0,
+                        "applyOn": "Full Amount"
+                    },
+                    "tax3": {
+                        "rate": {
+                            "value": 0.00000,
+                            "type": "Percentage"
+                        },
+                        "minimumAmount": 0.00000,
+                        "maximumAmount": 0.00000,
+                        "applyOn": "Full Amount"
+                    },
+                    "tax4": {
+                        "rate": {
+                            "value": 0.00000,
+                            "type": "Percentage"
+                        },
+                        "minimumAmount": 0.00000,
+                        "maximumAmount": 0.00000,
+                        "applyOn": "Full Amount"
+                    },
+                    "tax5": {
+                        "rate": {
+                            "value": 0.00000,
+                            "type": "Percentage"
+                        },
+                        "minimumAmount": 0.00000,
+                        "maximumAmount": 0.00000,
+                        "applyOn": "Full Amount"
+                    },
+                    "tax6": {
+                        "rate": {
+                            "value": 0.00000,
+                            "type": "Percentage"
+                        },
+                        "minimumAmount": 0.00000,
+                        "maximumAmount": 0.00000,
+                        "applyOn": "Full Amount"
+                    },
+                    "id": 1
+                },
+                "taxID": 1,
+                "taxIncluded": false,
+                "typeID": 2,
+                "type": {
+                    "typeID": 2,
+                    "id": 2,
+                    "name": "Service"
+                },
+                "vendor": {
+                    "vendorID": 1,
+                    "vendorCode": "zzz999",
+                    "vendorName": "Zack",
+                    "status": "Active",
+                    "id": 1,
+                    "code": "zzz999"
+                },
+                "consignment": false,
+                "licensee": false,
+                "productName": "Shipping",
+                "productID": "Shipping",
+                "ecommerceEnabled": false,
+                "customizationEnabled": false,
+                "appCommerceEnabled": false,
+                "id": "Shipping",
+                "modifiedOn": "2024-08-09T15:50:19+05:30",
+                "unitCost": 0.00,
+                "isPackageComponent": false,
+                "enableAutoReplenishment": true,
+                "reportingMode": "GENERIC"
+            },
+            "id": 1239551505813499904,
+            "appliedPromotions": [],
+            "isTaxIncluded": false,
+            "validateQOH": false
+        }
+    ],
+    "transactions": [
+        "2024/1/29/405"
+    ],
+    "billingAddress": {
+        "addressID": 1239551555776049152,
+        "fullName": "Ann James",
+        "address1": "2702 Clayton Road",
+        "city": "Concord",
+        "state": "California",
+        "country": "United States",
+        "zip": "94519",
+        "postalCode": "94519",
+        "id": 1239551555776049152
+    },
+    "deliveryAddress": {
+        "addressID": 1239551556069650432,
+        "fullName": "Ann James",
+        "address1": "2702 Clayton Road",
+        "city": "Concord",
+        "state": "California",
+        "country": "United States",
+        "zip": "94519",
+        "postalCode": "94519",
+        "id": 1239551556069650432
+    },
+    "registerID": 29,
+    "source": "shopify",
+    "externalOrderKey": 5946330546495,
+    "metadata": {
+        "externalOrderOrigin": "\"web\"",
+        "externalStore": "\"flingmac.myshopify.com\""
+    },
+    "employee": {
+        "employeeID": 1,
+        "name": "FLY",
+        "userID": 1,
+        "id": 1
+    },
+    "createTransaction": true,
+    "store": {
+        "storeID": 1,
+        "name": "Fly LLC",
+        "id": 1
+    },
+    "register": {
+        "id": 29,
+        "registerID": 29,
+        "name": "FLYING MAC ONLINE"
+    },
+    "netDiscount": 35.15,
+    "isTaxExempt": false,
+    "totalItemQuantity": 2.0,
+    "id": 1239551505599590400
+}

@@ -13,6 +13,8 @@ export default function Orders() {
   const [searchText, setSearchText] = useState('');
   const router = useRouter();
   const params = useLocalSearchParams();
+  
+  const isPicklistMode = params.mode === 'picklist';
 
   useEffect(() => {
     loadOrders();
@@ -33,11 +35,21 @@ export default function Orders() {
   };
 
   const toggleOrderSelection = (orderId: string) => {
+    if (!isPicklistMode) return;
+    
     setSelectedOrders(prev => 
       prev.includes(orderId) 
         ? prev.filter(id => id !== orderId)
         : [...prev, orderId]
     );
+  };
+
+  const viewOrderDetail = (order: Order) => {
+    if (isPicklistMode) {
+      toggleOrderSelection(order.id);
+    } else {
+      router.push(`/orders/detail?orderId=${order.id}`);
+    }
   };
 
   const proceedToLocationSelection = () => {
@@ -56,22 +68,27 @@ export default function Orders() {
     <TouchableOpacity
       style={[
         styles.orderCard,
-        selectedOrders.includes(item.id) && styles.selectedCard
+        isPicklistMode && selectedOrders.includes(item.id) && styles.selectedCard
       ]}
-      onPress={() => toggleOrderSelection(item.id)}
+      onPress={() => viewOrderDetail(item)}
     >
       <View style={styles.orderHeader}>
         <View style={styles.orderInfo}>
           <Text style={styles.orderNumber}>#{item.orderNumber}</Text>
           <Text style={styles.customer}>{item.customer}</Text>
         </View>
-        <View style={styles.checkboxContainer}>
-          <MaterialIcons
-            name={selectedOrders.includes(item.id) ? 'check-box' : 'check-box-outline-blank'}
-            size={24}
-            color={selectedOrders.includes(item.id) ? '#007AFF' : '#ccc'}
-          />
-        </View>
+        {isPicklistMode && (
+          <View style={styles.checkboxContainer}>
+            <MaterialIcons
+              name={selectedOrders.includes(item.id) ? 'check-box' : 'check-box-outline-blank'}
+              size={24}
+              color={selectedOrders.includes(item.id) ? '#007AFF' : '#ccc'}
+            />
+          </View>
+        )}
+        {!isPicklistMode && (
+          <MaterialIcons name="chevron-right" size={24} color="#ccc" />
+        )}
       </View>
       
       <View style={styles.orderDetails}>
@@ -93,7 +110,9 @@ export default function Orders() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Orders</Text>
+        <Text style={styles.title}>
+          {isPicklistMode ? 'Select Orders for Picklist' : 'Orders'}
+        </Text>
         {params.source && (
           <Text style={styles.subtitle}>Filtered by: {params.source}</Text>
         )}
@@ -117,7 +136,7 @@ export default function Orders() {
         contentContainerStyle={styles.ordersContent}
       />
 
-      {selectedOrders.length > 0 && (
+      {isPicklistMode && selectedOrders.length > 0 && (
         <View style={styles.bottomBar}>
           <Text style={styles.selectedCount}>
             {selectedOrders.length} orders selected

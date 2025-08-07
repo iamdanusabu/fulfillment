@@ -11,11 +11,16 @@ export default function PicklistIndex() {
   const router = useRouter();
 
   const createNewPicklist = () => {
-    router.push('/orders');
+    router.push('/orders?mode=picklist');
+  };
+
+  const viewPicklist = (picklist: Picklist) => {
+    // Navigate to packing screen with the picklist details
+    router.push(`/picklist/packing?picklistId=${picklist.id}`);
   };
 
   const renderPicklistItem = ({ item }: { item: Picklist }) => (
-    <TouchableOpacity style={styles.picklistCard}>
+    <TouchableOpacity style={styles.picklistCard} onPress={() => viewPicklist(item)}>
       <View style={styles.picklistHeader}>
         <Text style={styles.picklistId}>Picklist #{item.id}</Text>
         <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>

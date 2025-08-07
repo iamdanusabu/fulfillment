@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, useWindowDimensions } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter, usePathname } from 'expo-router';
 
@@ -9,120 +9,85 @@ interface SidebarProps {
   onToggle: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
+export function Sidebar({ isOpen, onToggle }: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { width } = useWindowDimensions();
-  const isTablet = width >= 768;
 
   const menuItems = [
-    { id: 'dashboard', title: 'Dashboard', icon: 'dashboard', route: '/dashboard' },
-    { id: 'orders', title: 'Orders', icon: 'list-alt', route: '/orders' },
-    { id: 'picklist', title: 'Picklist', icon: 'inventory', route: '/picklist' },
+    { 
+      title: 'Dashboard', 
+      icon: 'dashboard', 
+      route: '/dashboard',
+      isActive: pathname === '/dashboard'
+    },
+    { 
+      title: 'Orders', 
+      icon: 'receipt-long', 
+      route: '/orders',
+      isActive: pathname === '/orders'
+    },
+    { 
+      title: 'Picklists', 
+      icon: 'inventory', 
+      route: '/picklist',
+      isActive: pathname.startsWith('/picklist')
+    },
   ];
 
   const handleNavigation = (route: string) => {
     router.push(route);
-    if (!isTablet) {
+    if (window.innerWidth < 768) {
       onToggle();
     }
   };
 
+  if (!isOpen) return null;
+
   return (
-    <View style={[
-      styles.sidebar,
-      { width: isOpen || isTablet ? (isTablet ? 250 : 200) : 0 },
-      !isTablet && styles.mobileSidebar
-    ]}>
-      {(isOpen || isTablet) && (
-        <View style={styles.sidebarContent}>
-          <View style={styles.header}>
-            <Text style={styles.title}>Menu</Text>
-            {!isTablet && (
-              <TouchableOpacity onPress={onToggle} style={styles.closeButton}>
-                <MaterialIcons name="close" size={24} color="#666" />
-              </TouchableOpacity>
-            )}
-          </View>
-          
-          {menuItems.map((item) => (
-            <TouchableOpacity
-              key={item.id}
-              style={[
-                styles.menuItem,
-                pathname === item.route && styles.activeMenuItem
-              ]}
-              onPress={() => handleNavigation(item.route)}
-            >
-              <MaterialIcons 
-                name={item.icon as any} 
-                size={24} 
-                color={pathname === item.route ? '#007AFF' : '#666'} 
-              />
-              <Text style={[
-                styles.menuText,
-                pathname === item.route && styles.activeMenuText
-              ]}>
-                {item.title}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      )}
+    <View style={styles.sidebar}>
+      <View style={styles.menuItems}>
+        {menuItems.map((item) => (
+          <TouchableOpacity
+            key={item.route}
+            style={[styles.menuItem, item.isActive && styles.activeMenuItem]}
+            onPress={() => handleNavigation(item.route)}
+          >
+            <MaterialIcons 
+              name={item.icon as any} 
+              size={24} 
+              color={item.isActive ? '#007AFF' : '#666'} 
+            />
+            <Text style={[styles.menuText, item.isActive && styles.activeMenuText]}>
+              {item.title}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   sidebar: {
-    backgroundColor: '#f8f9fa',
+    width: 250,
+    backgroundColor: '#fff',
     borderRightWidth: 1,
     borderRightColor: '#e9ecef',
-    overflow: 'hidden',
+    paddingVertical: 20,
   },
-  mobileSidebar: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    height: '100%',
-    zIndex: 1000,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 2, height: 0 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  sidebarContent: {
+  menuItems: {
     flex: 1,
-    padding: 16,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e9ecef',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  closeButton: {
-    padding: 4,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal: 20,
     paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    marginBottom: 4,
+    marginHorizontal: 10,
+    borderRadius: 6,
   },
   activeMenuItem: {
-    backgroundColor: '#e3f2fd',
+    backgroundColor: '#f0f8ff',
   },
   menuText: {
     marginLeft: 12,

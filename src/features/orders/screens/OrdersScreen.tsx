@@ -13,6 +13,8 @@ export default function OrdersScreen() {
     loading, 
     hasMore, 
     totalRecords,
+    currentPage,
+    totalPages,
     loadMore, 
     refresh 
   } = usePaginatedOrders({ 
@@ -126,7 +128,7 @@ export default function OrdersScreen() {
           <Text style={styles.subtitle}>Filtered by: {params.source}</Text>
         )}
         <Text style={styles.pagination}>
-          Page {pagination.currentPage} of {pagination.totalPages} ({pagination.totalRecords} total)
+          Page {currentPage} of {totalPages} ({totalRecords} total)
         </Text>
       </View>
 

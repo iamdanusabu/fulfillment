@@ -1,12 +1,12 @@
 
 export interface Order {
   id: string;
-  orderNumber: string;
+  orderNumber?: string;
   source: string;
   status: string;
-  customer: string;
+  customer: string | Customer;
   items: OrderItem[];
-  createdAt: string;
+  createdAt?: string;
   orderID: string;
   externalOrderID?: string;
   date: string;
@@ -39,6 +39,42 @@ export interface Order {
     registerID: number;
     name: string;
   };
+  billingAddress?: Address;
+  deliveryAddress?: Address;
+  statusCode?: number;
+  modifiedBy?: number;
+  modifiedDate?: string;
+  transactions?: string[];
+  metadata?: any;
+  createTransaction?: boolean;
+}
+
+export interface Customer {
+  customerNumber: string;
+  name: string;
+  firstName: string;
+  lastName: string;
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+  zipCode: string;
+  email: string;
+  countryCode: string;
+  mobilePhone: string;
+  id: string;
+}
+
+export interface Address {
+  addressID: string;
+  fullName: string;
+  address1: string;
+  city: string;
+  state: string;
+  country: string;
+  zip: string;
+  postalCode: string;
+  id: string;
 }
 
 export interface OrderItem {

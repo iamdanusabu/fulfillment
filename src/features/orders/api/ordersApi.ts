@@ -33,5 +33,9 @@ export const ordersApi = {
     });
     
     return await fetchWithToken(`/console/transactions/orders?${searchParams.toString()}`);
+  },
+
+  async getOrderById(orderId: string): Promise<Order> {
+    return await fetchWithToken(`/console/transactions/orders/${orderId}?expand=customization,item`);
   }
 };

@@ -21,9 +21,8 @@ export default function OrderDetail() {
   const loadOrderDetail = async () => {
     try {
       setLoading(true);
-      // This would need to be implemented in the API
-      // const orderData = await ordersApi.getOrderById(params.orderId as string);
-      // setOrder(orderData);
+      const orderData = await ordersApi.getOrderById(params.orderId as string);
+      setOrder(orderData);
     } catch (error) {
       console.error('Failed to load order detail:', error);
     } finally {
@@ -34,13 +33,16 @@ export default function OrderDetail() {
   const renderOrderItem = ({ item }: { item: OrderItem }) => (
     <View style={styles.itemCard}>
       <View style={styles.itemInfo}>
-        <Text style={styles.productName}>{item.productName}</Text>
-        <Text style={styles.productId}>SKU: {item.productId}</Text>
+        <Text style={styles.productName}>{item.name || item.productName}</Text>
+        <Text style={styles.productId}>SKU: {item.itemID || item.productId}</Text>
+        <Text style={styles.productId}>UPC: {item.upc}</Text>
       </View>
-      <View style={styles.quantityInfo}>
-        <Text style={styles.quantity}>Qty: {item.quantity}</Text>
-        {item.pickedQuantity !== undefined && (
-          <Text style={styles.pickedQuantity}>Picked: {item.pickedQuantity}</Text>
+      <View style={styles.itemPricing}>
+        <Text style={styles.unitPrice}>Unit Price: ${item.unitPrice.toFixed(2)}</Text>
+        <Text style={styles.quantity}>Qty: {item.orderQuantity || item.quantity}</Text>
+        <Text style={styles.itemAmount}>Amount: ${item.amount.toFixed(2)}</Text>
+        {item.discount > 0 && (
+          <Text style={styles.discount}>Discount: ${item.discount.toFixed(2)}</Text>
         )}
       </View>
     </View>
@@ -75,16 +77,38 @@ export default function OrderDetail() {
       </View>
 
       <View style={styles.orderSummary}>
-        <Text style={styles.orderNumber}>#{order.orderNumber}</Text>
-        <Text style={styles.customer}>{order.customer}</Text>
+        <Text style={styles.orderNumber}>Order ID: {order.orderID}</Text>
+        <Text style={styles.externalOrderId}>External Order ID: {order.externalOrderID}</Text>
+        <Text style={styles.customer}>
+          {typeof order.customer === 'string' ? order.customer : order.customer.name}
+        </Text>
         <View style={styles.orderMeta}>
           <Text style={styles.source}>Source: {order.source}</Text>
           <Text style={styles.status}>Status: {order.status}</Text>
-          <Text style={styles.createdAt}>
-            Created: {new Date(order.createdAt).toLocaleDateString()}
+          <Text style={styles.paymentStatus}>Payment: {order.paymentStatus}</Text>
+        </View>
+        <View style={styles.orderAmounts}>
+          <Text style={styles.amount}>Subtotal: ${order.subTotal.toFixed(2)}</Text>
+          <Text style={styles.amount}>Tax: ${order.tax.toFixed(2)}</Text>
+          <Text style={styles.amount}>Discount: ${order.netDiscount.toFixed(2)}</Text>
+          <Text style={styles.totalAmount}>Total: ${order.amount.toFixed(2)}</Text>
+        </View>
+        <Text style={styles.createdAt}>
+          Created: {new Date(order.date).toLocaleDateString()} at {new Date(order.date).toLocaleTimeString()}
+        </Text>
+      </View>
+
+      {typeof order.customer === 'object' && (
+        <View style={styles.customerSection}>
+          <Text style={styles.sectionTitle}>Customer Information</Text>
+          <Text style={styles.customerDetail}>Name: {order.customer.name}</Text>
+          <Text style={styles.customerDetail}>Email: {order.customer.email}</Text>
+          <Text style={styles.customerDetail}>Phone: {order.customer.countryCode} {order.customer.mobilePhone}</Text>
+          <Text style={styles.customerDetail}>
+            Address: {order.customer.address}, {order.customer.city}, {order.customer.state} {order.customer.zipCode}
           </Text>
         </View>
-      </View>
+      )}
 
       <View style={styles.itemsSection}>
         <Text style={styles.sectionTitle}>Items ({order.items.length})</Text>
@@ -139,11 +163,17 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
+    marginBottom: 4,
+  },
+  externalOrderId: {
+    fontSize: 14,
+    color: '#666',
     marginBottom: 8,
   },
   customer: {
     fontSize: 16,
-    color: '#666',
+    color: '#333',
+    fontWeight: '600',
     marginBottom: 12,
   },
   orderMeta: {
@@ -161,6 +191,38 @@ const styles = StyleSheet.create({
   createdAt: {
     fontSize: 12,
     color: '#666',
+    marginTop: 8,
+  },
+  paymentStatus: {
+    fontSize: 12,
+    color: '#666',
+  },
+  orderAmounts: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+  },
+  amount: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 2,
+  },
+  totalAmount: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    marginTop: 4,
+  },
+  customerSection: {
+    backgroundColor: '#fff',
+    padding: 20,
+    marginBottom: 16,
+  },
+  customerDetail: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
   },
   itemsSection: {
     backgroundColor: '#fff',
@@ -193,17 +255,28 @@ const styles = StyleSheet.create({
     color: '#666',
     marginTop: 2,
   },
-  quantityInfo: {
+  itemPricing: {
     alignItems: 'flex-end',
+  },
+  unitPrice: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 2,
   },
   quantity: {
     fontSize: 14,
     color: '#333',
+    marginBottom: 2,
   },
-  pickedQuantity: {
+  itemAmount: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 2,
+  },
+  discount: {
     fontSize: 12,
-    color: '#28a745',
-    marginTop: 2,
+    color: '#e74c3c',
   },
   backButton: {
     backgroundColor: '#007AFF',

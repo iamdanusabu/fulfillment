@@ -7,21 +7,21 @@ export function useTabTitle() {
 
   const tabTitle = useMemo(() => {
     switch (pathname) {
-      case '/(tabs)/dashboard':
+      case '/dashboard':
         return 'Dashboard';
-      case '/(tabs)/orders':
+      case '/orders':
         return 'Orders';
-      case '/(tabs)/picklist':
+      case '/picklist':
         return 'Picklists';
-      case '/(tabs)/settings':
+      case '/settings':
         return 'Settings';
       case '/login':
         return 'Login';
       default:
-        if (pathname.startsWith('/(tabs)/orders/')) {
+        if (pathname.startsWith('/orders/')) {
           return 'Order Details';
         }
-        if (pathname.startsWith('/(tabs)/picklist/')) {
+        if (pathname.startsWith('/picklist/')) {
           return 'Picklist';
         }
         return 'OrderUp';

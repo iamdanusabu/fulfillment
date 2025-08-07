@@ -36,7 +36,7 @@ function RootLayoutContent() {
     setSidebarOpen(!sidebarOpen);
   };
 
-  const showSidebarAndHeader = isAuthenticated && pathname !== '/login' && pathname !== '/' && pathname.startsWith('/(tabs)');
+  const showSidebarAndHeader = isAuthenticated && pathname !== '/login' && pathname !== '/';
   const showSidebar = showSidebarAndHeader && (sidebarOpen || isTablet);
 
   // Effect to handle sidebar visibility based on screen size
@@ -79,7 +79,10 @@ function RootLayoutContent() {
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="index" />
             <Stack.Screen name="login" />
-            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="dashboard" />
+            <Stack.Screen name="orders" />
+            <Stack.Screen name="picklist" />
+            <Stack.Screen name="settings" />
           </Stack>
         </View>
       </View>

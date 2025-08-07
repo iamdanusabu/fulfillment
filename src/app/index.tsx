@@ -17,7 +17,7 @@ export default function Index() {
         await new Promise(resolve => setTimeout(resolve, 100));
         
         if (token) {
-          router.replace('/(tabs)/dashboard');
+          router.replace('/dashboard');
         } else {
           router.replace('/login');
         }

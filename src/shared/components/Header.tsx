@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, useWindowDimensions } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -22,7 +21,7 @@ export const Header: React.FC<HeaderProps> = ({ title, onMenuToggle }) => {
         )}
         <Text style={styles.title}>{title}</Text>
       </View>
-      
+
       <View style={styles.rightSection}>
         <TouchableOpacity style={styles.iconButton}>
           <MaterialIcons name="notifications" size={24} color="#666" />

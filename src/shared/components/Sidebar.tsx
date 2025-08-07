@@ -36,6 +36,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
   const handleNavigation = (route: string) => {
     router.push(route);
+    // Auto-close on mobile only
     if (window?.innerWidth && window.innerWidth < 768) {
       onToggle();
     }
@@ -48,6 +49,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
     router.replace('/login');
   };
 
+  // Don't render sidebar when closed
   if (!isOpen) return null;
 
   return (
@@ -88,7 +90,8 @@ const styles = StyleSheet.create({
     borderRightWidth: 1,
     borderRightColor: '#e9ecef',
     paddingVertical: 20,
-    justifyContent: 'space-between', // Added to push logout to bottom
+    justifyContent: 'space-between',
+    position: 'relative',
   },
   menuItems: {
     flex: 1,

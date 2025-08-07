@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import { Stack, usePathname } from 'expo-router';
@@ -7,7 +6,7 @@ import { Header } from '../src/shared/components/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function RootLayout() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { width } = useWindowDimensions();
@@ -37,6 +36,22 @@ export default function RootLayout() {
   const showSidebarAndHeader = isAuthenticated && pathname !== '/login' && pathname !== '/';
   const showSidebar = showSidebarAndHeader && (sidebarOpen || isTablet);
 
+  // Effect to handle sidebar visibility based on screen size
+  useEffect(() => {
+    const updateLayout = () => {
+      const isLarge = window.innerWidth >= 768;
+      // For large devices, start with sidebar open, for mobile start closed
+      setSidebarOpen(isLarge);
+    };
+
+    if (typeof window !== 'undefined') {
+      updateLayout();
+      window.addEventListener('resize', updateLayout);
+      return () => window.removeEventListener('resize', updateLayout);
+    }
+  }, []);
+
+
   if (isLoading) {
     return <View style={styles.container} />;
   }
@@ -44,14 +59,18 @@ export default function RootLayout() {
   return (
     <View style={styles.container}>
       {showSidebarAndHeader && (
-        <Header title="OrderUp" onMenuToggle={toggleSidebar} />
+        <Header
+            title="OrderUp"
+            onMenuToggle={toggleSidebar}
+            sidebarOpen={sidebarOpen}
+          />
       )}
-      
+
       <View style={styles.content}>
         {showSidebarAndHeader && (
           <Sidebar isOpen={showSidebar} onToggle={toggleSidebar} />
         )}
-        
+
         <View style={[
           styles.mainContent,
           { flex: showSidebarAndHeader ? 1 : 1 }
@@ -65,7 +84,7 @@ export default function RootLayout() {
           </Stack>
         </View>
       </View>
-      
+
       {showSidebar && !isTablet && (
         <View style={styles.overlay} onTouchEnd={toggleSidebar} />
       )}

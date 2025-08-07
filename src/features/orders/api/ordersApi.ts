@@ -77,5 +77,16 @@ export const ordersApi = {
   },
 };
 
+// Get single order by ID
+  async getOrderById(orderId: string) {
+    const fetcher = this.createSingleOrderFetcher(orderId);
+    const response = await fetcher.fetchPage();
+    if (response.data && response.data.length > 0) {
+      return transformOrder(response.data[0]);
+    }
+    throw new Error('Order not found');
+  },
+};
+
 // Export the transform function for use in hooks
 export { transformOrder };

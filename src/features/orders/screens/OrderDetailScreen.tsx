@@ -11,22 +11,19 @@ export default function OrderDetailScreen() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const params = useLocalSearchParams();
+  const orderId = params.orderId as string;
 
   useEffect(() => {
-    if (params.orderId) {
+    if (orderId) {
       loadOrderDetail();
     }
-  }, [params.orderId]);
+  }, [orderId]);
 
   const loadOrderDetail = async () => {
     try {
       setLoading(true);
-      const fetcher = ordersApi.createSingleOrderFetcher(params.orderId as string);
-      const response = await fetcher.fetchPage();
-      if (response.data && response.data.length > 0) {
-        const transformedOrder = transformOrder(response.data[0]);
-        setOrder(transformedOrder);
-      }
+      const orderData = await ordersApi.getOrderById(orderId);
+      setOrder(orderData);
     } catch (error) {
       console.error('Failed to load order detail:', error);
     } finally {

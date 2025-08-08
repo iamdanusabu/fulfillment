@@ -89,10 +89,10 @@ export class PaginatedFetcher<T> {
 
       this.updateState({
         data: newData,
-        currentPage: response.pageNo,
+        currentPage: pageNo,
         totalPages: response.totalPages,
         totalRecords: response.totalRecords,
-        hasMore: response.pageNo < response.totalPages,
+        hasMore: pageNo < response.totalPages,
         loading: false,
       });
 

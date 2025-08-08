@@ -9,6 +9,25 @@ export const picklistApi = {
     return await fetchWithToken(config.endpoints.locations);
   },
 
+  async getStores(): Promise<Location[]> {
+    const config = getConfig();
+    return await fetchWithToken(`${config.endpoints.stores}?fulfillable=true`);
+  },
+
+  async getWarehouses(): Promise<Location[]> {
+    const config = getConfig();
+    return await fetchWithToken(`${config.endpoints.warehouses}?fulfillable=true`);
+  },
+
+  async getAllFulfillableLocations(): Promise<Location[]> {
+    const config = getConfig();
+    const [stores, warehouses] = await Promise.all([
+      fetchWithToken(`${config.endpoints.stores}?fulfillable=true`),
+      fetchWithToken(`${config.endpoints.warehouses}?fulfillable=true`)
+    ]);
+    return [...stores, ...warehouses];
+  },
+
   async simulateFulfillment(orderIds: string[], locationId: string): Promise<PicklistItem[]> {
     const config = getConfig();
     return await fetchWithToken(config.endpoints.simulateFulfillment, {

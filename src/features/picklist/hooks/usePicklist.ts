@@ -56,6 +56,84 @@ export const useLocations = () => {
   };
 };
 
+export const useStores = () => {
+  const [stores, setStores] = useState<Location[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadStores();
+  }, []);
+
+  const loadStores = async () => {
+    try {
+      const data = await picklistApi.getStores();
+      setStores(data);
+    } catch (error) {
+      console.error('Failed to load stores:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    stores,
+    loading,
+    refetch: loadStores,
+  };
+};
+
+export const useWarehouses = () => {
+  const [warehouses, setWarehouses] = useState<Location[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadWarehouses();
+  }, []);
+
+  const loadWarehouses = async () => {
+    try {
+      const data = await picklistApi.getWarehouses();
+      setWarehouses(data);
+    } catch (error) {
+      console.error('Failed to load warehouses:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    warehouses,
+    loading,
+    refetch: loadWarehouses,
+  };
+};
+
+export const useFulfillableLocations = () => {
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadFulfillableLocations();
+  }, []);
+
+  const loadFulfillableLocations = async () => {
+    try {
+      const data = await picklistApi.getAllFulfillableLocations();
+      setLocations(data);
+    } catch (error) {
+      console.error('Failed to load fulfillable locations:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    locations,
+    loading,
+    refetch: loadFulfillableLocations,
+  };
+};
+
 export const usePicklistCreation = () => {
   const [items, setItems] = useState<PicklistItem[]>([]);
   const [loading, setLoading] = useState(false);

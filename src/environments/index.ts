@@ -6,6 +6,8 @@ export const COMMON_ENDPOINTS = {
   token: "/goauth/oauth/token",
   orders: "/console/transactions/orders",
   locations: "/api/locations",
+  stores: "/console/business/stores",
+  warehouses: "/console/business/warehouses",
   simulateFulfillment: "/api/fulfillment/simulate",
   fulfillment: "/api/fulfillment",
   finalize: "/api/fulfillment/finalize",

@@ -1,32 +1,19 @@
 
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
-import { picklistApi } from '../api/picklistApi';
+import { useStores, useWarehouses } from '../hooks/usePicklist';
 import { Location } from '../../../shared/types';
 
 export default function LocationSelectionScreen() {
-  const [locations, setLocations] = useState<Location[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'stores' | 'warehouses'>('stores');
   const router = useRouter();
   const params = useLocalSearchParams();
 
-  useEffect(() => {
-    loadLocations();
-  }, []);
-
-  const loadLocations = async () => {
-    try {
-      const data = await picklistApi.getLocations();
-      setLocations(data);
-    } catch (error) {
-      console.error('Failed to load locations:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { stores, loading: storesLoading } = useStores();
+  const { warehouses, loading: warehousesLoading } = useWarehouses();
 
   const proceedToPicklist = () => {
     if (!selectedLocation) return;
@@ -46,7 +33,9 @@ export default function LocationSelectionScreen() {
       <View style={styles.locationHeader}>
         <View style={styles.locationInfo}>
           <Text style={styles.locationName}>{item.name}</Text>
-          <Text style={styles.locationType}>{item.type}</Text>
+          <Text style={[styles.locationType, activeTab === 'stores' ? styles.storeType : styles.warehouseType]}>
+            {activeTab === 'stores' ? 'Store' : 'Warehouse'}
+          </Text>
           <Text style={styles.locationAddress}>{item.address}</Text>
         </View>
         <View style={styles.radioContainer}>
@@ -60,13 +49,8 @@ export default function LocationSelectionScreen() {
     </TouchableOpacity>
   );
 
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Text>Loading locations...</Text>
-      </View>
-    );
-  }
+  const currentData = activeTab === 'stores' ? stores : warehouses;
+  const currentLoading = activeTab === 'stores' ? storesLoading : warehousesLoading;
 
   return (
     <View style={styles.container}>
@@ -77,16 +61,75 @@ export default function LocationSelectionScreen() {
         <Text style={styles.title}>Select Location</Text>
       </View>
 
-      <FlatList
-        data={locations}
-        renderItem={renderLocationItem}
-        keyExtractor={(item) => item.id}
-        style={styles.locationsList}
-        contentContainerStyle={styles.locationsContent}
-      />
+      {/* Tab Navigation */}
+      <View style={styles.tabContainer}>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'stores' && styles.activeTab]}
+          onPress={() => {
+            setActiveTab('stores');
+            setSelectedLocation(null);
+          }}
+        >
+          <MaterialIcons 
+            name="store" 
+            size={20} 
+            color={activeTab === 'stores' ? '#007AFF' : '#666'} 
+          />
+          <Text style={[styles.tabText, activeTab === 'stores' && styles.activeTabText]}>
+            Stores ({stores.length})
+          </Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'warehouses' && styles.activeTab]}
+          onPress={() => {
+            setActiveTab('warehouses');
+            setSelectedLocation(null);
+          }}
+        >
+          <MaterialIcons 
+            name="warehouse" 
+            size={20} 
+            color={activeTab === 'warehouses' ? '#007AFF' : '#666'} 
+          />
+          <Text style={[styles.tabText, activeTab === 'warehouses' && styles.activeTabText]}>
+            Warehouses ({warehouses.length})
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Content */}
+      {currentLoading ? (
+        <View style={styles.loadingContainer}>
+          <Text>Loading {activeTab}...</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={currentData}
+          renderItem={renderLocationItem}
+          keyExtractor={(item) => item.id}
+          style={styles.locationsList}
+          contentContainerStyle={styles.locationsContent}
+          ListEmptyComponent={() => (
+            <View style={styles.emptyContainer}>
+              <MaterialIcons 
+                name={activeTab === 'stores' ? 'store' : 'warehouse'} 
+                size={48} 
+                color="#ccc" 
+              />
+              <Text style={styles.emptyText}>
+                No {activeTab} available for fulfillment
+              </Text>
+            </View>
+          )}
+        />
+      )}
 
       {selectedLocation && (
         <View style={styles.bottomBar}>
+          <Text style={styles.selectedInfo}>
+            Selected: {currentData.find(item => item.id === selectedLocation)?.name}
+          </Text>
           <TouchableOpacity
             style={styles.proceedButton}
             onPress={proceedToPicklist}
@@ -126,6 +169,35 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
   },
+  tabContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e9ecef',
+  },
+  tab: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+    borderBottomWidth: 3,
+    borderBottomColor: 'transparent',
+  },
+  activeTab: {
+    borderBottomColor: '#007AFF',
+  },
+  tabText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#666',
+    marginLeft: 8,
+  },
+  activeTabText: {
+    color: '#007AFF',
+    fontWeight: '600',
+  },
   locationsList: {
     flex: 1,
   },
@@ -160,13 +232,20 @@ const styles = StyleSheet.create({
   },
   locationType: {
     fontSize: 12,
-    color: '#007AFF',
-    backgroundColor: '#e3f2fd',
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 4,
     alignSelf: 'flex-start',
     marginBottom: 4,
+    fontWeight: '500',
+  },
+  storeType: {
+    color: '#28a745',
+    backgroundColor: '#d4edda',
+  },
+  warehouseType: {
+    color: '#6f42c1',
+    backgroundColor: '#e2d9f3',
   },
   locationAddress: {
     fontSize: 14,
@@ -175,11 +254,29 @@ const styles = StyleSheet.create({
   radioContainer: {
     padding: 4,
   },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 60,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#666',
+    marginTop: 12,
+    textAlign: 'center',
+  },
   bottomBar: {
     padding: 16,
     backgroundColor: '#fff',
     borderTopWidth: 1,
     borderTopColor: '#e9ecef',
+  },
+  selectedInfo: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 8,
+    textAlign: 'center',
   },
   proceedButton: {
     backgroundColor: '#007AFF',

@@ -49,8 +49,8 @@ export default function OrdersScreen() {
   const proceedToLocationSelection = () => {
     if (selectedOrders.length === 0) return;
 
-    const orderIds = selectedOrders.join(',');
-    router.push(`/picklist/location-selection?orderIds=${orderIds}`);
+    const orderIdsParam = selectedOrders.join(',');
+    router.push(`/picklist/location-selection?orderIds=${orderIdsParam}`);
   };
 
   const filteredOrders = orders.filter(order => 

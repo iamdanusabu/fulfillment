@@ -43,6 +43,9 @@ function RootLayoutContent() {
 
   const showSidebarAndHeader = isAuthenticated && pathname !== '/login' && pathname !== '/';
   const showSidebar = showSidebarAndHeader && (sidebarOpen || isTablet);
+  
+  // Force re-render when dimensions change to fix Android rendering issues
+  const screenKey = `${width}x${height}-${isTablet}-${isLandscape}`;
 
   // Effect to handle sidebar visibility based on screen size and orientation
   useEffect(() => {
@@ -68,7 +71,7 @@ function RootLayoutContent() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} key={screenKey}>
       {showSidebarAndHeader && (
         <AppToolbar
           onMenuToggle={toggleSidebar}

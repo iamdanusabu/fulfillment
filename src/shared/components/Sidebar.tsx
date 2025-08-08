@@ -48,7 +48,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
   const handleNavigation = (route: string) => {
     router.push(route);
     // Auto-close on mobile only
-    if (window?.innerWidth && window.innerWidth < 768) {
+    if (!isTablet) {
       onToggle();
     }
   };
@@ -60,11 +60,17 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
     router.replace('/login');
   };
 
-  // Don't render sidebar when closed
-  if (!isOpen) return null;
+  // Don't render sidebar when closed on mobile, but always render on tablet
+  if (!isOpen && !isTablet) return null;
 
   return (
-    <View style={[styles.sidebar, { width: sidebarWidth }]}>
+    <View style={[
+      styles.sidebar, 
+      { 
+        width: sidebarWidth,
+        display: isOpen ? 'flex' : 'none'
+      }
+    ]}>
       <View style={styles.menuItems}>
         {menuItems.map((item) => (
           <TouchableOpacity

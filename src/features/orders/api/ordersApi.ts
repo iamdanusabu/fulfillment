@@ -5,6 +5,8 @@ import { getConfig } from '../../../environments';
 interface GetOrdersParams {
   source?: string;
   pageNo?: number;
+  status?: string;
+  paymentStatus?: string;
 }
 
 const transformOrder = (apiOrder: any): Order => ({
@@ -65,6 +67,8 @@ export const ordersApi = {
       pageSize: 20,
       initialParams: {
         hasFulfilmentJob: 'false',
+        expand: 'item,bin,location_hint,payment',
+        pagination: 'true',
         ...params,
       },
     });

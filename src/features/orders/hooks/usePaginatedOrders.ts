@@ -2,10 +2,12 @@
 import { usePaginatedFetcher } from '../../../shared/services/paginatedFetcher';
 import { Order } from '../../../shared/types';
 import { getConfig } from '../../../environments';
+import { useOrderFilters } from './useOrderFilters';
 
 interface UsePaginatedOrdersOptions {
   source?: string;
   pageSize?: number;
+  useFilters?: boolean;
 }
 
 // Transform raw API order data to our Order type
@@ -60,14 +62,24 @@ const transformOrder = (apiOrder: any): Order => ({
 });
 
 export const usePaginatedOrders = (options: UsePaginatedOrdersOptions = {}) => {
-  const { source, pageSize = 20 } = options;
+  const { source, pageSize = 20, useFilters = true } = options;
   const config = getConfig();
+  const { getFilterParams, loading: filtersLoading } = useOrderFilters();
 
   const initialParams: Record<string, string | number> = {
-    hasFulfilmentJob: 'false'
+    hasFulfilmentJob: 'false',
+    expand: 'item,bin,location_hint,payment',
+    pagination: 'true'
   };
+
+  // Use specific source if provided, otherwise use filter settings
   if (source) {
     initialParams.source = source;
+  } else if (useFilters && !filtersLoading) {
+    const filterParams = getFilterParams();
+    initialParams.source = filterParams.source;
+    initialParams.status = filterParams.status;
+    initialParams.paymentStatus = filterParams.paymentStatus;
   }
 
   const paginatedState = usePaginatedFetcher<any>(
@@ -83,7 +95,7 @@ export const usePaginatedOrders = (options: UsePaginatedOrdersOptions = {}) => {
 
   return {
     orders: transformedOrders,
-    loading: paginatedState.loading,
+    loading: paginatedState.loading || filtersLoading,
     error: paginatedState.error,
     hasMore: paginatedState.hasMore,
     currentPage: paginatedState.currentPage,

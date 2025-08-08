@@ -8,7 +8,7 @@ export const COMMON_ENDPOINTS = {
   locations: "/api/locations",
   stores: "/console/business/stores",
   warehouses: "/console/business/warehouses",
-  simulateFulfillment: "/api/fulfillment/simulate",
+  simulateFulfillment: "/inventory/fulfillments/simulate",
   fulfillment: "/api/fulfillment",
   finalize: "/api/fulfillment/finalize",
   dashboard: "/api/dashboard",

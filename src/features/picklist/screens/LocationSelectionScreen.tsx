@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -17,9 +16,14 @@ export default function LocationSelectionScreen() {
 
   const proceedToPicklist = () => {
     if (!selectedLocation) return;
-    
+
     const { orderIds } = params;
     router.push(`/picklist/create?orderIds=${orderIds}&locationId=${selectedLocation}`);
+  };
+
+  const handleLocationSelect = (location: Location) => {
+    const orderIds = params.orderIds as string;
+    router.push(`/picklist/create?orderIds=${orderIds}&locationId=${location.id}&locationType=${location.type.toUpperCase()}`);
   };
 
   const renderLocationItem = ({ item }: { item: Location }) => (
@@ -28,7 +32,10 @@ export default function LocationSelectionScreen() {
         styles.locationCard,
         selectedLocation === item.id && styles.selectedCard
       ]}
-      onPress={() => setSelectedLocation(item.id)}
+      onPress={() => {
+        setSelectedLocation(item.id);
+        handleLocationSelect(item); 
+      }}
     >
       <View style={styles.locationHeader}>
         <View style={styles.locationInfo}>
@@ -79,7 +86,7 @@ export default function LocationSelectionScreen() {
             Stores ({stores.length})
           </Text>
         </TouchableOpacity>
-        
+
         <TouchableOpacity
           style={[styles.tab, activeTab === 'warehouses' && styles.activeTab]}
           onPress={() => {

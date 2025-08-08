@@ -55,12 +55,29 @@ export const picklistApi = {
     return [...stores, ...warehouses];
   },
 
-  async simulateFulfillment(orderIds: string[], locationId: string): Promise<PicklistItem[]> {
+  async simulateFulfillment(orderIds: string[], locationId: string, locationType: string = 'STORE'): Promise<PicklistItem[]> {
     const config = getConfig();
-    return await fetchWithToken(config.endpoints.simulateFulfillment, {
-      method: 'POST',
-      body: JSON.stringify({ orderIds, locationId }),
-    });
+    const orderIDParam = orderIds.join(',');
+    const url = `${config.endpoints.simulateFulfillment}?orderID=${encodeURIComponent(orderIDParam)}&locationID=${locationId}&locationType=${locationType}`;
+    
+    const response = await fetchWithToken(url);
+    
+    // Transform the API response to PicklistItem format
+    if (response && Array.isArray(response)) {
+      return response.map((item: any) => ({
+        id: item.id || item.itemID || Math.random().toString(),
+        productId: item.itemID || item.productId,
+        productName: item.name || item.productName,
+        location: item.location || 'Unknown',
+        requiredQuantity: item.requiredQuantity || item.quantity || 0,
+        pickedQuantity: 0,
+        availableQuantity: item.availableQuantity || 0,
+        upc: item.upc,
+        batch: item.batch,
+      }));
+    }
+    
+    return [];
   },
 
   async createFulfillment(orderIds: string[], locationId: string, items: PicklistItem[]) {

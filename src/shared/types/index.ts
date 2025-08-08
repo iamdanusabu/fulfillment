@@ -89,9 +89,12 @@ export interface PicklistItem {
   id: string;
   productId: string;
   productName: string;
+  location: string;
   requiredQuantity: number;
   pickedQuantity: number;
-  location: string;
+  availableQuantity?: number;
+  upc?: string;
+  batch?: number;
 }
 
 export interface Picklist {

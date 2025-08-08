@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -23,7 +22,7 @@ export default function CreatePicklistScreen() {
       setLoading(true);
       const orderIds = (params.orderIds as string).split(',');
       const locationId = params.locationId as string;
-      
+
       const simulatedItems = await picklistApi.simulateFulfillment(orderIds, locationId);
       setItems(simulatedItems);
     } catch (error) {
@@ -47,9 +46,9 @@ export default function CreatePicklistScreen() {
     try {
       const orderIds = (params.orderIds as string).split(',');
       const locationId = params.locationId as string;
-      
+
       const result = await picklistApi.createFulfillment(orderIds, locationId, items);
-      
+
       // Navigate to packing screen with fulfillment ID
       router.push(`/picklist/packing?fulfillmentId=${result.fulfillmentId}&orderIds=${params.orderIds}`);
     } catch (error) {
@@ -64,7 +63,7 @@ export default function CreatePicklistScreen() {
         <Text style={styles.location}>Location: {item.location}</Text>
         <Text style={styles.requiredQty}>Required: {item.requiredQuantity}</Text>
       </View>
-      
+
       <View style={styles.quantityControls}>
         <TouchableOpacity
           onPress={() => updatePickedQuantity(item.id, item.pickedQuantity - 1)}
@@ -72,14 +71,14 @@ export default function CreatePicklistScreen() {
         >
           <MaterialIcons name="remove" size={20} color="#666" />
         </TouchableOpacity>
-        
+
         <TextInput
           style={styles.quantityInput}
           value={item.pickedQuantity.toString()}
           onChangeText={(text) => updatePickedQuantity(item.id, parseInt(text) || 0)}
           keyboardType="numeric"
         />
-        
+
         <TouchableOpacity
           onPress={() => updatePickedQuantity(item.id, item.pickedQuantity + 1)}
           style={styles.quantityButton}
@@ -98,13 +97,27 @@ export default function CreatePicklistScreen() {
     );
   }
 
+  const pickedItems = items.filter(item => item.pickedQuantity > 0).length;
+  const totalItems = items.length;
+  const progressPercentage = totalItems > 0 ? (pickedItems / totalItems) * 100 : 0;
+
   const allItemsPicked = items.every(item => item.pickedQuantity > 0);
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Picklist Creation</Text>
+        <Text style={styles.title}>Create Picklist</Text>
         <Text style={styles.subtitle}>{items.length} items to pick</Text>
+
+        {/* Progress Bar */}
+        <View style={styles.progressContainer}>
+          <View style={styles.progressBar}>
+            <View style={[styles.progressFill, { width: `${progressPercentage}%` }]} />
+          </View>
+          <Text style={styles.progressText}>
+            {pickedItems} / {totalItems} items picked ({Math.round(progressPercentage)}%)
+          </Text>
+        </View>
       </View>
 
       <FlatList
@@ -229,5 +242,27 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '600',
     fontSize: 16,
+  },
+  // Styles for the progress bar
+  progressContainer: {
+    marginTop: 10,
+    width: '100%',
+  },
+  progressBar: {
+    height: 8,
+    backgroundColor: '#e0e0e0',
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#007AFF',
+    borderRadius: 4,
+  },
+  progressText: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 4,
+    textAlign: 'center',
   },
 });

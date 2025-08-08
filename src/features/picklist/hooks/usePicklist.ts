@@ -138,10 +138,10 @@ export const usePicklistCreation = () => {
   const [items, setItems] = useState<PicklistItem[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const simulateFulfillment = async (orderIds: string[], locationId: string) => {
+  const simulateFulfillment = async (orderIds: string[], locationId: string, locationType: string = 'STORE') => {
     try {
       setLoading(true);
-      const simulatedItems = await picklistApi.simulateFulfillment(orderIds, locationId);
+      const simulatedItems = await picklistApi.simulateFulfillment(orderIds, locationId, locationType);
       setItems(simulatedItems);
     } catch (error) {
       console.error('Failed to simulate fulfillment:', error);

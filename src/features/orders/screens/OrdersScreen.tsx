@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, RefreshControl, ActivityIndicator } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -53,11 +53,16 @@ export default function OrdersScreen() {
     router.push(`/picklist/location-selection?orderIds=${orderIdsParam}`);
   };
 
-  const filteredOrders = orders.filter(order => 
-    order.orderNumber.toLowerCase().includes(searchText.toLowerCase()) ||
-    order.customer.toLowerCase().includes(searchText.toLowerCase()) ||
-    order.source.toLowerCase().includes(searchText.toLowerCase())
-  );
+  const filteredOrders = useMemo(() => {
+    if (!searchText.trim()) return orders;
+
+    return orders.filter(order => 
+      order.orderNumber.toLowerCase().includes(searchText.toLowerCase()) ||
+      order.customer.toLowerCase().includes(searchText.toLowerCase()) ||
+      order.source.toLowerCase().includes(searchText.toLowerCase())
+    );
+  }, [orders, searchText]);
+
 
   const renderOrderItem = ({ item }: { item: Order }) => (
     <TouchableOpacity

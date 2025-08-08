@@ -41,18 +41,42 @@ export const fetchWithToken = async (url: string, options: RequestInit = {}) => 
     ...options.headers,
   };
 
-  const response = await fetch(`${config.baseURL}${url}`, {
-    ...options,
-    headers,
-  });
+  try {
+    const response = await fetch(`${config.baseURL}${url}`, {
+      ...options,
+      headers,
+    });
 
-  if (response.status === 401) {
-    tokenService.clearToken();
-    throw new Error('Unauthorized');
-  }
+    if (response.status === 401) {
+      tokenService.clearToken();
+      throw new Error('Unauthorized');
+    }
 
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => response.statusText);
+      throw new Error(`HTTP ${response.status}: ${errorText}`);
+    }
+
+    const responseText = await response.text();
+    
+    // Handle empty responses
+    if (!responseText) {
+      return null;
+    }
+
+    // Try to parse as JSON
+    try {
+      return JSON.parse(responseText);
+    } catch (parseError) {
+      console.warn('Response is not valid JSON:', responseText);
+      return responseText;
+    }
+  } catch (error) {
+    // Handle network errors
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new Error('Network error: Unable to connect to server');
+    }
+    throw error;
   }
 
   const text = await response.text();

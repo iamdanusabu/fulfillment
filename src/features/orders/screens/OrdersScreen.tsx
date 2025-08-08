@@ -9,17 +9,17 @@ import { finalizePacking } from '../api/picklistApi';
 export default function OrdersScreen() {
   const params = useLocalSearchParams();
   const router = useRouter();
-  const { 
-    orders, 
-    loading, 
-    hasMore, 
+  const {
+    orders,
+    loading,
+    hasMore,
     totalRecords,
     currentPage,
     totalPages,
-    loadMore, 
-    refresh 
-  } = usePaginatedOrders({ 
-    source: params.source as string 
+    loadMore,
+    refresh
+  } = usePaginatedOrders({
+    source: params.source as string
   });
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
   const [isPicklistMode, setIsPicklistMode] = useState(false);
@@ -32,8 +32,8 @@ export default function OrdersScreen() {
   const toggleOrderSelection = (orderId: string) => {
     if (!isPicklistMode) return;
 
-    setSelectedOrders(prev => 
-      prev.includes(orderId) 
+    setSelectedOrders(prev =>
+      prev.includes(orderId)
         ? prev.filter(id => id !== orderId)
         : [...prev, orderId]
     );
@@ -64,7 +64,7 @@ export default function OrdersScreen() {
   const filteredOrders = useMemo(() => {
     if (!searchText.trim()) return orders;
 
-    return orders.filter(order => 
+    return orders.filter(order =>
       order.orderNumber.toLowerCase().includes(searchText.toLowerCase()) ||
       order.customer.toLowerCase().includes(searchText.toLowerCase()) ||
       order.source.toLowerCase().includes(searchText.toLowerCase())

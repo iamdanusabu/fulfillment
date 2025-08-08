@@ -133,6 +133,29 @@ export const ordersApi = {
       throw error;
     }
   },
+
+  // Update order status
+  async updateOrderStatus(orderId: string, status: string) {
+    try {
+      const { fetchWithToken } = await import('../../../shared/services/fetchWithToken');
+      const config = getConfig();
+      
+      const requestBody = {
+        orderID: orderId,
+        status: status
+      };
+      
+      const data = await fetchWithToken(`${config.endpoints.orders}/${orderId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(requestBody),
+      });
+      
+      return data;
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      throw error;
+    }
+  },
 };
 
 // Export the transform function for use in hooks

@@ -1,14 +1,24 @@
 
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList, Modal, Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { ordersApi, transformOrder } from '../api/ordersApi';
 import { Order, OrderItem } from '../../../shared/types';
 
+const STATUS_OPTIONS = [
+  { label: 'Initiated', value: 'INITIATED' },
+  { label: 'Processing', value: 'PROCESSING' },
+  { label: 'Ready', value: 'READY' },
+  { label: 'Delivered', value: 'DELIVERED' },
+  { label: 'Cancelled', value: 'CANCELLED' }
+];
+
 export default function OrderDetailScreen() {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showStatusDropdown, setShowStatusDropdown] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
   const router = useRouter();
   const params = useLocalSearchParams();
   const orderId = params.orderId as string;
@@ -28,6 +38,27 @@ export default function OrderDetailScreen() {
       console.error('Failed to load order detail:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleStatusChange = async (newStatus: string) => {
+    if (!order || updatingStatus) return;
+
+    setUpdatingStatus(true);
+    setShowStatusDropdown(false);
+
+    try {
+      await ordersApi.updateOrderStatus(order.orderID.toString(), newStatus);
+      
+      // Update local state
+      setOrder(prev => prev ? { ...prev, status: newStatus } : null);
+      
+      Alert.alert('Success', 'Order status updated successfully');
+    } catch (error) {
+      console.error('Failed to update order status:', error);
+      Alert.alert('Error', 'Failed to update order status');
+    } finally {
+      setUpdatingStatus(false);
     }
   };
 
@@ -123,7 +154,16 @@ export default function OrderDetailScreen() {
             </View>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Status:</Text>
-              <Text style={[styles.summaryValue, styles.statusText]}>{order.status}</Text>
+              <TouchableOpacity 
+                style={styles.statusContainer}
+                onPress={() => setShowStatusDropdown(true)}
+                disabled={updatingStatus}
+              >
+                <Text style={[styles.summaryValue, styles.statusText]}>
+                  {updatingStatus ? 'Updating...' : order.status}
+                </Text>
+                <MaterialIcons name="arrow-drop-down" size={20} color="#007AFF" />
+              </TouchableOpacity>
             </View>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Payment Status:</Text>
@@ -277,6 +317,43 @@ export default function OrderDetailScreen() {
           </View>
         </View>
       </View>
+
+      {/* Status Dropdown Modal */}
+      <Modal
+        visible={showStatusDropdown}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowStatusDropdown(false)}
+      >
+        <TouchableOpacity 
+          style={styles.modalOverlay}
+          onPress={() => setShowStatusDropdown(false)}
+        >
+          <View style={styles.dropdownContainer}>
+            <Text style={styles.dropdownTitle}>Change Order Status</Text>
+            {STATUS_OPTIONS.map((option) => (
+              <TouchableOpacity
+                key={option.value}
+                style={[
+                  styles.dropdownOption,
+                  order?.status === option.value && styles.selectedOption
+                ]}
+                onPress={() => handleStatusChange(option.value)}
+              >
+                <Text style={[
+                  styles.dropdownOptionText,
+                  order?.status === option.value && styles.selectedOptionText
+                ]}>
+                  {option.label}
+                </Text>
+                {order?.status === option.value && (
+                  <MaterialIcons name="check" size={20} color="#007AFF" />
+                )}
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </ScrollView>
   );
 }
@@ -348,8 +425,61 @@ const styles = StyleSheet.create({
   statusText: {
     color: '#007AFF',
   },
+  statusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 4,
+    backgroundColor: '#f8f9fa',
+  },
   paymentText: {
     color: '#28a745',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dropdownContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 16,
+    minWidth: 250,
+    maxWidth: 300,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  dropdownTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  dropdownOption: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+    marginBottom: 4,
+  },
+  selectedOption: {
+    backgroundColor: '#f0f8ff',
+  },
+  dropdownOptionText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  selectedOptionText: {
+    color: '#007AFF',
+    fontWeight: '600',
   },
   customerCard: {
     backgroundColor: '#fff',

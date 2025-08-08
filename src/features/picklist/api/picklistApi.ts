@@ -69,7 +69,7 @@ export const picklistApi = {
         productId: apiItem.item?.itemID || apiItem.item?.id,
         productName: apiItem.item?.name || 'Unknown Product',
         location: apiItem.bin?.location?.name || 'Unknown Location',
-        requiredQuantity: apiItem.requiredQuantity || apiItem.quantity || 1,
+        requiredQuantity: apiItem.requiredCount || apiItem.requiredQuantity || apiItem.quantity || 1,
         pickedQuantity: 0,
         availableQuantity: apiItem.availableQuantity || 0,
         upc: apiItem.item?.upc,

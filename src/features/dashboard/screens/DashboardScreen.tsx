@@ -182,7 +182,7 @@ export default function DashboardScreen() {
       <View style={styles.quickStatsContainer}>
         <TouchableOpacity
           style={[styles.quickStatCard, styles.readyForPickupCard]}
-          onPress={() => navigateToOrders()}
+          onPress={() => router.push('/orders?status=Ready&hasFulfilmentJob=true')}
         >
           <MaterialIcons
             name="assignment-turned-in"

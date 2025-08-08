@@ -85,6 +85,34 @@ export interface Location {
   address: string;
 }
 
+export interface Bin {
+  id: number;
+  name: string;
+  location: {
+    type: string;
+    name: string;
+    locationID: number;
+    id: number;
+  };
+}
+
+export interface LocationHint {
+  id: number;
+  hint: string;
+  location: {
+    type: string;
+    name: string;
+    locationID: number;
+    id: number;
+  };
+  createdOn: string;
+  createdBy: {
+    userID: number;
+    userName: string;
+    id: number;
+  };
+}
+
 export interface PicklistItem {
   id: string;
   productId: string;
@@ -95,6 +123,8 @@ export interface PicklistItem {
   availableQuantity?: number;
   upc?: string;
   batch?: number;
+  bin?: Bin;
+  locationHints?: LocationHint[];
 }
 
 export interface Picklist {

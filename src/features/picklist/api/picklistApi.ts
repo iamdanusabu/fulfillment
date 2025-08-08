@@ -63,17 +63,23 @@ export const picklistApi = {
     const response = await fetchWithToken(url);
     
     // Transform the API response to PicklistItem format
-    if (response && Array.isArray(response)) {
-      return response.map((item: any) => ({
-        id: item.id || item.itemID || Math.random().toString(),
-        productId: item.itemID || item.productId,
-        productName: item.name || item.productName,
-        location: item.location || 'Unknown',
-        requiredQuantity: item.requiredQuantity || item.quantity || 0,
+    if (response && response.items && Array.isArray(response.items)) {
+      return response.items.map((apiItem: any) => ({
+        id: apiItem.item?.id || apiItem.item?.itemID || Math.random().toString(),
+        productId: apiItem.item?.itemID || apiItem.item?.id,
+        productName: apiItem.item?.name || 'Unknown Product',
+        location: apiItem.bin?.location?.name || 'Unknown Location',
+        requiredQuantity: apiItem.requiredQuantity || apiItem.quantity || 1,
         pickedQuantity: 0,
-        availableQuantity: item.availableQuantity || 0,
-        upc: item.upc,
-        batch: item.batch,
+        availableQuantity: apiItem.availableQuantity || 0,
+        upc: apiItem.item?.upc,
+        batch: apiItem.batch,
+        bin: apiItem.bin ? {
+          id: apiItem.bin.id,
+          name: apiItem.bin.name,
+          location: apiItem.bin.location
+        } : undefined,
+        locationHints: apiItem.locationHints || []
       }));
     }
     

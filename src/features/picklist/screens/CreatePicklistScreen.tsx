@@ -56,12 +56,36 @@ export default function CreatePicklistScreen() {
     }
   };
 
+  const groupedItems = React.useMemo(() => {
+    const groups: { [binName: string]: PicklistItem[] } = {};
+    
+    items.forEach(item => {
+      const binName = item.bin?.name || 'No Bin Assigned';
+      if (!groups[binName]) {
+        groups[binName] = [];
+      }
+      groups[binName].push(item);
+    });
+    
+    return groups;
+  }, [items]);
+
   const renderPicklistItem = ({ item }: { item: PicklistItem }) => (
     <View style={styles.itemCard}>
       <View style={styles.itemInfo}>
         <Text style={styles.productName}>{item.productName}</Text>
+        <Text style={styles.upc}>UPC: {item.upc}</Text>
         <Text style={styles.location}>Location: {item.location}</Text>
         <Text style={styles.requiredQty}>Required: {item.requiredQuantity}</Text>
+        
+        {item.locationHints && item.locationHints.length > 0 && (
+          <View style={styles.hintsContainer}>
+            <Text style={styles.hintsTitle}>💡 Hints:</Text>
+            {item.locationHints.map((hint, index) => (
+              <Text key={index} style={styles.hintText}>• {hint.hint}</Text>
+            ))}
+          </View>
+        )}
       </View>
 
       <View style={styles.quantityControls}>
@@ -86,6 +110,21 @@ export default function CreatePicklistScreen() {
           <MaterialIcons name="add" size={20} color="#666" />
         </TouchableOpacity>
       </View>
+    </View>
+  );
+
+  const renderBinSection = (binName: string, binItems: PicklistItem[]) => (
+    <View key={binName} style={styles.binSection}>
+      <View style={styles.binHeader}>
+        <MaterialIcons name="inventory" size={20} color="#007AFF" />
+        <Text style={styles.binName}>{binName}</Text>
+        <Text style={styles.binItemCount}>({binItems.length} items)</Text>
+      </View>
+      {binItems.map(item => (
+        <View key={item.id}>
+          {renderPicklistItem({ item })}
+        </View>
+      ))}
     </View>
   );
 
@@ -121,9 +160,9 @@ export default function CreatePicklistScreen() {
       </View>
 
       <FlatList
-        data={items}
-        renderItem={renderPicklistItem}
-        keyExtractor={(item) => item.id}
+        data={Object.entries(groupedItems)}
+        renderItem={({ item: [binName, binItems] }) => renderBinSection(binName, binItems)}
+        keyExtractor={([binName]) => binName}
         style={styles.itemsList}
         contentContainerStyle={styles.itemsContent}
       />
@@ -264,5 +303,53 @@ const styles = StyleSheet.create({
     color: '#666',
     marginTop: 4,
     textAlign: 'center',
+  },
+  binSection: {
+    marginBottom: 20,
+  },
+  binHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f0f8ff',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 8,
+    borderLeftWidth: 4,
+    borderLeftColor: '#007AFF',
+  },
+  binName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#007AFF',
+    marginLeft: 8,
+    flex: 1,
+  },
+  binItemCount: {
+    fontSize: 12,
+    color: '#666',
+  },
+  upc: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 2,
+  },
+  hintsContainer: {
+    marginTop: 8,
+    padding: 8,
+    backgroundColor: '#fff9e6',
+    borderRadius: 4,
+    borderLeftWidth: 3,
+    borderLeftColor: '#ffc107',
+  },
+  hintsTitle: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#856404',
+    marginBottom: 4,
+  },
+  hintText: {
+    fontSize: 11,
+    color: '#856404',
+    marginLeft: 8,
   },
 });

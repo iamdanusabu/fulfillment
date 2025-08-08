@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -39,7 +38,7 @@ export default function DashboardScreen() {
     try {
       setLoading(true);
       await Promise.all([
-        loadSourceCounts(), 
+        loadSourceCounts(),
         loadReadyForPickupCount(),
         loadActivePicklistsCount()
       ]);
@@ -163,6 +162,10 @@ export default function DashboardScreen() {
     router.push(route);
   };
 
+  const navigateToReadyForPickup = () => {
+    router.push("/orders?hasFulfilmentJob=false&status=Ready");
+  };
+
   const navigateToPicklists = () => {
     router.push("/picklist");
   };
@@ -183,7 +186,7 @@ export default function DashboardScreen() {
       <View style={styles.quickStatsContainer}>
         <TouchableOpacity
           style={[styles.quickStatCard, styles.readyForPickupCard]}
-          onPress={() => navigateToOrders()}
+          onPress={navigateToReadyForPickup}
         >
           <MaterialIcons name="assignment-turned-in" size={32} color="#28a745" />
           <Text style={styles.quickStatNumber}>{readyForPickupCount}</Text>
@@ -206,7 +209,7 @@ export default function DashboardScreen() {
           <MaterialIcons name="store" size={24} color="#333" />
           <Text style={styles.sectionTitle}>Orders by Source</Text>
         </View>
-        
+
         <View style={styles.sourceGrid}>
           {sourceCounts.map((sourceCount) => (
             <TouchableOpacity

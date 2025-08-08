@@ -35,13 +35,20 @@ export const usePaginatedOrders = (options: UsePaginatedOrdersOptions = {}) => {
     initialParams.paymentStatus = filterParams.paymentStatus;
   }
 
-  const paginatedState = usePaginatedFetcher<any>(
-    shouldFetch ? config.endpoints.orders : null, // Pass null to prevent API call
-    {
-      pageSize,
-      initialParams,
-    }
-  );
+  // Build URL for the paginated fetcher
+  const buildUrl = (params: Record<string, string | number>) => {
+    const url = new URL(config.endpoints.orders);
+    Object.entries(params).forEach(([key, value]) => {
+      url.searchParams.append(key, String(value));
+    });
+    return url.toString();
+  };
+
+  const paginatedState = usePaginatedFetcher<Order>({
+    buildUrl,
+    transform: (apiOrder: any) => transformOrder(apiOrder),
+    keyExtractor: (order) => order.id,
+  });
 
   // Load settings on hook initialization only (when user goes to orders screen)
   React.useEffect(() => {
@@ -81,9 +88,9 @@ export const usePaginatedOrders = (options: UsePaginatedOrdersOptions = {}) => {
     loading: paginatedState.loading || filtersLoading,
     error: paginatedState.error,
     hasMore: paginatedState.hasMore,
-    totalRecords: paginatedState.totalRecords,
-    currentPage: paginatedState.currentPage,
-    totalPages: paginatedState.totalPages,
+    totalRecords: paginatedState.totalRecords || 0,
+    currentPage: paginatedState.currentPage || 1,
+    totalPages: paginatedState.totalPages || 1,
     loadMore: paginatedState.loadMore,
     refresh: paginatedState.refresh,
   };

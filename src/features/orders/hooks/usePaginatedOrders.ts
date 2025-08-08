@@ -16,6 +16,7 @@ interface UsePaginatedOrdersOptions {
 export const usePaginatedOrders = (options: UsePaginatedOrdersOptions = {}) => {
   const { source, pageSize = 20, useFilters = true, status, hasFulfilmentJob } = options;
   const { getFilterParams, loading: filtersLoading, settings } = useOrderFilters();
+  const initialFetchRef = React.useRef(false);
 
   // Only make API calls if filters are loaded and settings exist or if a specific source is provided
   const shouldFetch = source || status || hasFulfilmentJob || (!filtersLoading && settings);
@@ -107,10 +108,16 @@ export const usePaginatedOrders = (options: UsePaginatedOrdersOptions = {}) => {
 
   // Load initial data when fetcher is ready
   React.useEffect(() => {
-    if (fetcher && paginatedState.data.length === 0 && !paginatedState.loading) {
+    if (fetcher && !initialFetchRef.current) {
+      initialFetchRef.current = true;
       refresh();
     }
-  }, [fetcher, paginatedState.data.length, paginatedState.loading, refresh]);
+  }, [fetcher]); // Only depend on fetcher to prevent continuous calls
+
+  // Reset the ref when fetcher changes
+  React.useEffect(() => {
+    initialFetchRef.current = false;
+  }, [fetcher]);
 
   // Transform the raw data to Order objects
   const transformedOrders = paginatedState.data ? paginatedState.data.map(transformOrder) : [];

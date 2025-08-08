@@ -1,0 +1,73 @@
+{
+    "sources": [
+        {
+            "type": "ORDER",
+            "typeID": "1308763742777303040"
+        }
+    ],
+    "items": [
+        {
+            "item": {
+                "itemID": "1800159",
+                "upc": "6700190",
+                "name": "Sala Cuoa namde",
+                "id": "1800159"
+            },
+            "bin": {
+                "merchant": {
+                    "domain": "ETIOS",
+                    "merchantID": 1161126,
+                    "id": 1161126
+                },
+                "id": 1,
+                "name": "Bin A",
+                "location": {
+                    "type": "STORE",
+                    "name": "Default Store",
+                    "venue": {
+                        "venueID": 1,
+                        "name": "Default",
+                        "id": 1
+                    },
+                    "locationID": 1,
+                    "id": 1
+                }
+            },
+            "locationHints": [
+                {
+                    "id": 1,
+                    "item": {
+                        "itemID": "1800159",
+                        "id": "1800159"
+                    },
+                    "hint": "In bin",
+                    "location": {
+                        "type": "STORE",
+                        "name": "Default Store",
+                        "venue": {
+                            "venueID": 1,
+                            "name": "Default",
+                            "id": 1
+                        },
+                        "locationID": 1,
+                        "id": 1
+                    },
+                    "createdOn": "2024-12-04T22:48:57-08:00",
+                    "createdBy": {
+                        "userID": 1,
+                        "userName": "ETIOS",
+                        "pinEncrypted": false,
+                        "id": 1
+                    },
+                    "modifiedOn": "2024-12-04T22:48:57-08:00",
+                    "modifiedBy": {
+                        "userID": 1,
+                        "userName": "ETIOS",
+                        "pinEncrypted": false,
+                        "id": 1
+                    }
+                }
+            ]
+        }
+    ]
+}

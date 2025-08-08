@@ -46,8 +46,265 @@ export default function OrdersScreen() {
     }
   };
 
+  const filteredOrders = orders.filter(order => 
+    order.orderNumber.toLowerCase().includes(searchText.toLowerCase()) ||
+    order.customer.toLowerCase().includes(searchText.toLowerCase())
+  );
+
   const proceedToLocationSelection = () => {
     if (selectedOrders.length === 0) return;
+    
+    const orderIds = selectedOrders.join(',');
+    router.push(`/picklist/location-selection?orderIds=${orderIds}`);
+  };
+
+  const filteredOrders = orders.filter(order => 
+    order.orderNumber.toLowerCase().includes(searchText.toLowerCase()) ||
+    order.customer.toLowerCase().includes(searchText.toLowerCase())
+  );
+
+  const renderOrderItem = ({ item }: { item: Order }) => (
+    <TouchableOpacity 
+      style={[
+        styles.orderCard,
+        isPicklistMode && selectedOrders.includes(item.id) && styles.selectedCard
+      ]}
+      onPress={() => viewOrderDetail(item)}
+    >
+      <View style={styles.orderHeader}>
+        <View style={styles.orderInfo}>
+          <Text style={styles.orderNumber}>#{item.orderNumber}</Text>
+          <Text style={styles.customerName}>{item.customer}</Text>
+          <Text style={styles.orderDate}>{item.date}</Text>
+        </View>
+        {isPicklistMode && (
+          <View style={styles.checkbox}>
+            <MaterialIcons
+              name={selectedOrders.includes(item.id) ? 'check-box' : 'check-box-outline-blank'}
+              size={24}
+              color={selectedOrders.includes(item.id) ? '#007AFF' : '#ccc'}
+            />
+          </View>
+        )}
+      </View>
+      <View style={styles.orderDetails}>
+        <Text style={styles.orderStatus}>{item.status}</Text>
+        <Text style={styles.itemCount}>{item.items.length} items</Text>
+      </View>
+    </TouchableOpacity>
+  );
+
+  const renderFooter = () => {
+    if (!hasMore || loading) return null;
+    return (
+      <TouchableOpacity style={styles.loadMoreButton} onPress={loadMore}>
+        <Text style={styles.loadMoreText}>Load More</Text>
+      </TouchableOpacity>
+    );
+  };
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <MaterialIcons name="arrow-back" size={24} color="#333" />
+        </TouchableOpacity>
+        <Text style={styles.title}>
+          {isPicklistMode ? 'Select Orders for Picklist' : 'Orders'}
+        </Text>
+      </View>
+
+      <View style={styles.searchContainer}>
+        <MaterialIcons name="search" size={24} color="#666" style={styles.searchIcon} />
+        <TextInput
+          style={styles.searchInput}
+          value={searchText}
+          onChangeText={setSearchText}
+          placeholder="Search orders..."
+        />
+      </View>
+
+      <Text style={styles.resultsText}>
+        {totalRecords} orders found - Page {currentPage} of {totalPages}
+      </Text>
+
+      <FlatList
+        data={filteredOrders}
+        renderItem={renderOrderItem}
+        keyExtractor={(item) => item.id}
+        refreshControl={
+          <RefreshControl
+            refreshing={loading && currentPage === 1}
+            onRefresh={refresh}
+          />
+        }
+        ListFooterComponent={renderFooter}
+        style={styles.ordersList}
+        contentContainerStyle={styles.ordersContent}
+      />
+
+      {isPicklistMode && selectedOrders.length > 0 && (
+        <View style={styles.bottomBar}>
+          <Text style={styles.selectedCount}>
+            {selectedOrders.length} order{selectedOrders.length !== 1 ? 's' : ''} selected
+          </Text>
+          <TouchableOpacity
+            style={styles.proceedButton}
+            onPress={proceedToLocationSelection}
+          >
+            <Text style={styles.proceedText}>Continue to Location</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f8f9fa',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e9ecef',
+  },
+  backButton: {
+    marginRight: 16,
+    padding: 4,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    margin: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+  },
+  searchIcon: {
+    marginRight: 12,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+  },
+  resultsText: {
+    paddingHorizontal: 16,
+    paddingBottom: 8,
+    color: '#666',
+    fontSize: 14,
+  },
+  ordersList: {
+    flex: 1,
+  },
+  ordersContent: {
+    padding: 16,
+  },
+  orderCard: {
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+  },
+  selectedCard: {
+    borderColor: '#007AFF',
+    backgroundColor: '#f0f8ff',
+  },
+  orderHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  orderInfo: {
+    flex: 1,
+  },
+  orderNumber: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 4,
+  },
+  customerName: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 2,
+  },
+  orderDate: {
+    fontSize: 12,
+    color: '#999',
+  },
+  checkbox: {
+    padding: 4,
+  },
+  orderDetails: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  orderStatus: {
+    fontSize: 12,
+    color: '#007AFF',
+    backgroundColor: '#e3f2fd',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  itemCount: {
+    fontSize: 12,
+    color: '#666',
+  },
+  loadMoreButton: {
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+  },
+  loadMoreText: {
+    color: '#007AFF',
+    fontWeight: '600',
+  },
+  bottomBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#e9ecef',
+  },
+  selectedCount: {
+    fontSize: 14,
+    color: '#333',
+  },
+  proceedButton: {
+    backgroundColor: '#007AFF',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 6,
+  },
+  proceedText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+});
 
     const orderIds = selectedOrders.join(',');
     router.push(`/picklist/location-selection?orderIds=${orderIds}`);

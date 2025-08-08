@@ -27,7 +27,7 @@ export default function PackingScreen() {
       
       // Load order details for each order in the picklist
       const orderPromises = orderIds.map(id => 
-        ordersApi.getOrders({ id }).then(response => response.data[0])
+        ordersApi.getOrderById(id)
       );
       const orderData = await Promise.all(orderPromises);
       setOrders(orderData.filter(Boolean));

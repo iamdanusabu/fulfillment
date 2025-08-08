@@ -16,7 +16,8 @@ export default function PicklistIndexScreen() {
 
   const viewPicklist = (picklist: Picklist) => {
     // Navigate to packing screen with the picklist details
-    router.push(`/picklist/packing?picklistId=${picklist.id}`);
+    const orderIds = picklist.orderIds.join(',');
+    router.push(`/picklist/packing?orderIds=${orderIds}&fulfillmentId=${picklist.id}`);
   };
 
   const renderPicklistItem = ({ item }: { item: Picklist }) => (

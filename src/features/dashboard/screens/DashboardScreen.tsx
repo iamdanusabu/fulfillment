@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -38,7 +39,7 @@ export default function DashboardScreen() {
     try {
       setLoading(true);
       await Promise.all([
-        loadSourceCounts(),
+        loadSourceCounts(), 
         loadReadyForPickupCount(),
         loadActivePicklistsCount()
       ]);
@@ -209,7 +210,7 @@ export default function DashboardScreen() {
           <MaterialIcons name="store" size={24} color="#333" />
           <Text style={styles.sectionTitle}>Orders by Source</Text>
         </View>
-
+        
         <View style={styles.sourceGrid}>
           {sourceCounts.map((sourceCount) => (
             <TouchableOpacity

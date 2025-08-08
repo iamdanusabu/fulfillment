@@ -1,0 +1,180 @@
+{
+  "id" : "13443714806340c4",
+  "name" : "FULFILLMENT # 1754636574377",
+  "status" : "OPEN",
+  "totalItemCount" : 3,
+  "totalItemAmount" : 88.57,
+  "type" : "BATCH",
+  "fulfillmentStatus" : "UNFULFILLED",
+  "fulfillmentLocation" : {
+    "type" : "STORE",
+    "name" : "Fly LLC",
+    "locationID" : 1,
+    "id" : 1
+  },
+  "sources" : [ {
+    "fulfillment" : {
+      "id" : "13443714806340c4",
+      "name" : "FULFILLMENT # 1754636574377"
+    },
+    "type" : "ORDER",
+    "typeID" : "7358463319977644041",
+    "status" : "OPEN",
+    "createdBy" : {
+      "userID" : 2,
+      "name" : "Financial",
+      "pinEncrypted" : false,
+      "id" : 2
+    },
+    "createdOn" : "2025-08-08T12:32:54+05:30",
+    "modifiedBy" : {
+      "userID" : 2,
+      "name" : "Financial",
+      "pinEncrypted" : false,
+      "id" : 2
+    },
+    "modifiedOn" : "2025-08-08T12:32:54+05:30",
+    "modifiedTime" : "2025-08-08 07:02:54"
+  }, {
+    "fulfillment" : {
+      "id" : "13443714806340c4",
+      "name" : "FULFILLMENT # 1754636574377"
+    },
+    "type" : "ORDER",
+    "typeID" : "7358798917997408260",
+    "status" : "OPEN",
+    "createdBy" : {
+      "userID" : 2,
+      "name" : "Financial",
+      "pinEncrypted" : false,
+      "id" : 2
+    },
+    "createdOn" : "2025-08-08T12:32:54+05:30",
+    "modifiedBy" : {
+      "userID" : 2,
+      "name" : "Financial",
+      "pinEncrypted" : false,
+      "id" : 2
+    },
+    "modifiedOn" : "2025-08-08T12:32:54+05:30",
+    "modifiedTime" : "2025-08-08 07:02:54"
+  } ],
+  "items" : [ {
+    "id" : 368,
+    "fulfillment" : {
+      "id" : "13443714806340c4",
+      "name" : "FULFILLMENT # 1754636574377"
+    },
+    "item" : {
+      "itemID" : "213234717532",
+      "upc" : "213234717532",
+      "name" : "0livaceous black cold shoulder3",
+      "id" : "213234717532"
+    },
+    "pickedCount" : 1,
+    "returnedCount" : 0,
+    "requiredCount" : 1.0,
+    "createdBy" : {
+      "userID" : 2,
+      "name" : "Financial",
+      "pinEncrypted" : false,
+      "id" : 2
+    },
+    "createdOn" : "2025-08-08T12:32:54+05:30",
+    "modifiedBy" : {
+      "userID" : 2,
+      "name" : "Financial",
+      "pinEncrypted" : false,
+      "id" : 2
+    },
+    "modifiedOn" : "2025-08-08T12:32:54+05:30",
+    "modifiedTime" : "2025-08-08 07:02:54"
+  }, {
+    "id" : 367,
+    "fulfillment" : {
+      "id" : "13443714806340c4",
+      "name" : "FULFILLMENT # 1754636574377"
+    },
+    "item" : {
+      "itemID" : "213252241941",
+      "upc" : "213252241941",
+      "name" : "0livaceous black vneck",
+      "id" : "213252241941"
+    },
+    "pickedCount" : 1,
+    "returnedCount" : 0,
+    "requiredCount" : 1.0,
+    "createdBy" : {
+      "userID" : 2,
+      "name" : "Financial",
+      "pinEncrypted" : false,
+      "id" : 2
+    },
+    "createdOn" : "2025-08-08T12:32:54+05:30",
+    "modifiedBy" : {
+      "userID" : 2,
+      "name" : "Financial",
+      "pinEncrypted" : false,
+      "id" : 2
+    },
+    "modifiedOn" : "2025-08-08T12:32:54+05:30",
+    "modifiedTime" : "2025-08-08 07:02:54"
+  }, {
+    "id" : 369,
+    "fulfillment" : {
+      "id" : "13443714806340c4",
+      "name" : "FULFILLMENT # 1754636574377"
+    },
+    "item" : {
+      "itemID" : "00032425",
+      "upc" : "00032425",
+      "name" : "T-S MENS JWL T-REX L J",
+      "color" : {
+        "colorID" : 18,
+        "description" : "Brown",
+        "id" : 18
+      },
+      "itemImage" : "https://storage.googleapis.com/rc-files/Merchant1154085/1154085-00032419-0.jpg",
+      "size" : {
+        "sizeID" : 97,
+        "description" : "1 TB",
+        "id" : 97
+      },
+      "id" : "00032425"
+    },
+    "pickedCount" : 1,
+    "returnedCount" : 0,
+    "requiredCount" : 1.0,
+    "createdBy" : {
+      "userID" : 2,
+      "name" : "Financial",
+      "pinEncrypted" : false,
+      "id" : 2
+    },
+    "createdOn" : "2025-08-08T12:32:54+05:30",
+    "modifiedBy" : {
+      "userID" : 2,
+      "name" : "Financial",
+      "pinEncrypted" : false,
+      "id" : 2
+    },
+    "modifiedOn" : "2025-08-08T12:32:54+05:30",
+    "modifiedTime" : "2025-08-08 07:02:54"
+  } ],
+  "createdBy" : {
+    "userID" : 2,
+    "name" : "Financial",
+    "pinEncrypted" : false,
+    "id" : 2
+  },
+  "createdOn" : "2025-08-08T12:32:54+05:30",
+  "modifiedBy" : {
+    "userID" : 2,
+    "name" : "Financial",
+    "pinEncrypted" : false,
+    "id" : 2
+  },
+  "modifiedOn" : "2025-08-08T12:32:54+05:30",
+  "modifiedTime" : "2025-08-08 07:02:54",
+  "orderCount" : 2
+}

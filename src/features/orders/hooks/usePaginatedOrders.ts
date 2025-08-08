@@ -112,9 +112,15 @@ export const usePaginatedOrders = (options: UsePaginatedOrdersOptions = {}) => {
         newParams.paymentStatus = filterParams.paymentStatus;
       }
 
-      paginatedState.updateParams(newParams);
+      // Only update params if they're actually different
+      const currentParams = JSON.stringify(initialParams);
+      const newParamsStr = JSON.stringify(newParams);
+      
+      if (currentParams !== newParamsStr) {
+        paginatedState.updateParams(newParams);
+      }
     }
-  }, [settings, filtersLoading, useFilters, source, shouldFetch]);
+  }, [JSON.stringify(settings), filtersLoading]); // Simplified dependencies
 
   // Transform the raw data to Order objects
   const transformedOrders = paginatedState.data.map(transformOrder);

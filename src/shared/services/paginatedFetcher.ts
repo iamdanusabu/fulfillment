@@ -164,25 +164,30 @@ export const usePaginatedFetcher = <T>(
   const [params, setParams] = useState<Record<string, string | number>>(options.initialParams || {});
 
   const fetchData = useCallback(async (page: number = 1, append: boolean = false) => {
-    if (state.loading || !baseUrl) return;
+    if (!baseUrl) return;
 
-    setState(prevState => ({ ...prevState, loading: true, error: null }));
+    setState(prevState => ({ 
+      ...prevState, 
+      loading: true, 
+      error: null 
+    }));
 
     try {
       const fetcher = new PaginatedFetcher<T>(baseUrl, { ...options, initialParams: params });
-      fetcherRef.current = fetcher; // Update ref with the new fetcher instance
+      fetcherRef.current = fetcher;
 
-      const fetcherState = await fetcher.fetchPage(page, append);
+      await fetcher.fetchPage(page, append);
+      const fetcherState = fetcher.getState();
 
-      setState({
-        data: append ? [...state.data, ...fetcher.getState().data] : fetcher.getState().data,
-        currentPage: fetcher.getState().currentPage,
-        totalPages: fetcher.getState().totalPages,
-        totalRecords: fetcher.getState().totalRecords,
-        hasMore: fetcher.getState().hasMore,
+      setState(prevState => ({
+        data: append ? [...prevState.data, ...fetcherState.data] : fetcherState.data,
+        currentPage: fetcherState.currentPage,
+        totalPages: fetcherState.totalPages,
+        totalRecords: fetcherState.totalRecords,
+        hasMore: fetcherState.hasMore,
         loading: false,
         error: null,
-      });
+      }));
 
     } catch (error) {
       setState(prevState => ({
@@ -191,7 +196,7 @@ export const usePaginatedFetcher = <T>(
         error: error instanceof Error ? error.message : 'Failed to fetch data',
       }));
     }
-  }, [baseUrl, options, params, state.loading, state.data]); // Include dependencies
+  }, [baseUrl, JSON.stringify(params)]); // Use JSON.stringify to avoid object reference issues
 
   useEffect(() => {
     if (baseUrl) {
@@ -207,9 +212,9 @@ export const usePaginatedFetcher = <T>(
         loading: false,
         error: null,
       });
-      fetcherRef.current = null; // Clear the ref if no baseUrl
+      fetcherRef.current = null;
     }
-  }, [baseUrl, fetchData]); // Depend on fetchData
+  }, [baseUrl, JSON.stringify(params)]); // Only depend on baseUrl and params, not fetchData
 
   const loadMore = useCallback(() => {
     if (fetcherRef.current) {

@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { picklistApi } from '../api/picklistApi';
-import { Picklist, Location, PicklistItem } from '../../../shared/types';
+import { Picklist, Location, PicklistItem, Fulfillment } from '../../../shared/types';
 
 export const usePicklists = () => {
   const [picklists, setPicklists] = useState<Picklist[]>([]);
@@ -27,6 +27,68 @@ export const usePicklists = () => {
     picklists,
     loading,
     refetch: loadPicklists,
+  };
+};
+
+export const useFulfillments = () => {
+  const [fulfillments, setFulfillments] = useState<Fulfillment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [currentPage, setCurrentPage] = useState(0);
+
+  const loadFulfillments = async (refresh: boolean = false) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const fetcher = await picklistApi.getActiveFulfillments();
+      
+      if (refresh) {
+        await fetcher.refresh();
+      } else {
+        await fetcher.fetchPage(1);
+      }
+      
+      const state = fetcher.getState();
+      setFulfillments(state.data);
+      setHasMore(state.hasMore);
+      setCurrentPage(state.currentPage);
+      setError(state.error);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load fulfillments');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadMore = async () => {
+    if (!hasMore || loading) return;
+    
+    try {
+      const fetcher = await picklistApi.getActiveFulfillments();
+      await fetcher.loadMore();
+      const state = fetcher.getState();
+      setFulfillments(state.data);
+      setHasMore(state.hasMore);
+      setCurrentPage(state.currentPage);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load more fulfillments');
+    }
+  };
+
+  useEffect(() => {
+    loadFulfillments();
+  }, []);
+
+  return {
+    fulfillments,
+    loading,
+    error,
+    hasMore,
+    currentPage,
+    refetch: () => loadFulfillments(true),
+    loadMore,
   };
 };
 

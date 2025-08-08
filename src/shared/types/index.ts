@@ -136,6 +136,62 @@ export interface Picklist {
   createdAt: string;
 }
 
+export interface Fulfillment {
+  id: string;
+  name: string;
+  status: string;
+  totalItemCount: number;
+  totalItemAmount: number;
+  type: string;
+  fulfillmentStatus: 'FULFILLED' | 'UNFULFILLED';
+  fulfillmentLocation: {
+    type: string;
+    name: string;
+    locationID: number;
+    id: number;
+  };
+  sources: Array<{
+    fulfillment: {
+      id: string;
+      name: string;
+    };
+    type: string;
+    typeID: string;
+    status: string;
+    createdBy: {
+      userID: number;
+      name: string;
+      pinEncrypted: boolean;
+      id: number;
+    };
+    createdOn: string;
+    modifiedBy: {
+      userID: number;
+      name: string;
+      pinEncrypted: boolean;
+      id: number;
+    };
+    modifiedOn: string;
+    modifiedTime: string;
+  }>;
+  createdBy: {
+    userID: number;
+    name: string;
+    pinEncrypted: boolean;
+    id: number;
+  };
+  createdOn: string;
+  modifiedBy: {
+    userID: number;
+    name: string;
+    pinEncrypted: boolean;
+    id: number;
+  };
+  modifiedOn: string;
+  modifiedTime: string;
+  orderCount: number;
+}
+
 export interface DashboardStats {
   orderCounts: {
     fanvista: number;

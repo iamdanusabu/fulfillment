@@ -1,8 +1,28 @@
 import { fetchWithToken } from '../../../shared/services/fetchWithToken';
+import { PaginatedFetcher } from '../../../shared/services/paginatedFetcher';
 import { Location, PicklistItem } from '../../../shared/types';
 import { getConfig } from '../../../environments';
 
 export const picklistApi = {
+  async getActiveFulfillments() {
+    const { fetchWithToken } = await import('../../../shared/services/fetchWithToken');
+    const config = getConfig();
+    
+    // Use the paginated fetcher for fulfillments
+    const fetcher = new (await import('../../../shared/services/paginatedFetcher')).PaginatedFetcher(
+      config.endpoints.activePicklists,
+      {
+        pageSize: 20,
+        initialParams: {
+          status: 'OPEN',
+          pagination: 'true'
+        }
+      }
+    );
+    
+    return fetcher;
+  },
+
   async getLocations(): Promise<Location[]> {
     const { fetchWithToken } = await import('../../../shared/services/fetchWithToken');
     const config = getConfig();

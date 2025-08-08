@@ -13,9 +13,14 @@ export default function CreatePicklistScreen() {
 
   useEffect(() => {
     if (params.orderIds && params.locationId) {
-      simulateFulfillment();
+      if (params.fulfillmentId) {
+        // Fetch existing fulfillment if fulfillmentId is provided
+        fetchFulfillment(params.fulfillmentId as string);
+      } else {
+        simulateFulfillment();
+      }
     }
-  }, [params.orderIds, params.locationId]);
+  }, [params.orderIds, params.locationId, params.fulfillmentId]);
 
   const simulateFulfillment = async () => {
     try {
@@ -32,6 +37,18 @@ export default function CreatePicklistScreen() {
     }
   };
 
+  const fetchFulfillment = async (fulfillmentId: string) => {
+    try {
+      setLoading(true);
+      const fulfillment = await picklistApi.getFulfillment(fulfillmentId);
+      setItems(fulfillment.items);
+    } catch (error) {
+      console.error('Failed to fetch fulfillment:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const updatePickedQuantity = (itemId: string, quantity: number) => {
     setItems(prev =>
       prev.map(item =>
@@ -42,23 +59,30 @@ export default function CreatePicklistScreen() {
     );
   };
 
-  const createFulfillment = async () => {
+  const handleFulfillment = async () => {
     try {
       const orderIds = (params.orderIds as string).split(',');
       const locationId = params.locationId as string;
+      let result;
 
-      const result = await picklistApi.createFulfillment(orderIds, locationId, items);
+      if (params.fulfillmentId) {
+        // Update existing fulfillment
+        result = await picklistApi.updateFulfillment(params.fulfillmentId as string, items);
+      } else {
+        // Create new fulfillment
+        result = await picklistApi.createFulfillment(orderIds, locationId, items);
+      }
 
       // Navigate to packing screen with fulfillment ID from response
       router.push(`/picklist/packing?fulfillmentId=${result.id}&orderIds=${params.orderIds}`);
     } catch (error) {
-      console.error('Failed to create fulfillment:', error);
+      console.error('Failed to process fulfillment:', error);
     }
   };
 
   const groupedItems = React.useMemo(() => {
     const groups: { [binName: string]: PicklistItem[] } = {};
-    
+
     items.forEach(item => {
       const binName = item.bin?.name || 'No Bin Assigned';
       if (!groups[binName]) {
@@ -66,7 +90,7 @@ export default function CreatePicklistScreen() {
       }
       groups[binName].push(item);
     });
-    
+
     return groups;
   }, [items]);
 
@@ -77,7 +101,7 @@ export default function CreatePicklistScreen() {
         <Text style={styles.upc}>UPC: {item.upc}</Text>
         <Text style={styles.location}>Location: {item.location}</Text>
         <Text style={styles.requiredQty}>Required: {item.requiredQuantity}</Text>
-        
+
         {item.locationHints && item.locationHints.length > 0 && (
           <View style={styles.hintsContainer}>
             <Text style={styles.hintsTitle}>💡 Hints:</Text>
@@ -134,22 +158,26 @@ export default function CreatePicklistScreen() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <Text>Simulating fulfillment...</Text>
+        <Text>Loading picklist data...</Text>
       </View>
     );
   }
 
-  const pickedItems = items.filter(item => item.pickedQuantity > 0).length;
-  const totalItems = items.length;
-  const progressPercentage = totalItems > 0 ? (pickedItems / totalItems) * 100 : 0;
+  const pickedItemsCount = items.filter(item => item.pickedQuantity > 0).length;
+  const totalItemsCount = items.length;
+  const progressPercentage = totalItemsCount > 0 ? (pickedItemsCount / totalItemsCount) * 100 : 0;
 
-  const allItemsPicked = items.every(item => item.pickedQuantity > 0);
+  const hasPickedItems = items.some(item => item.pickedQuantity > 0);
+  const allItemsPicked = items.every(item => item.pickedQuantity === item.requiredQuantity);
+
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Create Picklist</Text>
-        <Text style={styles.subtitle}>{items.length} items to pick</Text>
+        <Text style={styles.title}>
+          {params.fulfillmentId ? 'Update Picklist' : 'Create Picklist'}
+        </Text>
+        <Text style={styles.subtitle}>{totalItemsCount} items to pick</Text>
 
         {/* Progress Bar */}
         <View style={styles.progressContainer}>
@@ -157,7 +185,7 @@ export default function CreatePicklistScreen() {
             <View style={[styles.progressFill, { width: `${progressPercentage}%` }]} />
           </View>
           <Text style={styles.progressText}>
-            {pickedItems} / {totalItems} items picked ({Math.round(progressPercentage)}%)
+            {pickedItemsCount} / {totalItemsCount} items picked ({Math.round(progressPercentage)}%)
           </Text>
         </View>
       </View>
@@ -172,11 +200,13 @@ export default function CreatePicklistScreen() {
 
       <View style={styles.bottomBar}>
         <TouchableOpacity
-          style={[styles.fulfillButton, !allItemsPicked && styles.disabledButton]}
-          onPress={createFulfillment}
-          disabled={!allItemsPicked}
+          style={[styles.fulfillButton, !hasPickedItems && styles.disabledButton]}
+          onPress={handleFulfillment}
+          disabled={!hasPickedItems}
         >
-          <Text style={styles.fulfillText}>Create Fulfillment</Text>
+          <Text style={styles.fulfillText}>
+            {params.fulfillmentId ? 'Update Picklist' : 'Create Picklist'}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>

@@ -199,11 +199,22 @@ export const usePicklistCreation = () => {
     }
   };
 
+  const updateFulfillment = async (fulfillmentId: string) => {
+    try {
+      const result = await picklistApi.updateFulfillment(fulfillmentId, items);
+      return result;
+    } catch (error) {
+      console.error('Failed to update fulfillment:', error);
+      throw error;
+    }
+  };
+
   return {
     items,
     loading,
     simulateFulfillment,
     updatePickedQuantity,
     createFulfillment,
+    updateFulfillment,
   };
 };

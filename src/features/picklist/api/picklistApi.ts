@@ -135,6 +135,30 @@ export const picklistApi = {
     });
   },
 
+  async updateFulfillment(fulfillmentId: string, items: PicklistItem[]) {
+    const config = getConfig();
+    
+    // Format items with picked count - minimum required fields
+    const formattedItems = items
+      .filter(item => item.pickedQuantity > 0)
+      .map(item => ({
+        item: {
+          itemID: item.productId
+        },
+        pickedCount: item.pickedQuantity
+      }));
+    
+    const requestBody = {
+      id: fulfillmentId,
+      items: formattedItems
+    };
+    
+    return await fetchWithToken(`${config.endpoints.inventoryFulfillments}/${fulfillmentId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(requestBody),
+    });
+  },
+
   async finalizePacking(fulfillmentId: string, sources: Array<{type: string, typeID: string}>) {
     const config = getConfig();
     return await fetchWithToken(`${config.endpoints.inventoryFulfillments}/${fulfillmentId}/finalize`, {

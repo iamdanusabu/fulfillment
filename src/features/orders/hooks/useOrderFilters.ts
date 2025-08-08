@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -24,19 +23,7 @@ export const useOrderFilters = () => {
 
   useEffect(() => {
     loadSettings();
-    
-    // Listen for settings changes from other parts of the app
-    const handleSettingsChange = () => {
-      loadSettings();
-    };
-    
-    if (typeof window !== 'undefined') {
-      window.addEventListener('orderFilterSettingsChanged', handleSettingsChange);
-      
-      return () => {
-        window.removeEventListener('orderFilterSettingsChanged', handleSettingsChange);
-      };
-    }
+    // Removed the settings change listener to prevent automatic API calls
   }, []);
 
   const loadSettings = async () => {

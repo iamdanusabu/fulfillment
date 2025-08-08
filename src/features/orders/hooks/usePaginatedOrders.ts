@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { usePaginatedFetcher } from '../../../shared/services/paginatedFetcher';
 import { Order } from '../../../shared/types';
@@ -94,9 +95,9 @@ export const usePaginatedOrders = (options: UsePaginatedOrdersOptions = {}) => {
     }
   );
 
-  // Update API params when filter settings change
+  // Load settings on hook initialization only (when user goes to orders screen)
   React.useEffect(() => {
-    if (useFilters && !filtersLoading && settings && shouldFetch) {
+    if (useFilters && !filtersLoading && settings && shouldFetch && paginatedState.data.length === 0) {
       const filterParams = getFilterParams();
       const newParams: Record<string, string | number> = {
         hasFulfilmentJob: 'false',
@@ -119,10 +120,10 @@ export const usePaginatedOrders = (options: UsePaginatedOrdersOptions = {}) => {
         }
       }
 
-      // Update params to trigger a fresh API call with new filters
+      // Update params only on initial load, not on settings changes
       paginatedState.updateParams(newParams);
     }
-  }, [settings?.sources, settings?.statuses, settings?.paymentStatuses, filtersLoading, source]); // More specific dependencies
+  }, [filtersLoading, shouldFetch]); // Only depend on loading state, not settings values
 
   // Transform the raw data to Order objects
   const transformedOrders = paginatedState.data.map(transformOrder);

@@ -19,7 +19,9 @@ export default function OrdersScreen() {
     loadMore, 
     refresh 
   } = usePaginatedOrders({ 
-    source: params.source as string 
+    source: params.source as string,
+    status: params.status as string,
+    hasFulfilmentJob: params.hasFulfilmentJob as string
   });
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
   const [isPicklistMode, setIsPicklistMode] = useState(false);

@@ -4,7 +4,6 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { usePaginatedOrders } from '../hooks/usePaginatedOrders';
 import { Order } from '../../../shared/types';
-import { finalizePacking } from '../api/picklistApi';
 
 export default function OrdersScreen() {
   const params = useLocalSearchParams();
@@ -47,18 +46,11 @@ export default function OrdersScreen() {
     }
   };
 
-  const proceedToLocationSelection = async () => {
+  const proceedToLocationSelection = () => {
     if (selectedOrders.length === 0) return;
 
-    try {
-      await finalizePacking({
-        sources: selectedOrders.map(id => ({ type: 'ORDER', typeID: id }))
-      });
-      router.push('/picklist');
-    } catch (error) {
-      console.error("Failed to finalize packing:", error);
-      // Optionally show an error message to the user
-    }
+    const orderIdsParam = selectedOrders.join(',');
+    router.push(`/picklist/location-selection?orderIds=${orderIdsParam}`);
   };
 
   const filteredOrders = useMemo(() => {

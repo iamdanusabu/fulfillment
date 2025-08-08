@@ -67,6 +67,9 @@ export const usePaginatedOrders = (options: UsePaginatedOrdersOptions = {}) => {
   const config = getConfig();
   const { getFilterParams, loading: filtersLoading, settings } = useOrderFilters();
 
+  // Only make API calls if filters are loaded and settings exist or if a specific source is provided
+  const shouldFetch = source || (!filtersLoading && settings);
+
   const initialParams: Record<string, string | number> = {
     hasFulfilmentJob: 'false',
     expand: 'item,bin,location_hint,payment',
@@ -76,7 +79,7 @@ export const usePaginatedOrders = (options: UsePaginatedOrdersOptions = {}) => {
   // Use specific source if provided, otherwise use filter settings
   if (source) {
     initialParams.source = source;
-  } else if (useFilters && !filtersLoading) {
+  } else if (useFilters && !filtersLoading && settings) {
     const filterParams = getFilterParams();
     initialParams.source = filterParams.source;
     initialParams.status = filterParams.status;
@@ -84,7 +87,7 @@ export const usePaginatedOrders = (options: UsePaginatedOrdersOptions = {}) => {
   }
 
   const paginatedState = usePaginatedFetcher<any>(
-    config.endpoints.orders,
+    shouldFetch ? config.endpoints.orders : null, // Pass null to prevent API call
     {
       pageSize,
       initialParams,
@@ -93,7 +96,7 @@ export const usePaginatedOrders = (options: UsePaginatedOrdersOptions = {}) => {
 
   // Update API params when filter settings change
   React.useEffect(() => {
-    if (useFilters && !filtersLoading) {
+    if (useFilters && !filtersLoading && settings && shouldFetch) {
       const filterParams = getFilterParams();
       const newParams: Record<string, string | number> = {
         hasFulfilmentJob: 'false',
@@ -111,7 +114,7 @@ export const usePaginatedOrders = (options: UsePaginatedOrdersOptions = {}) => {
 
       paginatedState.updateParams(newParams);
     }
-  }, [settings, filtersLoading, useFilters, source]);
+  }, [settings, filtersLoading, useFilters, source, shouldFetch]);
 
   // Transform the raw data to Order objects
   const transformedOrders = paginatedState.data.map(transformOrder);

@@ -59,135 +59,49 @@ export default function PackingScreen() {
       <View style={styles.orderHeader}>
         <View style={styles.orderTitleSection}>
           <Text style={styles.orderNumber}>#{item.orderNumber}</Text>
+          <Text style={styles.customerName}>{item.customer}</Text>
+          {item.externalOrderKey && (
+            <Text style={styles.externalId}>External ID: {item.externalOrderKey}</Text>
+          )}
           <Text style={styles.orderDate}>
-            {new Date(item.date).toLocaleDateString()} at {new Date(item.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            Date: {new Date(item.date).toLocaleDateString()} {new Date(item.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </Text>
         </View>
         <View style={styles.orderStatusSection}>
-          <Text style={[styles.status, getStatusColor(item.status)]}>{item.status}</Text>
+          <View style={[styles.statusBadge, getStatusBadgeColor(item.status)]}>
+            <Text style={styles.statusText}>{item.status?.toUpperCase()}</Text>
+          </View>
           <Text style={styles.orderAmount}>${(item.amount || 0).toFixed(2)}</Text>
         </View>
       </View>
-
-      <View style={styles.orderDetails}>
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>Customer:</Text>
-          <Text style={styles.detailValue}>{item.customer}</Text>
-        </View>
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>Source:</Text>
-          <Text style={styles.detailValue}>{item.source}</Text>
-        </View>
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>Payment:</Text>
-          <Text style={[styles.detailValue, getPaymentStatusColor(item.paymentStatus)]}>
-            {item.paymentStatus}
-          </Text>
-        </View>
-        {item.type && (
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Type:</Text>
-            <Text style={styles.detailValue}>{item.type}</Text>
-          </View>
-        )}
-        {item.externalOrderKey && (
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>External Key:</Text>
-            <Text style={styles.detailValue}>{item.externalOrderKey}</Text>
-          </View>
-        )}
-      </View>
       
       <View style={styles.orderItems}>
-        <Text style={styles.itemsHeader}>Items ({item.items.length})</Text>
-        {item.items.map((orderItem, index) => (
+        <Text style={styles.itemsHeader}>Items({item.items.length})</Text>
+        {item.items.map((orderItem) => (
           <View key={orderItem.id} style={styles.itemRow}>
-            <View style={styles.itemDetails}>
-              <Text style={styles.productName}>{orderItem.productName}</Text>
-              <View style={styles.itemMetadata}>
-                {orderItem.upc && (
-                  <Text style={styles.itemMeta}>UPC: {orderItem.upc}</Text>
-                )}
-                {orderItem.productId && (
-                  <Text style={styles.itemMeta}>ID: {orderItem.productId}</Text>
-                )}
-                <Text style={styles.itemMeta}>Unit: ${(orderItem.unitPrice || 0).toFixed(2)}</Text>
-              </View>
-              {orderItem.batch && (
-                <Text style={styles.batchText}>Batch: {orderItem.batch}</Text>
-              )}
-            </View>
-            <View style={styles.quantitySection}>
-              <Text style={styles.quantity}>
-                {orderItem.pickedQuantity || orderItem.quantity} / {orderItem.quantity}
-              </Text>
-              <Text style={styles.itemTotal}>
-                ${((orderItem.unitPrice || 0) * (orderItem.quantity || 0)).toFixed(2)}
-              </Text>
-            </View>
+            <Text style={styles.productName}>{orderItem.productName}</Text>
+            <Text style={styles.quantity}>Qty:{orderItem.quantity}</Text>
           </View>
         ))}
-        
-        <View style={styles.orderSummary}>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Subtotal:</Text>
-            <Text style={styles.summaryValue}>${(item.subTotal || 0).toFixed(2)}</Text>
-          </View>
-          {item.tax && item.tax > 0 && (
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Tax:</Text>
-              <Text style={styles.summaryValue}>${item.tax.toFixed(2)}</Text>
-            </View>
-          )}
-          {item.netDiscount && item.netDiscount > 0 && (
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Discount:</Text>
-              <Text style={[styles.summaryValue, styles.discountText]}>-${item.netDiscount.toFixed(2)}</Text>
-            </View>
-          )}
-          {item.totalFees && item.totalFees > 0 && (
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Fees:</Text>
-              <Text style={styles.summaryValue}>${item.totalFees.toFixed(2)}</Text>
-            </View>
-          )}
-          <View style={[styles.summaryRow, styles.totalRow]}>
-            <Text style={styles.totalLabel}>Total:</Text>
-            <Text style={styles.totalValue}>${(item.amount || 0).toFixed(2)}</Text>
-          </View>
-        </View>
       </View>
     </View>
   );
 
-  const getStatusColor = (status: string) => {
+  const getStatusBadgeColor = (status: string) => {
     switch (status?.toLowerCase()) {
+      case 'initiated':
+        return { backgroundColor: '#FF8C00' };
       case 'completed':
       case 'fulfilled':
-        return { color: '#28a745' };
+        return { backgroundColor: '#28a745' };
       case 'pending':
       case 'processing':
-        return { color: '#ffc107' };
+        return { backgroundColor: '#ffc107' };
       case 'cancelled':
       case 'failed':
-        return { color: '#dc3545' };
+        return { backgroundColor: '#dc3545' };
       default:
-        return { color: '#007AFF' };
-    }
-  };
-
-  const getPaymentStatusColor = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case 'paid':
-      case 'completed':
-        return { color: '#28a745' };
-      case 'pending':
-        return { color: '#ffc107' };
-      case 'failed':
-      case 'refunded':
-        return { color: '#dc3545' };
-      default:
-        return { color: '#666' };
+        return { backgroundColor: '#007AFF' };
     }
   };
 
@@ -278,10 +192,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 12,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    marginBottom: 16,
   },
   orderTitleSection: {
     flex: 1,
@@ -293,23 +204,38 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#333',
+    marginBottom: 4,
+  },
+  customerName: {
+    fontSize: 14,
+    color: '#333',
+    marginBottom: 2,
+  },
+  externalId: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 2,
   },
   orderDate: {
     fontSize: 12,
     color: '#666',
-    marginTop: 2,
   },
-  status: {
-    fontSize: 12,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+  statusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginBottom: 8,
+  },
+  statusText: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: '#fff',
+    textAlign: 'center',
   },
   orderAmount: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#333',
-    marginTop: 2,
   },
   orderDetails: {
     marginBottom: 12,
@@ -336,7 +262,9 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   orderItems: {
-    marginTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+    paddingTop: 12,
   },
   itemsHeader: {
     fontSize: 14,
@@ -347,20 +275,18 @@ const styles = StyleSheet.create({
   itemRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f8f9fa',
-  },
-  itemDetails: {
-    flex: 1,
-    marginRight: 12,
+    alignItems: 'center',
+    paddingVertical: 4,
   },
   productName: {
     fontSize: 14,
     color: '#333',
+    flex: 1,
+  },
+  quantity: {
+    fontSize: 14,
+    color: '#333',
     fontWeight: '500',
-    marginBottom: 4,
   },
   itemMetadata: {
     flexDirection: 'row',

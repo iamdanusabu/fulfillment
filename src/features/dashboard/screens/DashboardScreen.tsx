@@ -1,10 +1,15 @@
-
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { useRouter } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { fetchWithToken } from '../../../shared/services/fetchWithToken';
-import { getConfig } from '../../../environments';
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
+import { useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { fetchWithToken } from "../../../shared/services/fetchWithToken";
+import { getConfig } from "../../../environments";
 
 interface FilterSettings {
   sources: string[];
@@ -30,12 +35,9 @@ export default function DashboardScreen() {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      await Promise.all([
-        loadSourceCounts(),
-        loadReadyForPickupCount()
-      ]);
+      await Promise.all([loadSourceCounts(), loadReadyForPickupCount()]);
     } catch (error) {
-      console.error('Failed to load dashboard data:', error);
+      console.error("Failed to load dashboard data:", error);
     } finally {
       setLoading(false);
     }
@@ -44,18 +46,29 @@ export default function DashboardScreen() {
   const loadSourceCounts = async () => {
     try {
       // Get sources from settings
-      const savedSettings = await AsyncStorage.getItem('orderFilterSettings');
+      const savedSettings = await AsyncStorage.getItem("orderFilterSettings");
       let sources: string[] = [];
-      
+
       if (savedSettings) {
         const settings: FilterSettings = JSON.parse(savedSettings);
         sources = settings.sources;
       } else {
         // Default sources if no settings found
         sources = [
-          'Shopify', 'Tapin2', 'Breakaway', 'bigcommerce', 'Ecwid', 
-          'PHONE ORDER', 'DELIVERY', 'BAR TAB', 'TIKT', 'TABLE', 
-          'OTHER', 'MANUAL', 'FanVista', 'QSR'
+          "Shopify",
+          "Tapin2",
+          "Breakaway",
+          "bigcommerce",
+          "Ecwid",
+          "PHONE ORDER",
+          "DELIVERY",
+          "BAR TAB",
+          "TIKT",
+          "TABLE",
+          "OTHER",
+          "MANUAL",
+          "FanVista",
+          "QSR",
         ];
       }
 
@@ -67,13 +80,13 @@ export default function DashboardScreen() {
           const response = await fetchWithToken(url);
           return {
             name: source,
-            count: response?.totalRecords || 0
+            count: response?.totalRecords || 0,
           };
         } catch (error) {
           console.error(`Failed to get count for source ${source}:`, error);
           return {
             name: source,
-            count: 0
+            count: 0,
           };
         }
       });
@@ -81,42 +94,53 @@ export default function DashboardScreen() {
       const counts = await Promise.all(countPromises);
       setSourceCounts(counts);
     } catch (error) {
-      console.error('Failed to load source counts:', error);
+      console.error("Failed to load source counts:", error);
     }
   };
 
   const loadReadyForPickupCount = async () => {
     try {
       // Get sources from settings to use in the API call
-      const savedSettings = await AsyncStorage.getItem('orderFilterSettings');
+      const savedSettings = await AsyncStorage.getItem("orderFilterSettings");
       let sources: string[] = [];
-      
+
       if (savedSettings) {
         const settings: FilterSettings = JSON.parse(savedSettings);
         sources = settings.sources;
       } else {
         // Default sources if no settings found
         sources = [
-          'Shopify', 'Tapin2', 'Breakaway', 'bigcommerce', 'Ecwid', 
-          'PHONE ORDER', 'DELIVERY', 'BAR TAB', 'TIKT', 'TABLE', 
-          'OTHER', 'MANUAL', 'FanVista', 'QSR'
+          "Shopify",
+          "Tapin2",
+          "Breakaway",
+          "bigcommerce",
+          "Ecwid",
+          "PHONE ORDER",
+          "DELIVERY",
+          "BAR TAB",
+          "TIKT",
+          "TABLE",
+          "OTHER",
+          "MANUAL",
+          "FanVista",
+          "QSR",
         ];
       }
 
       const config = getConfig();
-      const sourceParam = sources.join(',');
+      const sourceParam = sources.join(",");
       // Match the exact API structure from the curl command
-      const url = `${config.endpoints.orders}?pageNo=1&pageSize=20&hasFulfilmentJob=false&expand=item%2Cbin%2Clocation_hint%2Cpayment&pagination=true&source=${encodeURIComponent(sourceParam)}&status=Ready&paymentStatus=PAID%2CUNPAID`;
+      const url = `${config.endpoints.orders}?pageNo=1&pageSize=20&hasFulfilmentJob=true&expand=item%2Cbin%2Clocation_hint%2Cpayment&pagination=true&source=${encodeURIComponent(sourceParam)}&status=Ready&paymentStatus=PAID%2CUNPAID`;
       const response = await fetchWithToken(url);
       setReadyForPickupCount(response?.totalRecords || 0);
     } catch (error) {
-      console.error('Failed to load ready for pickup count:', error);
+      console.error("Failed to load ready for pickup count:", error);
       setReadyForPickupCount(0);
     }
   };
 
   const navigateToOrders = (source?: string) => {
-    const route = source ? `/orders?source=${source}` : '/orders';
+    const route = source ? `/orders?source=${source}` : "/orders";
     router.push(route);
   };
 
@@ -131,10 +155,10 @@ export default function DashboardScreen() {
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.title}>Dashboard</Text>
-      
+
       <View style={styles.statsGrid}>
         {sourceCounts.map((sourceCount) => (
-          <TouchableOpacity 
+          <TouchableOpacity
             key={sourceCount.name}
             style={styles.statCard}
             onPress={() => navigateToOrders(sourceCount.name)}
@@ -144,7 +168,7 @@ export default function DashboardScreen() {
           </TouchableOpacity>
         ))}
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.statCard}
           onPress={() => navigateToOrders()}
         >
@@ -163,42 +187,42 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   title: {
     fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
     marginBottom: 24,
   },
   statsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 16,
   },
   statCard: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     padding: 20,
     borderRadius: 12,
     minWidth: 150,
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
   statNumber: {
     fontSize: 32,
-    fontWeight: 'bold',
-    color: '#007AFF',
+    fontWeight: "bold",
+    color: "#007AFF",
     marginBottom: 8,
   },
   statLabel: {
     fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
+    color: "#666",
+    textAlign: "center",
   },
 });

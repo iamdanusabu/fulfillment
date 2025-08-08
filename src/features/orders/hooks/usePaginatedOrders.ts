@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { Order } from '../../../shared/types';
 import { useOrderFilters } from './useOrderFilters';
@@ -49,60 +48,37 @@ export const usePaginatedOrders = (options: UsePaginatedOrdersOptions = {}) => {
     error: null as Error | null,
     hasMore: true,
     totalRecords: 0,
-    currentPage: 1,
+    currentPage: 0,
     totalPages: 1,
   });
 
-  const loadMore = React.useCallback(async () => {
-    if (!fetcher || paginatedState.loading || !paginatedState.hasMore) return;
+  // Subscribe to fetcher state changes
+  React.useEffect(() => {
+    if (!fetcher) return;
 
-    setPaginatedState(prev => ({ ...prev, loading: true }));
-    
-    try {
-      await fetcher.loadMore();
-      const state = fetcher.getState();
+    const unsubscribe = fetcher.subscribe((state) => {
       setPaginatedState({
         data: state.data || [],
-        loading: false,
-        error: null,
+        loading: state.loading,
+        error: state.error ? new Error(state.error) : null,
         hasMore: state.hasMore,
         totalRecords: state.totalRecords,
         currentPage: state.currentPage,
         totalPages: state.totalPages,
       });
-    } catch (error) {
-      setPaginatedState(prev => ({
-        ...prev,
-        loading: false,
-        error: error as Error,
-      }));
-    }
-  }, [fetcher, paginatedState.loading, paginatedState.hasMore]);
+    });
+
+    return unsubscribe;
+  }, [fetcher]);
+
+  const loadMore = React.useCallback(async () => {
+    if (!fetcher) return;
+    await fetcher.loadMore();
+  }, [fetcher]);
 
   const refresh = React.useCallback(async () => {
     if (!fetcher) return;
-
-    setPaginatedState(prev => ({ ...prev, loading: true, data: [] }));
-    
-    try {
-      await fetcher.refresh();
-      const state = fetcher.getState();
-      setPaginatedState({
-        data: state.data || [],
-        loading: false,
-        error: null,
-        hasMore: state.hasMore,
-        totalRecords: state.totalRecords,
-        currentPage: state.currentPage,
-        totalPages: state.totalPages,
-      });
-    } catch (error) {
-      setPaginatedState(prev => ({
-        ...prev,
-        loading: false,
-        error: error as Error,
-      }));
-    }
+    await fetcher.refresh();
   }, [fetcher]);
 
   // Load initial data when fetcher is ready

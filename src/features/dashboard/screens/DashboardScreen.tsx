@@ -25,6 +25,7 @@ interface SourceCount {
 export default function DashboardScreen() {
   const [sourceCounts, setSourceCounts] = useState<SourceCount[]>([]);
   const [readyForPickupCount, setReadyForPickupCount] = useState(0);
+  const [activePicklistsCount, setActivePicklistsCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -35,7 +36,7 @@ export default function DashboardScreen() {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      await Promise.all([loadSourceCounts(), loadReadyForPickupCount()]);
+      await Promise.all([loadSourceCounts(), loadReadyForPickupCount(), loadActivePicklistsCount()]);
     } catch (error) {
       console.error("Failed to load dashboard data:", error);
     } finally {
@@ -139,6 +140,19 @@ export default function DashboardScreen() {
     }
   };
 
+  const loadActivePicklistsCount = async () => {
+    try {
+      const config = getConfig();
+      // Get active picklists (status=OPEN)
+      const url = `${config.endpoints.activePicklists}?pageNo=1&pageSize=20&status=OPEN&pagination=true`;
+      const response = await fetchWithToken(url);
+      setActivePicklistsCount(response?.totalRecords || 0);
+    } catch (error) {
+      console.error("Failed to load active picklists count:", error);
+      setActivePicklistsCount(0);
+    }
+  };
+
   const navigateToOrders = (source?: string) => {
     const route = source ? `/orders?source=${source}` : "/orders";
     router.push(route);
@@ -174,6 +188,14 @@ export default function DashboardScreen() {
         >
           <Text style={styles.statNumber}>{readyForPickupCount}</Text>
           <Text style={styles.statLabel}>Ready for Pickup</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.statCard}
+          onPress={() => router.push('/picklist')}
+        >
+          <Text style={styles.statNumber}>{activePicklistsCount}</Text>
+          <Text style={styles.statLabel}>Active Picklists</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

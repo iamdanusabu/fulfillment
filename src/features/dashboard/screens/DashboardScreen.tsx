@@ -163,6 +163,10 @@ export default function DashboardScreen() {
     router.push(route);
   };
 
+  const navigateToReadyForPickup = () => {
+    router.push("/orders?hasFulfilmentJob=false&status=Ready");
+  };
+
   const navigateToPicklists = () => {
     router.push("/picklist");
   };
@@ -183,7 +187,7 @@ export default function DashboardScreen() {
       <View style={styles.quickStatsContainer}>
         <TouchableOpacity
           style={[styles.quickStatCard, styles.readyForPickupCard]}
-          onPress={() => navigateToOrders()}
+          onPress={navigateToReadyForPickup}
         >
           <MaterialIcons name="assignment-turned-in" size={32} color="#28a745" />
           <Text style={styles.quickStatNumber}>{readyForPickupCount}</Text>

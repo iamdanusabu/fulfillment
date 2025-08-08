@@ -1,95 +1,80 @@
-import React, { useMemo } from 'react';
+import React from 'react';
+import { usePaginatedFetcher } from '../../../shared/services/paginatedFetcher';
 import { Order } from '../../../shared/types';
+import { getConfig } from '../../../environments';
 import { useOrderFilters } from './useOrderFilters';
 import { transformOrder } from '../api/ordersApi';
-import * as ordersApi from '../api/ordersApi';
 
 interface UsePaginatedOrdersOptions {
   source?: string;
-  status?: string;
-  hasFulfilmentJob?: string;
   pageSize?: number;
   useFilters?: boolean;
 }
 
 export const usePaginatedOrders = (options: UsePaginatedOrdersOptions = {}) => {
-  const { source, pageSize = 20, useFilters = true, status, hasFulfilmentJob } = options;
+  const { source, pageSize = 20, useFilters = true } = options;
+  const config = getConfig();
   const { getFilterParams, loading: filtersLoading, settings } = useOrderFilters();
 
   // Only make API calls if filters are loaded and settings exist or if a specific source is provided
-  const shouldFetch = source || status || hasFulfilmentJob || (!filtersLoading && settings);
+  const shouldFetch = source || (!filtersLoading && settings);
 
-  const fetcher = useMemo(() => {
-    if (!shouldFetch) return null;
+  const initialParams: Record<string, string | number> = {
+    hasFulfilmentJob: 'false',
+    expand: 'item,bin,location_hint,payment',
+    pagination: 'true'
+  };
 
-    const fetcherParams: Record<string, string | number> = {
-      hasFulfilmentJob: 'false',
-      expand: 'item,bin,location_hint,payment',
-      pagination: 'true'
-    };
+  // Use specific source if provided, otherwise use filter settings
+  if (source) {
+    initialParams.source = source;
+  } else if (useFilters && !filtersLoading && settings) {
+    const filterParams = getFilterParams();
+    initialParams.source = filterParams.source;
+    initialParams.status = filterParams.status;
+    initialParams.paymentStatus = filterParams.paymentStatus;
+  }
 
-    if (source) fetcherParams.source = source;
-    if (status) fetcherParams.status = status;
-    if (hasFulfilmentJob) fetcherParams.hasFulfilmentJob = hasFulfilmentJob;
+  const paginatedState = usePaginatedFetcher<any>(
+    shouldFetch ? config.endpoints.orders : null, // Pass null to prevent API call
+    {
+      pageSize,
+      initialParams,
+    }
+  );
 
-    if (!source && !status && !hasFulfilmentJob && useFilters && !filtersLoading && settings) {
+  // Load settings on hook initialization only (when user goes to orders screen)
+  React.useEffect(() => {
+    if (useFilters && !filtersLoading && settings && shouldFetch && paginatedState.data.length === 0) {
       const filterParams = getFilterParams();
-      if (filterParams.source) fetcherParams.source = filterParams.source;
-      if (filterParams.status) fetcherParams.status = filterParams.status;
-      if (filterParams.paymentStatus) fetcherParams.paymentStatus = filterParams.paymentStatus;
+      const newParams: Record<string, string | number> = {
+        hasFulfilmentJob: 'false',
+        expand: 'item,bin,location_hint,payment',
+        pagination: 'true'
+      };
+
+      if (source) {
+        newParams.source = source;
+      } else {
+        // Apply all filter parameters from settings
+        if (filterParams.source) {
+          newParams.source = filterParams.source;
+        }
+        if (filterParams.status) {
+          newParams.status = filterParams.status;
+        }
+        if (filterParams.paymentStatus) {
+          newParams.paymentStatus = filterParams.paymentStatus;
+        }
+      }
+
+      // Update params only on initial load, not on settings changes
+      paginatedState.updateParams(newParams);
     }
-
-    return ordersApi.ordersApi.createPaginatedOrdersFetcher(fetcherParams);
-  }, [source, status, hasFulfilmentJob, useFilters, filtersLoading, settings, getFilterParams, shouldFetch]);
-
-  const [paginatedState, setPaginatedState] = React.useState({
-    data: [] as any[],
-    loading: false,
-    error: null as Error | null,
-    hasMore: true,
-    totalRecords: 0,
-    currentPage: 0,
-    totalPages: 1,
-  });
-
-  // Subscribe to fetcher state changes
-  React.useEffect(() => {
-    if (!fetcher) return;
-
-    const unsubscribe = fetcher.subscribe((state) => {
-      setPaginatedState({
-        data: state.data || [],
-        loading: state.loading,
-        error: state.error ? new Error(state.error) : null,
-        hasMore: state.hasMore,
-        totalRecords: state.totalRecords,
-        currentPage: state.currentPage,
-        totalPages: state.totalPages,
-      });
-    });
-
-    return unsubscribe;
-  }, [fetcher]);
-
-  const loadMore = React.useCallback(async () => {
-    if (!fetcher) return;
-    await fetcher.loadMore();
-  }, [fetcher]);
-
-  const refresh = React.useCallback(async () => {
-    if (!fetcher) return;
-    await fetcher.refresh();
-  }, [fetcher]);
-
-  // Load initial data when fetcher is ready
-  React.useEffect(() => {
-    if (fetcher && paginatedState.data.length === 0 && !paginatedState.loading) {
-      refresh();
-    }
-  }, [fetcher, paginatedState.data.length, paginatedState.loading, refresh]);
+  }, [filtersLoading, shouldFetch]); // Only depend on loading state, not settings values
 
   // Transform the raw data to Order objects
-  const transformedOrders = paginatedState.data ? paginatedState.data.map(transformOrder) : [];
+  const transformedOrders = paginatedState.data.map(transformOrder);
 
   return {
     orders: transformedOrders,
@@ -99,7 +84,7 @@ export const usePaginatedOrders = (options: UsePaginatedOrdersOptions = {}) => {
     totalRecords: paginatedState.totalRecords,
     currentPage: paginatedState.currentPage,
     totalPages: paginatedState.totalPages,
-    loadMore,
-    refresh,
+    loadMore: paginatedState.loadMore,
+    refresh: paginatedState.refresh,
   };
 };

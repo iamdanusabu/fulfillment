@@ -89,10 +89,10 @@ export class PaginatedFetcher<T> {
 
       this.updateState({
         data: newData,
-        currentPage: pageNo,
+        currentPage: response.pageNo,
         totalPages: response.totalPages,
         totalRecords: response.totalRecords,
-        hasMore: pageNo < response.totalPages,
+        hasMore: response.pageNo < response.totalPages,
         loading: false,
       });
 
@@ -106,17 +106,10 @@ export class PaginatedFetcher<T> {
 
   async loadMore(): Promise<void> {
     if (!this.state.hasMore || this.state.loading) return;
-    const nextPage = this.state.currentPage + 1;
-    await this.fetchPage(nextPage, true);
+    await this.fetchPage(this.state.currentPage + 1, true);
   }
 
   async refresh(): Promise<void> {
-    this.updateState({
-      data: [],
-      currentPage: 0,
-      hasMore: true,
-      error: null
-    });
     await this.fetchPage(1, false);
   }
 
@@ -220,7 +213,7 @@ export const usePaginatedFetcher = <T>(
   const resetFetcher = useCallback(() => {
     if (fetcherRef.current) {
       fetcherRef.current.reset();
-      setState({
+      setState({ // Also reset local state
         data: [],
         currentPage: 0,
         totalPages: 1,

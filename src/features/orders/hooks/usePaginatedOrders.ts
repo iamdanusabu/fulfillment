@@ -59,16 +59,17 @@ export const usePaginatedOrders = (options: UsePaginatedOrdersOptions = {}) => {
     setPaginatedState(prev => ({ ...prev, loading: true }));
     
     try {
-      const result = await fetcher.loadMore();
-      setPaginatedState(prev => ({
-        ...prev,
-        data: result.data,
+      await fetcher.loadMore();
+      const state = fetcher.getState();
+      setPaginatedState({
+        data: state.data || [],
         loading: false,
-        hasMore: result.hasMore,
-        totalRecords: result.totalRecords,
-        currentPage: result.currentPage,
-        totalPages: result.totalPages,
-      }));
+        error: null,
+        hasMore: state.hasMore,
+        totalRecords: state.totalRecords,
+        currentPage: state.currentPage,
+        totalPages: state.totalPages,
+      });
     } catch (error) {
       setPaginatedState(prev => ({
         ...prev,
@@ -84,15 +85,16 @@ export const usePaginatedOrders = (options: UsePaginatedOrdersOptions = {}) => {
     setPaginatedState(prev => ({ ...prev, loading: true, data: [] }));
     
     try {
-      const result = await fetcher.refresh();
+      await fetcher.refresh();
+      const state = fetcher.getState();
       setPaginatedState({
-        data: result.data,
+        data: state.data || [],
         loading: false,
         error: null,
-        hasMore: result.hasMore,
-        totalRecords: result.totalRecords,
-        currentPage: result.currentPage,
-        totalPages: result.totalPages,
+        hasMore: state.hasMore,
+        totalRecords: state.totalRecords,
+        currentPage: state.currentPage,
+        totalPages: state.totalPages,
       });
     } catch (error) {
       setPaginatedState(prev => ({
@@ -106,12 +108,12 @@ export const usePaginatedOrders = (options: UsePaginatedOrdersOptions = {}) => {
   // Load initial data when fetcher is ready
   React.useEffect(() => {
     if (fetcher && paginatedState.data.length === 0 && !paginatedState.loading) {
-      loadMore();
+      refresh();
     }
-  }, [fetcher, paginatedState.data.length, paginatedState.loading, loadMore]);
+  }, [fetcher, paginatedState.data.length, paginatedState.loading, refresh]);
 
   // Transform the raw data to Order objects
-  const transformedOrders = paginatedState.data.map(transformOrder);
+  const transformedOrders = paginatedState.data ? paginatedState.data.map(transformOrder) : [];
 
   return {
     orders: transformedOrders,

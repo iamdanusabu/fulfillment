@@ -96,12 +96,15 @@ export default function CreatePicklistScreen() {
           <MaterialIcons name="remove" size={20} color="#666" />
         </TouchableOpacity>
 
-        <TextInput
-          style={styles.quantityInput}
-          value={item.pickedQuantity.toString()}
-          onChangeText={(text) => updatePickedQuantity(item.id, parseInt(text) || 0)}
-          keyboardType="numeric"
-        />
+        <View style={styles.quantityInputContainer}>
+          <TextInput
+            style={styles.quantityInput}
+            value={item.pickedQuantity.toString()}
+            onChangeText={(text) => updatePickedQuantity(item.id, parseInt(text) || 0)}
+            keyboardType="numeric"
+          />
+          <Text style={styles.requiredQtyLabel}>/ {item.requiredQuantity}</Text>
+        </View>
 
         <TouchableOpacity
           onPress={() => updatePickedQuantity(item.id, item.pickedQuantity + 1)}
@@ -253,14 +256,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  quantityInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 8,
+  },
   quantityInput: {
-    width: 60,
+    width: 50,
     height: 32,
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 4,
     textAlign: 'center',
-    marginHorizontal: 8,
+    marginRight: 4,
+  },
+  requiredQtyLabel: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '500',
   },
   bottomBar: {
     padding: 16,

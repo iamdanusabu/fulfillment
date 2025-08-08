@@ -125,6 +125,14 @@ export default function DashboardScreen() {
             error: false,
           };
         } catch (error) {
+          // 404 means no orders for this source, not an error
+          if (error instanceof Error && error.message.includes('404')) {
+            return {
+              name: source,
+              count: 0,
+              error: false,
+            };
+          }
           console.error(`Failed to get count for source ${source}:`, error);
           return {
             name: source,

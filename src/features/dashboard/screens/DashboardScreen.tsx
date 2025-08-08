@@ -105,7 +105,8 @@ export default function DashboardScreen() {
 
       const config = getConfig();
       const sourceParam = sources.join(',');
-      const url = `${config.endpoints.orders}?pageNo=1&pageSize=1&hasFulfilmentJob=false&expand=item,bin,location_hint,payment&pagination=true&source=${encodeURIComponent(sourceParam)}&status=Ready&paymentStatus=PAID,UNPAID`;
+      // Match the exact API structure from the curl command
+      const url = `${config.endpoints.orders}?pageNo=1&pageSize=20&hasFulfilmentJob=false&expand=item%2Cbin%2Clocation_hint%2Cpayment&pagination=true&source=${encodeURIComponent(sourceParam)}&status=Ready&paymentStatus=PAID%2CUNPAID`;
       const response = await fetchWithToken(url);
       setReadyForPickupCount(response?.totalRecords || 0);
     } catch (error) {

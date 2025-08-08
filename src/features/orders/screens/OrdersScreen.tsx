@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, RefreshControl, ActivityIndicator } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -24,6 +24,7 @@ export default function OrdersScreen() {
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
   const [isPicklistMode, setIsPicklistMode] = useState(false);
   const [searchText, setSearchText] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     setIsPicklistMode(params.mode === 'picklist');
@@ -63,6 +64,21 @@ export default function OrdersScreen() {
       order.source.toLowerCase().includes(searchText.toLowerCase())
     );
   }, [orders, searchText]);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await refresh();
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const handleLoadMore = useCallback(() => {
+    if (hasMore && !loading) {
+      loadMore();
+    }
+  }, [hasMore, loading, loadMore]);
 
 
   const renderOrderItem = ({ item }: { item: Order }) => (
@@ -158,27 +174,26 @@ export default function OrdersScreen() {
         keyExtractor={(item) => item.id}
         refreshControl={
           <RefreshControl
-            refreshing={loading && currentPage === 1}
-            onRefresh={refresh}
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
           />
         }
-        ListFooterComponent={() => (
-          <View style={styles.footer}>
-            {hasMore && (
-              <TouchableOpacity
-                style={styles.loadMoreButton}
-                onPress={loadMore}
-                disabled={loading}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#007AFF" />
-                ) : (
-                  <Text style={styles.loadMoreText}>Load More</Text>
-                )}
-              </TouchableOpacity>
-            )}
-          </View>
-        )}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.1}
+        ListFooterComponent={() => {
+          if (loading && orders.length > 0) {
+            return (
+              <View style={styles.loadingFooter}>
+                <ActivityIndicator color="#007AFF" />
+                <Text style={styles.loadingText}>Loading more orders...</Text>
+              </View>
+            );
+          }
+          if (!hasMore && orders.length > 0) {
+            return <Text style={styles.endText}>No more orders</Text>;
+          }
+          return null;
+        }}
         style={styles.ordersList}
         contentContainerStyle={styles.ordersContent}
       />
@@ -329,18 +344,22 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: 'center',
   },
-  loadMoreButton: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 8,
+  loadingFooter: {
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 12,
-    borderWidth: 1,
-    borderColor: '#e9ecef',
+    paddingVertical: 16,
+    gap: 8,
   },
-  loadMoreText: {
-    color: '#007AFF',
-    fontWeight: '600',
+  loadingText: {
+    color: '#666',
+    fontSize: 14,
+  },
+  endText: {
+    color: '#666',
+    textAlign: 'center',
+    paddingVertical: 20,
+    fontSize: 14,
   },
   bottomBar: {
     flexDirection: 'row',

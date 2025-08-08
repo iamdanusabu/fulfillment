@@ -39,11 +39,19 @@ export default function PackingScreen() {
   };
 
   const finalizePacking = async () => {
-    if (!params.fulfillmentId) return;
+    if (!params.fulfillmentId || !params.orderIds) return;
     
     try {
       setFinalizing(true);
-      await picklistApi.finalizePacking(params.fulfillmentId as string);
+      
+      // Create sources array from orderIds
+      const orderIds = (params.orderIds as string).split(',');
+      const sources = orderIds.map(orderId => ({
+        type: "ORDER",
+        typeID: orderId
+      }));
+      
+      await picklistApi.finalizePacking(params.fulfillmentId as string, sources);
       
       // Navigate back to picklist index
       router.push('/picklist');

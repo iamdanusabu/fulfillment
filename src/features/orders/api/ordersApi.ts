@@ -100,6 +100,32 @@ export const ordersApi = {
       throw error;
     }
   },
+
+  // Fulfill order
+  async fulfillOrder(orderId: string, fulfillmentLocationId: string) {
+    try {
+      const { fetchWithToken } = await import('../../../shared/services/fetchWithToken');
+      const config = getConfig();
+      
+      const requestBody = [{
+        orderID: orderId,
+        fulfillmentLocation: {
+          type: "STORE",
+          id: fulfillmentLocationId
+        }
+      }];
+      
+      const data = await fetchWithToken(config.endpoints.orderFulfill, {
+        method: 'PATCH',
+        body: JSON.stringify(requestBody),
+      });
+      
+      return data;
+    } catch (error) {
+      console.error('Error fulfilling order:', error);
+      throw error;
+    }
+  },
 };
 
 // Export the transform function for use in hooks

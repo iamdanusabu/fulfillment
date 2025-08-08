@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { picklistApi } from '../api/picklistApi';
@@ -11,6 +11,8 @@ export default function PackingScreen() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [finalizing, setFinalizing] = useState(false);
+  const [fulfilledOrders, setFulfilledOrders] = useState<Set<string>>(new Set());
+  const [fulfilling, setFulfilling] = useState<Set<string>>(new Set());
   const router = useRouter();
   const params = useLocalSearchParams();
 
@@ -38,6 +40,31 @@ export default function PackingScreen() {
     }
   };
 
+  const markOrderAsFulfilled = async (orderId: string) => {
+    try {
+      setFulfilling(prev => new Set([...prev, orderId]));
+      
+      // Use fulfillment location ID from params or default to "1"
+      const fulfillmentLocationId = params.locationId as string || "1";
+      
+      await ordersApi.fulfillOrder(orderId, fulfillmentLocationId);
+      
+      // Mark order as fulfilled in local state
+      setFulfilledOrders(prev => new Set([...prev, orderId]));
+      
+      Alert.alert('Success', 'Order has been marked as fulfilled');
+    } catch (error) {
+      console.error('Failed to fulfill order:', error);
+      Alert.alert('Error', 'Failed to mark order as fulfilled');
+    } finally {
+      setFulfilling(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(orderId);
+        return newSet;
+      });
+    }
+  };
+
   const finalizePacking = async () => {
     if (!params.fulfillmentId) return;
     
@@ -62,38 +89,59 @@ export default function PackingScreen() {
     }
   };
 
-  const renderOrderItem = ({ item }: { item: Order }) => (
-    <View style={styles.orderCard}>
-      <View style={styles.orderHeader}>
-        <View style={styles.orderTitleSection}>
-          <Text style={styles.orderNumber}>#{item.orderNumber}</Text>
-          <Text style={styles.customerName}>{item.customer}</Text>
-          {item.externalOrderKey && (
-            <Text style={styles.externalId}>External ID: {item.externalOrderKey}</Text>
-          )}
-          <Text style={styles.orderDate}>
-            Date: {new Date(item.date).toLocaleDateString()} {new Date(item.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-          </Text>
-        </View>
-        <View style={styles.orderStatusSection}>
-          <View style={[styles.statusBadge, getStatusBadgeColor(item.status)]}>
-            <Text style={styles.statusText}>{item.status?.toUpperCase()}</Text>
+  const renderOrderItem = ({ item }: { item: Order }) => {
+    const isFulfilled = fulfilledOrders.has(item.id);
+    const isFulfilling = fulfilling.has(item.id);
+    
+    return (
+      <View style={styles.orderCard}>
+        <View style={styles.orderHeader}>
+          <View style={styles.orderTitleSection}>
+            <Text style={styles.orderNumber}>#{item.orderNumber}</Text>
+            <Text style={styles.customerName}>{item.customer}</Text>
+            {item.externalOrderKey && (
+              <Text style={styles.externalId}>External ID: {item.externalOrderKey}</Text>
+            )}
+            <Text style={styles.orderDate}>
+              Date: {new Date(item.date).toLocaleDateString()} {new Date(item.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </Text>
           </View>
-          <Text style={styles.orderAmount}>${(item.amount || 0).toFixed(2)}</Text>
+          <View style={styles.orderStatusSection}>
+            <View style={[styles.statusBadge, getStatusBadgeColor(item.status)]}>
+              <Text style={styles.statusText}>{item.status?.toUpperCase()}</Text>
+            </View>
+            <Text style={styles.orderAmount}>${(item.amount || 0).toFixed(2)}</Text>
+          </View>
+        </View>
+        
+        <View style={styles.orderItems}>
+          <Text style={styles.itemsHeader}>Items({item.items.length})</Text>
+          {item.items.map((orderItem) => (
+            <View key={orderItem.id} style={styles.itemRow}>
+              <Text style={styles.productName}>{orderItem.productName}</Text>
+              <Text style={styles.quantity}>Qty:{orderItem.quantity}</Text>
+            </View>
+          ))}
+        </View>
+        
+        <View style={styles.orderActions}>
+          <TouchableOpacity
+            style={[
+              styles.fulfillButton,
+              isFulfilled && styles.fulfilledButton,
+              isFulfilling && styles.disabledButton
+            ]}
+            onPress={() => markOrderAsFulfilled(item.id)}
+            disabled={isFulfilled || isFulfilling}
+          >
+            <Text style={[styles.fulfillButtonText, isFulfilled && styles.fulfilledButtonText]}>
+              {isFulfilling ? 'Fulfilling...' : isFulfilled ? 'Fulfilled' : 'Mark as Fulfilled'}
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
-      
-      <View style={styles.orderItems}>
-        <Text style={styles.itemsHeader}>Items({item.items.length})</Text>
-        {item.items.map((orderItem) => (
-          <View key={orderItem.id} style={styles.itemRow}>
-            <Text style={styles.productName}>{orderItem.productName}</Text>
-            <Text style={styles.quantity}>Qty:{orderItem.quantity}</Text>
-          </View>
-        ))}
-      </View>
-    </View>
-  );
+    );
+  };
 
   const getStatusBadgeColor = (status: string) => {
     switch (status?.toLowerCase()) {
@@ -383,5 +431,29 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '600',
     fontSize: 16,
+  },
+  orderActions: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+  },
+  fulfillButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+    alignItems: 'center',
+  },
+  fulfilledButton: {
+    backgroundColor: '#28a745',
+  },
+  fulfillButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  fulfilledButtonText: {
+    color: '#fff',
   },
 });

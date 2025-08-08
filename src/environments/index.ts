@@ -13,6 +13,7 @@ export const COMMON_ENDPOINTS = {
   inventoryFulfillments: "/inventory/fulfillments",
   finalize: "/api/fulfillment/finalize",
   dashboard: "/api/dashboard",
+  orderFulfill: "/console/transactions/orders/fulfill",
 };
 
 export const getConfig = () => {

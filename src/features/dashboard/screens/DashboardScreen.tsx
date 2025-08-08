@@ -87,8 +87,25 @@ export default function DashboardScreen() {
 
   const loadReadyForPickupCount = async () => {
     try {
+      // Get sources from settings to use in the API call
+      const savedSettings = await AsyncStorage.getItem('orderFilterSettings');
+      let sources: string[] = [];
+      
+      if (savedSettings) {
+        const settings: FilterSettings = JSON.parse(savedSettings);
+        sources = settings.sources;
+      } else {
+        // Default sources if no settings found
+        sources = [
+          'Shopify', 'Tapin2', 'Breakaway', 'bigcommerce', 'Ecwid', 
+          'PHONE ORDER', 'DELIVERY', 'BAR TAB', 'TIKT', 'TABLE', 
+          'OTHER', 'MANUAL', 'FanVista', 'QSR'
+        ];
+      }
+
       const config = getConfig();
-      const url = `${config.endpoints.orders}?status=ready&hasFulfilmentJob=false&pageNo=1&pageSize=1&pagination=true`;
+      const sourceParam = sources.join(',');
+      const url = `${config.endpoints.orders}?pageNo=1&pageSize=1&hasFulfilmentJob=false&expand=item,bin,location_hint,payment&pagination=true&source=${encodeURIComponent(sourceParam)}&status=Ready&paymentStatus=PAID,UNPAID`;
       const response = await fetchWithToken(url);
       setReadyForPickupCount(response?.totalRecords || 0);
     } catch (error) {

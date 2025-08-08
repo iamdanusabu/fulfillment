@@ -163,46 +163,14 @@ export const usePaginatedFetcher = <T>(
 
   const [params, setParams] = useState<Record<string, string | number>>(options.initialParams || {});
 
-  const fetchData = useCallback(async (page: number = 1, append: boolean = false) => {
-    if (!baseUrl) return;
-
-    setState(prevState => ({ 
-      ...prevState, 
-      loading: true, 
-      error: null 
-    }));
-
-    try {
-      const fetcher = new PaginatedFetcher<T>(baseUrl, { ...options, initialParams: params });
-      fetcherRef.current = fetcher;
-
-      await fetcher.fetchPage(page, append);
-      const fetcherState = fetcher.getState();
-
-      setState(prevState => ({
-        data: append ? [...prevState.data, ...fetcherState.data] : fetcherState.data,
-        currentPage: fetcherState.currentPage,
-        totalPages: fetcherState.totalPages,
-        totalRecords: fetcherState.totalRecords,
-        hasMore: fetcherState.hasMore,
-        loading: false,
-        error: null,
-      }));
-
-    } catch (error) {
-      setState(prevState => ({
-        ...prevState,
-        loading: false,
-        error: error instanceof Error ? error.message : 'Failed to fetch data',
-      }));
-    }
-  }, [baseUrl, JSON.stringify(params)]); // Use JSON.stringify to avoid object reference issues
-
   useEffect(() => {
     if (baseUrl) {
-      fetchData(1, false);
+      fetcherRef.current = new PaginatedFetcher<T>(baseUrl, { ...options, initialParams: params });
+      fetcherRef.current.fetchPage(1, false).then(() => {
+        setState(fetcherRef.current!.getState());
+      });
     } else {
-      // Reset state if baseUrl becomes null
+      fetcherRef.current = null;
       setState({
         data: [],
         currentPage: 0,
@@ -212,22 +180,23 @@ export const usePaginatedFetcher = <T>(
         loading: false,
         error: null,
       });
-      fetcherRef.current = null;
     }
-  }, [baseUrl, JSON.stringify(params)]); // Only depend on baseUrl and params, not fetchData
+  }, [baseUrl, JSON.stringify(params)]);
 
   const loadMore = useCallback(() => {
     if (fetcherRef.current) {
-      return fetcherRef.current.loadMore();
+      return fetcherRef.current.loadMore().then(() => {
+        setState(fetcherRef.current!.getState());
+      });
     }
-    return undefined;
   }, []);
 
   const refresh = useCallback(() => {
     if (fetcherRef.current) {
-      return fetcherRef.current.refresh();
+      return fetcherRef.current.refresh().then(() => {
+        setState(fetcherRef.current!.getState());
+      });
     }
-    return undefined;
   }, []);
 
   const updateParamsAndFetch = useCallback((newParams: Record<string, string | number>) => {

@@ -63,7 +63,9 @@ export const usePaginatedOrders = (options: UsePaginatedOrdersOptions = {}) => {
   const { source, pageSize = 20 } = options;
   const config = getConfig();
 
-  const initialParams: Record<string, string | number> = {};
+  const initialParams: Record<string, string | number> = {
+    hasFulfilmentJob: 'false'
+  };
   if (source) {
     initialParams.source = source;
   }

@@ -63,7 +63,10 @@ export const ordersApi = {
     const config = getConfig();
     return new PaginatedFetcher<any>(config.endpoints.orders, {
       pageSize: 20,
-      initialParams: params,
+      initialParams: {
+        hasFulfilmentJob: 'false',
+        ...params,
+      },
     });
   },
 

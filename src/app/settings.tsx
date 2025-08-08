@@ -62,6 +62,11 @@ export default function SettingsScreen() {
     try {
       await AsyncStorage.setItem('orderFilterSettings', JSON.stringify(settings));
       Alert.alert('Success', 'Filter settings saved successfully');
+      
+      // Trigger a custom event to notify other parts of the app that settings changed
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('orderFilterSettingsChanged'));
+      }
     } catch (error) {
       console.error('Error saving settings:', error);
       Alert.alert('Error', 'Failed to save settings');

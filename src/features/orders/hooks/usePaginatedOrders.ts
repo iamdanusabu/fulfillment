@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { usePaginatedFetcher } from '../../../shared/services/paginatedFetcher';
 import { Order } from '../../../shared/types';
 import { getConfig } from '../../../environments';
@@ -64,7 +65,7 @@ const transformOrder = (apiOrder: any): Order => ({
 export const usePaginatedOrders = (options: UsePaginatedOrdersOptions = {}) => {
   const { source, pageSize = 20, useFilters = true } = options;
   const config = getConfig();
-  const { getFilterParams, loading: filtersLoading } = useOrderFilters();
+  const { getFilterParams, loading: filtersLoading, settings } = useOrderFilters();
 
   const initialParams: Record<string, string | number> = {
     hasFulfilmentJob: 'false',
@@ -89,6 +90,28 @@ export const usePaginatedOrders = (options: UsePaginatedOrdersOptions = {}) => {
       initialParams,
     }
   );
+
+  // Update API params when filter settings change
+  React.useEffect(() => {
+    if (useFilters && !filtersLoading) {
+      const filterParams = getFilterParams();
+      const newParams: Record<string, string | number> = {
+        hasFulfilmentJob: 'false',
+        expand: 'item,bin,location_hint,payment',
+        pagination: 'true'
+      };
+
+      if (source) {
+        newParams.source = source;
+      } else {
+        newParams.source = filterParams.source;
+        newParams.status = filterParams.status;
+        newParams.paymentStatus = filterParams.paymentStatus;
+      }
+
+      paginatedState.updateParams(newParams);
+    }
+  }, [settings, filtersLoading, useFilters, source]);
 
   // Transform the raw data to Order objects
   const transformedOrders = paginatedState.data.map(transformOrder);

@@ -124,14 +124,6 @@ export default function OrdersScreen() {
           <Text style={styles.status}>Status: {item.status}</Text>
         </View>
       </View>
-
-      {item.items.map(item => (
-        <View key={item.id} style={styles.itemContainer}>
-          <Text style={styles.itemName}>{item.name} x {item.quantity}</Text>
-          {item.bin && <Text style={styles.itemBin}>Bin: {item.bin}</Text>}
-          {item.locationHint && <Text style={styles.itemLocation}>Location: {item.locationHint}</Text>}
-        </View>
-      ))}
     </TouchableOpacity>
   );
 
@@ -384,25 +376,5 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '600',
     fontSize: 16,
-  },
-  itemContainer: {
-    marginTop: 8,
-    paddingLeft: 8,
-    borderLeftWidth: 2,
-    borderLeftColor: '#007AFF',
-  },
-  itemName: {
-    fontSize: 14,
-    color: '#333',
-  },
-  itemBin: {
-    fontSize: 12,
-    color: '#666',
-    fontStyle: 'italic',
-  },
-  itemLocation: {
-    fontSize: 12,
-    color: '#28a745',
-    fontStyle: 'italic',
   },
 });

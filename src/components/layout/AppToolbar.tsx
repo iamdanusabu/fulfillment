@@ -7,165 +7,24 @@ import { BarCodeScanner } from 'expo-barcode-scanner';
 import { useRouter } from 'expo-router';
 
 interface AppToolbarProps {
-  onMenuToggle: () => void;
-  showMenuButton?: boolean;
-}
-
-export const AppToolbar: React.FC<AppToolbarProps> = ({ onMenuToggle, showMenuButton = true }) => {
-  const { width, height } = useWindowDimensions();
-  const [showScanner, setShowScanner] = useState(false);
-  const router = useRouter();
-  const { title } = useTabTitle();
-
-  const isLandscape = width > height;
-  const isTablet = width >= 768 || (isLandscape && width >= 600);
-  const isSmallMobile = width < 480;
-
-  const handleBarCodeScanned = ({ type, data }: { type: string; data: string }) => {
-    setShowScanner(false);
-    Alert.alert('Barcode Scanned', `Data: ${data}`);
-  };
-
-  const requestCameraPermissions = async () => {
-    const { status } = await BarCodeScanner.requestPermissionsAsync();
-    if (status === 'granted') {
-      setShowScanner(true);
-    } else {
-      Alert.alert('Permission denied', 'Camera permission is required to scan barcodes');
-    }
-  };
-
-  return (
-    <View style={[
-      styles.toolbar,
-      {
-        paddingHorizontal: isSmallMobile ? 12 : 16,
-        paddingVertical: isLandscape && !isTablet ? 8 : 12,
-      }
-    ]}>
-      <View style={styles.leftSection}>
-        {showMenuButton && (
-          <TouchableOpacity onPress={onMenuToggle} style={styles.menuButton}>
-            <MaterialIcons name="menu" size={24} color="#333" />
-          </TouchableOpacity>
-        )}
-        <Text style={[
-          styles.title,
-          {
-            fontSize: isSmallMobile ? 18 : isLandscape && !isTablet ? 20 : 24,
-          }
-        ]}>
-          {title}
-        </Text>
-      </View>
-
-      <View style={styles.rightSection}>
-        <TouchableOpacity 
-          style={[styles.iconButton, isSmallMobile && styles.smallIconButton]}
-          onPress={requestCameraPermissions}
-        >
-          <MaterialIcons name="qr-code-scanner" size={isSmallMobile ? 20 : 24} color="#666" />
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.iconButton, isSmallMobile && styles.smallIconButton]}>
-          <MaterialIcons name="notifications" size={isSmallMobile ? 20 : 24} color="#666" />
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.iconButton, isSmallMobile && styles.smallIconButton]}>
-          <MaterialIcons name="account-circle" size={isSmallMobile ? 20 : 24} color="#666" />
-        </TouchableOpacity>
-      </View>
-
-      <Modal visible={showScanner} animationType="slide">
-        <View style={styles.scannerContainer}>
-          <BarCodeScanner
-            onBarCodeScanned={handleBarCodeScanned}
-            style={StyleSheet.absoluteFillObject}
-          />
-          <View style={styles.scannerOverlay}>
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setShowScanner(false)}
-            >
-              <MaterialIcons name="close" size={32} color="#fff" />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-    </View>
-  );
-};
-
-const styles = StyleSheet.create({
-  toolbar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e9ecef',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  leftSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  menuButton: {
-    padding: 8,
-    marginRight: 8,
-  },
-  title: {
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  rightSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  iconButton: {
-    padding: 8,
-    marginLeft: 8,
-  },
-  smallIconButton: {
-    padding: 6,
-    marginLeft: 4,
-  },
-  scannerContainer: {
-    flex: 1,
-    backgroundColor: 'black',
-  },
-  scannerOverlay: {
-    position: 'absolute',
-    top: 50,
-    right: 20,
-    zIndex: 1,
-  },
-  closeButton: {
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    borderRadius: 20,
-    padding: 8,
-  },
-});
-
-interface AppToolbarProps {
   title?: string;
   onMenuToggle?: () => void;
   showMenuButton?: boolean;
 }
 
 export function AppToolbar({ title, onMenuToggle, showMenuButton = true }: AppToolbarProps) {
-  const { width } = useWindowDimensions();
-  const isTablet = width >= 768;
-  const { tabTitle } = useTabTitle();
-  const displayTitle = title || tabTitle || 'OrderUp';
-  const router = useRouter();
-  
+  const { width, height } = useWindowDimensions();
   const [showScanner, setShowScanner] = useState(false);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scanned, setScanned] = useState(false);
+  const router = useRouter();
+  const { tabTitle } = useTabTitle();
+
+  const isLandscape = width > height;
+  const isTablet = width >= 768 || (isLandscape && width >= 600);
+  const isSmallMobile = width < 480;
+
+  const displayTitle = title || tabTitle || 'OrderUp';
 
   const requestCameraPermission = async () => {
     const { status } = await BarCodeScanner.requestPermissionsAsync();
@@ -196,7 +55,6 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true }: AppTo
     setShowScanner(false);
     
     // Extract order ID from QR code data
-    // Assuming the QR code contains just the order ID or a URL with the order ID
     let orderId = data;
     
     // If it's a URL, extract the order ID
@@ -216,25 +74,41 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true }: AppTo
   };
 
   return (
-    <View style={styles.toolbar}>
+    <View style={[
+      styles.toolbar,
+      {
+        paddingHorizontal: isSmallMobile ? 12 : 16,
+        paddingVertical: isLandscape && !isTablet ? 8 : 12,
+      }
+    ]}>
       <View style={styles.leftSection}>
         {showMenuButton && !isTablet && (
           <TouchableOpacity style={styles.menuButton} onPress={onMenuToggle}>
             <MaterialIcons name="menu" size={24} color="#333" />
           </TouchableOpacity>
         )}
-        <Text style={styles.title}>{displayTitle}</Text>
+        <Text style={[
+          styles.title,
+          {
+            fontSize: isSmallMobile ? 18 : isLandscape && !isTablet ? 20 : 24,
+          }
+        ]}>
+          {displayTitle}
+        </Text>
       </View>
       
       <View style={styles.rightSection}>
-        <TouchableOpacity style={styles.iconButton} onPress={handleQRPress}>
-          <MaterialIcons name="qr-code-scanner" size={24} color="#666" />
+        <TouchableOpacity 
+          style={[styles.iconButton, isSmallMobile && styles.smallIconButton]}
+          onPress={handleQRPress}
+        >
+          <MaterialIcons name="qr-code-scanner" size={isSmallMobile ? 20 : 24} color="#666" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.iconButton}>
-          <MaterialIcons name="notifications" size={24} color="#666" />
+        <TouchableOpacity style={[styles.iconButton, isSmallMobile && styles.smallIconButton]}>
+          <MaterialIcons name="notifications" size={isSmallMobile ? 20 : 24} color="#666" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.iconButton}>
-          <MaterialIcons name="account-circle" size={24} color="#666" />
+        <TouchableOpacity style={[styles.iconButton, isSmallMobile && styles.smallIconButton]}>
+          <MaterialIcons name="account-circle" size={isSmallMobile ? 20 : 24} color="#666" />
         </TouchableOpacity>
       </View>
       
@@ -287,8 +161,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#e9ecef',
@@ -309,7 +181,6 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   title: {
-    fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
   },
@@ -320,6 +191,10 @@ const styles = StyleSheet.create({
   iconButton: {
     padding: 8,
     marginLeft: 8,
+  },
+  smallIconButton: {
+    padding: 6,
+    marginLeft: 4,
   },
   scannerContainer: {
     flex: 1,

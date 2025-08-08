@@ -126,10 +126,11 @@ export const picklistApi = {
     });
   },
 
-  async finalizePacking(fulfillmentId: string) {
+  async finalizePacking(fulfillmentId: string, sources: Array<{type: string, typeID: string}>) {
     const config = getConfig();
-    return await fetchWithToken(`${config.endpoints.fulfillment}/${fulfillmentId}/finalize`, {
+    return await fetchWithToken(`${config.endpoints.inventoryFulfillments}/${fulfillmentId}/finalize`, {
       method: 'PATCH',
+      body: JSON.stringify({ sources }),
     });
   }
 };

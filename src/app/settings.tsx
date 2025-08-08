@@ -24,7 +24,7 @@ const AVAILABLE_SOURCES = [
 ];
 
 const AVAILABLE_STATUSES = [
-  'Initiated', 'Sent for Processing', 'Completed', 'Cancelled'
+  'Initiated', 'Sent for Processing'
 ];
 
 const AVAILABLE_PAYMENT_STATUSES = [

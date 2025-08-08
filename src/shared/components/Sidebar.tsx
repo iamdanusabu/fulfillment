@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter, usePathname } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -12,6 +12,11 @@ interface SidebarProps {
 export function Sidebar({ isOpen, onToggle }: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const { width, height } = useWindowDimensions();
+  
+  const isLandscape = width > height;
+  const isTablet = width >= 768 || (isLandscape && width >= 600);
+  const sidebarWidth = isTablet ? 250 : isLandscape ? 220 : 200;
 
   const menuItems = [
     { 
@@ -59,7 +64,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
   if (!isOpen) return null;
 
   return (
-    <View style={styles.sidebar}>
+    <View style={[styles.sidebar, { width: sidebarWidth }]}>
       <View style={styles.menuItems}>
         {menuItems.map((item) => (
           <TouchableOpacity
@@ -91,7 +96,6 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
 const styles = StyleSheet.create({
   sidebar: {
-    width: 250,
     backgroundColor: '#fff',
     borderRightWidth: 1,
     borderRightColor: '#e9ecef',

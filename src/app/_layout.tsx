@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, useWindowDimensions } from 'react-native';
+import { View, StyleSheet, useWindowDimensions, Dimensions } from 'react-native';
 import { Stack, usePathname } from 'expo-router';
 import { Sidebar } from '../shared/components/Sidebar';
 import { AppToolbar } from '../components/layout/AppToolbar';
@@ -12,9 +12,14 @@ function RootLayoutContent() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const pathname = usePathname();
-  const isTablet = width >= 768;
+  
+  // More sophisticated responsive breakpoints
+  const isLandscape = width > height;
+  const isTablet = width >= 768 || (isLandscape && width >= 600);
+  const isMobile = width < 768;
+  const isSmallMobile = width < 480;
 
   useEffect(() => {
     checkAuthStatus();
@@ -39,20 +44,24 @@ function RootLayoutContent() {
   const showSidebarAndHeader = isAuthenticated && pathname !== '/login' && pathname !== '/';
   const showSidebar = showSidebarAndHeader && (sidebarOpen || isTablet);
 
-  // Effect to handle sidebar visibility based on screen size
+  // Effect to handle sidebar visibility based on screen size and orientation
   useEffect(() => {
-    const updateLayout = () => {
-      const isLarge = window.innerWidth >= 768;
-      // For large devices, start with sidebar open, for mobile start closed
-      setSidebarOpen(isLarge);
-    };
+    const subscription = Dimensions.addEventListener('change', ({ window }) => {
+      const newWidth = window.width;
+      const newHeight = window.height;
+      const newIsLandscape = newWidth > newHeight;
+      const newIsTablet = newWidth >= 768 || (newIsLandscape && newWidth >= 600);
+      
+      // Auto-adjust sidebar based on device size and orientation
+      setSidebarOpen(newIsTablet);
+    });
 
-    if (typeof window !== 'undefined') {
-      updateLayout();
-      window.addEventListener('resize', updateLayout);
-      return () => window.removeEventListener('resize', updateLayout);
-    }
-  }, []);
+    // Initial setup
+    const isLarge = isTablet;
+    setSidebarOpen(isLarge);
+
+    return () => subscription?.remove();
+  }, [isTablet]);
 
   if (isLoading) {
     return <View style={styles.container} />;
@@ -74,9 +83,19 @@ function RootLayoutContent() {
 
         <View style={[
           styles.mainContent,
-          { flex: showSidebarAndHeader ? 1 : 1 }
+          {
+            flex: 1,
+            paddingHorizontal: isSmallMobile ? 8 : 16,
+            paddingVertical: isLandscape && isMobile ? 8 : 16,
+          }
         ]}>
-          <Stack screenOptions={{ headerShown: false }}>
+          <Stack screenOptions={{ 
+            headerShown: false,
+            contentStyle: { 
+              backgroundColor: '#f8f9fa',
+              paddingHorizontal: isSmallMobile ? 4 : 0,
+            }
+          }}>
             <Stack.Screen name="index" />
             <Stack.Screen name="login" />
             <Stack.Screen name="dashboard" />
@@ -116,6 +135,7 @@ const styles = StyleSheet.create({
   mainContent: {
     flex: 1,
     backgroundColor: '#f8f9fa',
+    minHeight: 0, // Helps with flex layout in landscape
   },
   overlay: {
     position: 'absolute',

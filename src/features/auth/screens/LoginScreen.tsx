@@ -7,7 +7,9 @@ import {
   TouchableOpacity, 
   StyleSheet, 
   Alert,
-  ActivityIndicator 
+  ActivityIndicator,
+  useWindowDimensions,
+  ScrollView 
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -19,6 +21,11 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { width, height } = useWindowDimensions();
+  
+  const isLandscape = width > height;
+  const isTablet = width >= 768;
+  const isSmallMobile = width < 480;
 
   const handleLogin = async () => {
     if (!domain || !username || !password) {
@@ -47,8 +54,26 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.formContainer}>
+    <ScrollView 
+      contentContainerStyle={[
+        styles.container,
+        {
+          paddingHorizontal: isSmallMobile ? 16 : isLandscape && !isTablet ? 40 : 20,
+          justifyContent: isLandscape && !isTablet ? 'flex-start' : 'center',
+          paddingTop: isLandscape && !isTablet ? 40 : 0,
+        }
+      ]}
+      keyboardShouldPersistTaps="handled"
+    >
+      <View style={[
+        styles.formContainer,
+        {
+          maxWidth: isTablet ? 500 : isLandscape ? 400 : '100%',
+          width: '100%',
+          paddingHorizontal: isSmallMobile ? 20 : 30,
+          paddingVertical: isLandscape && !isTablet ? 20 : 30,
+        }
+      ]}>
         <Text style={styles.title}>Login</Text>
         
         <View style={styles.inputContainer}>
@@ -96,23 +121,19 @@ export default function LoginScreen() {
           )}
         </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: 'center',
+    flexGrow: 1,
     alignItems: 'center',
     backgroundColor: '#f8f9fa',
-    padding: 20,
+    minHeight: '100%',
   },
   formContainer: {
-    width: '100%',
-    maxWidth: 400,
     backgroundColor: '#fff',
-    padding: 30,
     borderRadius: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },

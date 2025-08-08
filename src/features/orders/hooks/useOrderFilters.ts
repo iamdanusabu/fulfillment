@@ -55,9 +55,9 @@ export const useOrderFilters = () => {
   // Convert settings to API parameters
   const getFilterParams = () => {
     return {
-      source: settings.sources.join(','),
-      status: settings.statuses.join(','),
-      paymentStatus: settings.paymentStatuses.join(',')
+      source: settings.sources.length > 0 ? settings.sources.join(',') : '',
+      status: settings.statuses.length > 0 ? settings.statuses.join(',') : '',
+      paymentStatus: settings.paymentStatuses.length > 0 ? settings.paymentStatuses.join(',') : ''
     };
   };
 

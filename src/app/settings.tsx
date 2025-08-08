@@ -65,7 +65,9 @@ export default function SettingsScreen() {
       
       // Trigger a custom event to notify other parts of the app that settings changed
       if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('orderFilterSettingsChanged'));
+        window.dispatchEvent(new CustomEvent('orderFilterSettingsChanged', {
+          detail: { settings }
+        }));
       }
     } catch (error) {
       console.error('Error saving settings:', error);

@@ -56,6 +56,50 @@ const transformOrder = (apiOrder: any): Order => ({
   externalOrderKey: apiOrder.externalOrderKey,
   netDiscount: apiOrder.netDiscount,
   isTaxExempt: apiOrder.isTaxExempt,
+const transformOrder = (apiOrder: any): Order => ({
+  id: apiOrder.orderID.toString(),
+  orderID: apiOrder.orderID,
+  orderNumber: apiOrder.externalOrderID || apiOrder.orderID.toString(),
+  source: apiOrder.source,
+  status: apiOrder.status,
+  customer: apiOrder.customer?.name || apiOrder.employee?.name || 'Unknown Customer',
+  items: apiOrder.items?.map((item: any) => ({
+    id: item.orderItemID.toString(),
+    productId: item.itemID,
+    productName: item.name,
+    quantity: item.orderQuantity,
+    pickedQuantity: item.returnQuantity || 0,
+    orderItemID: item.orderItemID,
+    itemID: item.itemID,
+    orderID: item.orderID,
+    upc: item.upc,
+    name: item.name,
+    sequence: item.sequence,
+    orderQuantity: item.orderQuantity,
+    returnQuantity: item.returnQuantity,
+    unitPrice: item.unitPrice,
+    costPrice: item.costPrice,
+    discount: item.discount,
+    tax: item.tax,
+    customizationTotal: item.customizationTotal,
+    status: item.status,
+    batch: item.batch,
+    amount: item.amount,
+  })) || [],
+  createdAt: apiOrder.date,
+  date: apiOrder.date,
+  type: apiOrder.type,
+  paymentStatus: apiOrder.paymentStatus,
+  employeeID: apiOrder.employeeID,
+  subTotal: apiOrder.subTotal,
+  totalFees: apiOrder.totalFees,
+  customizationTotal: apiOrder.customizationTotal,
+  tax: apiOrder.tax,
+  amount: apiOrder.amount,
+  registerID: apiOrder.registerID,
+  externalOrderKey: apiOrder.externalOrderKey,
+  netDiscount: apiOrder.netDiscount,
+  isTaxExempt: apiOrder.isTaxExempt,
   totalItemQuantity: apiOrder.totalItemQuantity,
   employee: apiOrder.employee,
   store: apiOrder.store,
@@ -107,20 +151,22 @@ export const usePaginatedOrders = (options: UsePaginatedOrdersOptions = {}) => {
       if (source) {
         newParams.source = source;
       } else {
-        newParams.source = filterParams.source;
-        newParams.status = filterParams.status;
-        newParams.paymentStatus = filterParams.paymentStatus;
+        // Apply all filter parameters from settings
+        if (filterParams.source) {
+          newParams.source = filterParams.source;
+        }
+        if (filterParams.status) {
+          newParams.status = filterParams.status;
+        }
+        if (filterParams.paymentStatus) {
+          newParams.paymentStatus = filterParams.paymentStatus;
+        }
       }
 
-      // Only update params if they're actually different
-      const currentParams = JSON.stringify(initialParams);
-      const newParamsStr = JSON.stringify(newParams);
-      
-      if (currentParams !== newParamsStr) {
-        paginatedState.updateParams(newParams);
-      }
+      // Update params to trigger a fresh API call with new filters
+      paginatedState.updateParams(newParams);
     }
-  }, [JSON.stringify(settings), filtersLoading]); // Simplified dependencies
+  }, [settings?.sources, settings?.statuses, settings?.paymentStatuses, filtersLoading, source]); // More specific dependencies
 
   // Transform the raw data to Order objects
   const transformedOrders = paginatedState.data.map(transformOrder);

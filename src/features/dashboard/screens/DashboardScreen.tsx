@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -11,7 +10,7 @@ import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { fetchWithToken } from "../../../shared/services/fetchWithToken";
 import { getConfig } from "../../../environments";
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons } from "@expo/vector-icons";
 
 interface FilterSettings {
   sources: string[];
@@ -39,9 +38,9 @@ export default function DashboardScreen() {
     try {
       setLoading(true);
       await Promise.all([
-        loadSourceCounts(), 
+        loadSourceCounts(),
         loadReadyForPickupCount(),
-        loadActivePicklistsCount()
+        loadActivePicklistsCount(),
       ]);
     } catch (error) {
       console.error("Failed to load dashboard data:", error);
@@ -136,7 +135,7 @@ export default function DashboardScreen() {
 
       const config = getConfig();
       const sourceParam = sources.join(",");
-      const url = `${config.endpoints.orders}?pageNo=1&pageSize=1&hasFulfilmentJob=false&expand=item,bin,location_hint,payment&pagination=true&source=${encodeURIComponent(sourceParam)}&status=Ready&paymentStatus=PAID,UNPAID`;
+      const url = `${config.endpoints.orders}?pageNo=1&pageSize=1&hasFulfilmentJob=true&expand=item,bin,location_hint,payment&pagination=true&source=${encodeURIComponent(sourceParam)}&status=Ready&paymentStatus=PAID,UNPAID`;
       const response = await fetchWithToken(url);
       setReadyForPickupCount(response?.totalRecords || 0);
     } catch (error) {
@@ -185,7 +184,11 @@ export default function DashboardScreen() {
           style={[styles.quickStatCard, styles.readyForPickupCard]}
           onPress={() => navigateToOrders()}
         >
-          <MaterialIcons name="assignment-turned-in" size={32} color="#28a745" />
+          <MaterialIcons
+            name="assignment-turned-in"
+            size={32}
+            color="#28a745"
+          />
           <Text style={styles.quickStatNumber}>{readyForPickupCount}</Text>
           <Text style={styles.quickStatLabel}>Ready for Pickup</Text>
         </TouchableOpacity>
@@ -206,7 +209,7 @@ export default function DashboardScreen() {
           <MaterialIcons name="store" size={24} color="#333" />
           <Text style={styles.sectionTitle}>Orders by Source</Text>
         </View>
-        
+
         <View style={styles.sourceGrid}>
           {sourceCounts.map((sourceCount) => (
             <TouchableOpacity
@@ -227,18 +230,18 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: "#f8f9fa",
     padding: 20,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: '#f8f9fa',
+    backgroundColor: "#f8f9fa",
   },
   loadingText: {
     fontSize: 16,
-    color: '#666',
+    color: "#666",
   },
   title: {
     fontSize: 32,
@@ -247,18 +250,18 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   quickStatsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 32,
     gap: 16,
   },
   quickStatCard: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     padding: 24,
     borderRadius: 16,
-    alignItems: 'center',
-    shadowColor: '#000',
+    alignItems: "center",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -266,10 +269,10 @@ const styles = StyleSheet.create({
     borderLeftWidth: 4,
   },
   readyForPickupCard: {
-    borderLeftColor: '#28a745',
+    borderLeftColor: "#28a745",
   },
   activePicklistsCard: {
-    borderLeftColor: '#007AFF',
+    borderLeftColor: "#007AFF",
   },
   quickStatNumber: {
     fontSize: 36,
@@ -282,21 +285,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666",
     textAlign: "center",
-    fontWeight: '500',
+    fontWeight: "500",
   },
   section: {
     marginBottom: 24,
   },
   sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 16,
     gap: 8,
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
   },
   sourceGrid: {
     flexDirection: "row",
@@ -310,13 +313,13 @@ const styles = StyleSheet.create({
     minWidth: 110,
     flex: 1,
     alignItems: "center",
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 2,
     borderWidth: 1,
-    borderColor: '#e9ecef',
+    borderColor: "#e9ecef",
   },
   sourceNumber: {
     fontSize: 24,
@@ -328,6 +331,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#666",
     textAlign: "center",
-    fontWeight: '500',
+    fontWeight: "500",
   },
 });

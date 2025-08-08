@@ -88,9 +88,41 @@ export const picklistApi = {
 
   async createFulfillment(orderIds: string[], locationId: string, items: PicklistItem[]) {
     const config = getConfig();
-    return await fetchWithToken(config.endpoints.fulfillment, {
+    
+    // Generate fulfillment name with timestamp
+    const timestamp = Date.now();
+    const fulfillmentName = `FULFILLMENT # ${timestamp}`;
+    
+    // Format sources from orderIds
+    const sources = orderIds.map(orderId => ({
+      type: "ORDER",
+      typeID: orderId
+    }));
+    
+    // Format items with picked count
+    const formattedItems = items
+      .filter(item => item.pickedQuantity > 0) // Only include items with picked quantity
+      .map(item => ({
+        item: {
+          itemID: item.productId
+        },
+        pickedCount: item.pickedQuantity
+      }));
+    
+    const requestBody = {
+      name: fulfillmentName,
+      status: "OPEN",
+      sources: sources,
+      items: formattedItems,
+      fulfillmentLocation: {
+        type: "STORE",
+        locationID: locationId
+      }
+    };
+    
+    return await fetchWithToken(config.endpoints.inventoryFulfillments, {
       method: 'POST',
-      body: JSON.stringify({ orderIds, locationId, items }),
+      body: JSON.stringify(requestBody),
     });
   },
 

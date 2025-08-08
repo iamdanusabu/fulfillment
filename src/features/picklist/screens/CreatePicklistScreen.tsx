@@ -49,8 +49,8 @@ export default function CreatePicklistScreen() {
 
       const result = await picklistApi.createFulfillment(orderIds, locationId, items);
 
-      // Navigate to packing screen with fulfillment ID
-      router.push(`/picklist/packing?fulfillmentId=${result.fulfillmentId}&orderIds=${params.orderIds}`);
+      // Navigate to packing screen with fulfillment ID from response
+      router.push(`/picklist/packing?fulfillmentId=${result.id}&orderIds=${params.orderIds}`);
     } catch (error) {
       console.error('Failed to create fulfillment:', error);
     }

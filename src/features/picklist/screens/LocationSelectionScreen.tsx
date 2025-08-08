@@ -18,12 +18,10 @@ export default function LocationSelectionScreen() {
     if (!selectedLocation) return;
 
     const { orderIds } = params;
-    router.push(`/picklist/create?orderIds=${orderIds}&locationId=${selectedLocation}`);
-  };
-
-  const handleLocationSelect = (location: Location) => {
-    const orderIds = params.orderIds as string;
-    router.push(`/picklist/create?orderIds=${orderIds}&locationId=${location.id}&locationType=${location.type.toUpperCase()}`);
+    const selectedLocationData = currentData.find(item => item.id === selectedLocation);
+    const locationType = selectedLocationData?.type.toUpperCase() || '';
+    
+    router.push(`/picklist/create?orderIds=${orderIds}&locationId=${selectedLocation}&locationType=${locationType}`);
   };
 
   const renderLocationItem = ({ item }: { item: Location }) => (
@@ -32,10 +30,7 @@ export default function LocationSelectionScreen() {
         styles.locationCard,
         selectedLocation === item.id && styles.selectedCard
       ]}
-      onPress={() => {
-        setSelectedLocation(item.id);
-        handleLocationSelect(item); 
-      }}
+      onPress={() => setSelectedLocation(item.id)}
     >
       <View style={styles.locationHeader}>
         <View style={styles.locationInfo}>

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -5,11 +6,14 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  RefreshControl,
+  ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { fetchWithToken } from "../../../shared/services/fetchWithToken";
 import { getConfig } from "../../../environments";
+import { MaterialIcons } from "@expo/vector-icons";
 
 interface FilterSettings {
   sources: string[];
@@ -20,33 +24,71 @@ interface FilterSettings {
 interface SourceCount {
   name: string;
   count: number;
+  error?: boolean;
+}
+
+interface DashboardStats {
+  sourceCounts: SourceCount[];
+  readyForPickupCount: number;
+  activePicklistsCount: number;
+  totalOrdersCount: number;
+  loading: boolean;
+  error: string | null;
 }
 
 export default function DashboardScreen() {
-  const [sourceCounts, setSourceCounts] = useState<SourceCount[]>([]);
-  const [readyForPickupCount, setReadyForPickupCount] = useState(0);
-  const [activePicklistsCount, setActivePicklistsCount] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<DashboardStats>({
+    sourceCounts: [],
+    readyForPickupCount: 0,
+    activePicklistsCount: 0,
+    totalOrdersCount: 0,
+    loading: true,
+    error: null,
+  });
+  const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     loadDashboardData();
   }, []);
 
-  const loadDashboardData = async () => {
+  const loadDashboardData = async (isRefresh = false) => {
     try {
-      setLoading(true);
-      await Promise.all([loadSourceCounts(), loadReadyForPickupCount(), loadActivePicklistsCount()]);
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setStats(prev => ({ ...prev, loading: true, error: null }));
+      }
+
+      const [sourceCounts, readyForPickupCount, activePicklistsCount, totalOrdersCount] = await Promise.all([
+        loadSourceCounts(),
+        loadReadyForPickupCount(),
+        loadActivePicklistsCount(),
+        loadTotalOrdersCount(),
+      ]);
+
+      setStats({
+        sourceCounts,
+        readyForPickupCount,
+        activePicklistsCount,
+        totalOrdersCount,
+        loading: false,
+        error: null,
+      });
     } catch (error) {
       console.error("Failed to load dashboard data:", error);
+      setStats(prev => ({
+        ...prev,
+        loading: false,
+        error: error instanceof Error ? error.message : "Failed to load dashboard data",
+      }));
     } finally {
-      setLoading(false);
+      setRefreshing(false);
     }
   };
 
-  const loadSourceCounts = async () => {
+  const loadSourceCounts = async (): Promise<SourceCount[]> => {
     try {
-      // Get sources from settings
       const savedSettings = await AsyncStorage.getItem("orderFilterSettings");
       let sources: string[] = [];
 
@@ -54,10 +96,9 @@ export default function DashboardScreen() {
         const settings: FilterSettings = JSON.parse(savedSettings);
         sources = settings.sources;
       } else {
-        // Default sources if no settings found
         sources = [
           "Shopify",
-          "Tapin2",
+          "Tapin2", 
           "Breakaway",
           "bigcommerce",
           "Ecwid",
@@ -73,7 +114,6 @@ export default function DashboardScreen() {
         ];
       }
 
-      // Get count for each source
       const config = getConfig();
       const countPromises = sources.map(async (source) => {
         try {
@@ -82,26 +122,39 @@ export default function DashboardScreen() {
           return {
             name: source,
             count: response?.totalRecords || 0,
+            error: false,
           };
         } catch (error) {
           console.error(`Failed to get count for source ${source}:`, error);
           return {
             name: source,
             count: 0,
+            error: true,
           };
         }
       });
 
-      const counts = await Promise.all(countPromises);
-      setSourceCounts(counts);
+      return await Promise.all(countPromises);
     } catch (error) {
       console.error("Failed to load source counts:", error);
+      return [];
     }
   };
 
-  const loadReadyForPickupCount = async () => {
+  const loadTotalOrdersCount = async (): Promise<number> => {
     try {
-      // Get sources from settings to use in the API call
+      const config = getConfig();
+      const url = `${config.endpoints.orders}?pageNo=1&pageSize=1&hasFulfilmentJob=false&pagination=true`;
+      const response = await fetchWithToken(url);
+      return response?.totalRecords || 0;
+    } catch (error) {
+      console.error("Failed to load total orders count:", error);
+      return 0;
+    }
+  };
+
+  const loadReadyForPickupCount = async (): Promise<number> => {
+    try {
       const savedSettings = await AsyncStorage.getItem("orderFilterSettings");
       let sources: string[] = [];
 
@@ -109,11 +162,10 @@ export default function DashboardScreen() {
         const settings: FilterSettings = JSON.parse(savedSettings);
         sources = settings.sources;
       } else {
-        // Default sources if no settings found
         sources = [
           "Shopify",
           "Tapin2",
-          "Breakaway",
+          "Breakaway", 
           "bigcommerce",
           "Ecwid",
           "PHONE ORDER",
@@ -130,26 +182,24 @@ export default function DashboardScreen() {
 
       const config = getConfig();
       const sourceParam = sources.join(",");
-      // Match the exact API structure from the curl command
       const url = `${config.endpoints.orders}?pageNo=1&pageSize=20&hasFulfilmentJob=true&expand=item%2Cbin%2Clocation_hint%2Cpayment&pagination=true&source=${encodeURIComponent(sourceParam)}&status=Ready&paymentStatus=PAID%2CUNPAID`;
       const response = await fetchWithToken(url);
-      setReadyForPickupCount(response?.totalRecords || 0);
+      return response?.totalRecords || 0;
     } catch (error) {
       console.error("Failed to load ready for pickup count:", error);
-      setReadyForPickupCount(0);
+      return 0;
     }
   };
 
-  const loadActivePicklistsCount = async () => {
+  const loadActivePicklistsCount = async (): Promise<number> => {
     try {
       const config = getConfig();
-      // Get active picklists (status=OPEN)
       const url = `${config.endpoints.activePicklists}?pageNo=1&pageSize=20&status=OPEN&pagination=true`;
       const response = await fetchWithToken(url);
-      setActivePicklistsCount(response?.totalRecords || 0);
+      return response?.totalRecords || 0;
     } catch (error) {
       console.error("Failed to load active picklists count:", error);
-      setActivePicklistsCount(0);
+      return 0;
     }
   };
 
@@ -158,46 +208,115 @@ export default function DashboardScreen() {
     router.push(route);
   };
 
-  if (loading) {
+  const onRefresh = () => {
+    loadDashboardData(true);
+  };
+
+  if (stats.loading) {
     return (
       <View style={styles.loadingContainer}>
-        <Text>Loading dashboard...</Text>
+        <ActivityIndicator size="large" color="#007AFF" />
+        <Text style={styles.loadingText}>Loading dashboard...</Text>
       </View>
     );
   }
 
+  const workingSources = stats.sourceCounts.filter(source => !source.error && source.count > 0);
+  const errorSources = stats.sourceCounts.filter(source => source.error);
+
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Dashboard</Text>
-
-      <View style={styles.statsGrid}>
-        {sourceCounts.map((sourceCount) => (
-          <TouchableOpacity
-            key={sourceCount.name}
-            style={styles.statCard}
-            onPress={() => navigateToOrders(sourceCount.name)}
-          >
-            <Text style={styles.statNumber}>{sourceCount.count}</Text>
-            <Text style={styles.statLabel}>{sourceCount.name} Orders</Text>
-          </TouchableOpacity>
-        ))}
-
-        <TouchableOpacity
-          style={styles.statCard}
-          onPress={() => navigateToOrders()}
-        >
-          <Text style={styles.statNumber}>{readyForPickupCount}</Text>
-          <Text style={styles.statLabel}>Ready for Pickup</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.statCard}
-          onPress={() => router.push('/picklist')}
-        >
-          <Text style={styles.statNumber}>{activePicklistsCount}</Text>
-          <Text style={styles.statLabel}>Active Picklists</Text>
+    <ScrollView 
+      style={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
+      <View style={styles.header}>
+        <Text style={styles.title}>Dashboard</Text>
+        <TouchableOpacity onPress={onRefresh} style={styles.refreshButton}>
+          <MaterialIcons name="refresh" size={24} color="#007AFF" />
         </TouchableOpacity>
       </View>
+
+      {stats.error && (
+        <View style={styles.errorBanner}>
+          <MaterialIcons name="error" size={20} color="#dc3545" />
+          <Text style={styles.errorText}>{stats.error}</Text>
+        </View>
+      )}
+
+      {/* Key Metrics Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Key Metrics</Text>
+        <View style={styles.keyMetricsGrid}>
+          <TouchableOpacity
+            style={[styles.keyMetricCard, styles.primaryMetric]}
+            onPress={() => navigateToOrders()}
+          >
+            <MaterialIcons name="shopping-cart" size={32} color="#fff" />
+            <Text style={styles.keyMetricNumber}>{stats.totalOrdersCount}</Text>
+            <Text style={styles.keyMetricLabel}>Total Orders</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.keyMetricCard, styles.readyMetric]}
+            onPress={() => router.push('/orders?status=Ready')}
+          >
+            <MaterialIcons name="local-shipping" size={32} color="#fff" />
+            <Text style={styles.keyMetricNumber}>{stats.readyForPickupCount}</Text>
+            <Text style={styles.keyMetricLabel}>Ready for Pickup</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.keyMetricCard, styles.picklistMetric]}
+            onPress={() => router.push('/picklist')}
+          >
+            <MaterialIcons name="inventory" size={32} color="#fff" />
+            <Text style={styles.keyMetricNumber}>{stats.activePicklistsCount}</Text>
+            <Text style={styles.keyMetricLabel}>Active Picklists</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Order Sources Section */}
+      {workingSources.length > 0 && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Orders by Source</Text>
+          <View style={styles.sourcesGrid}>
+            {workingSources.map((sourceCount) => (
+              <TouchableOpacity
+                key={sourceCount.name}
+                style={styles.sourceCard}
+                onPress={() => navigateToOrders(sourceCount.name)}
+              >
+                <Text style={styles.sourceNumber}>{sourceCount.count}</Text>
+                <Text style={styles.sourceLabel}>{sourceCount.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      )}
+
+      {/* Connection Issues Section */}
+      {errorSources.length > 0 && (
+        <View style={styles.section}>
+          <View style={styles.errorSectionHeader}>
+            <MaterialIcons name="warning" size={20} color="#ffc107" />
+            <Text style={styles.errorSectionTitle}>Connection Issues</Text>
+          </View>
+          <View style={styles.errorSourcesList}>
+            {errorSources.map((source) => (
+              <View key={source.name} style={styles.errorSourceItem}>
+                <MaterialIcons name="error-outline" size={16} color="#dc3545" />
+                <Text style={styles.errorSourceText}>{source.name}</Text>
+              </View>
+            ))}
+          </View>
+          <Text style={styles.errorHint}>
+            These sources couldn't be loaded. Pull to refresh to try again.
+          </Text>
+        </View>
+      )}
     </ScrollView>
   );
 }
@@ -205,46 +324,161 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    backgroundColor: '#f8f9fa',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: '#f8f9fa',
+  },
+  loadingText: {
+    fontSize: 16,
+    color: "#666",
+    marginTop: 16,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e9ecef',
   },
   title: {
     fontSize: 28,
     fontWeight: "bold",
     color: "#333",
-    marginBottom: 24,
   },
-  statsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 16,
+  refreshButton: {
+    padding: 8,
   },
-  statCard: {
-    backgroundColor: "#fff",
+  errorBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f8d7da',
+    padding: 12,
+    marginHorizontal: 16,
+    marginTop: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#f5c6cb',
+  },
+  errorText: {
+    color: '#721c24',
+    marginLeft: 8,
+    flex: 1,
+  },
+  section: {
+    margin: 16,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 12,
+  },
+  keyMetricsGrid: {
+    gap: 12,
+  },
+  keyMetricCard: {
+    backgroundColor: '#007AFF',
     padding: 20,
     borderRadius: 12,
-    minWidth: 150,
-    flex: 1,
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     elevation: 2,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
-  statNumber: {
-    fontSize: 32,
+  primaryMetric: {
+    backgroundColor: '#007AFF',
+  },
+  readyMetric: {
+    backgroundColor: '#28a745',
+  },
+  picklistMetric: {
+    backgroundColor: '#17a2b8',
+  },
+  keyMetricNumber: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: '#fff',
+    marginLeft: 16,
+    marginRight: 12,
+  },
+  keyMetricLabel: {
+    fontSize: 16,
+    color: '#fff',
+    fontWeight: '500',
+    flex: 1,
+  },
+  sourcesGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+  },
+  sourceCard: {
+    backgroundColor: "#fff",
+    padding: 16,
+    borderRadius: 8,
+    minWidth: 100,
+    flex: 1,
+    maxWidth: '48%',
+    alignItems: "center",
+    elevation: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  sourceNumber: {
+    fontSize: 20,
     fontWeight: "bold",
     color: "#007AFF",
-    marginBottom: 8,
+    marginBottom: 4,
   },
-  statLabel: {
-    fontSize: 14,
+  sourceLabel: {
+    fontSize: 12,
     color: "#666",
     textAlign: "center",
+  },
+  errorSectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  errorSectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#856404',
+    marginLeft: 8,
+  },
+  errorSourcesList: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#ffeaa7',
+  },
+  errorSourceItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 4,
+  },
+  errorSourceText: {
+    marginLeft: 8,
+    color: '#721c24',
+    fontSize: 14,
+  },
+  errorHint: {
+    fontSize: 12,
+    color: '#6c757d',
+    marginTop: 8,
+    textAlign: 'center',
+    fontStyle: 'italic',
   },
 });

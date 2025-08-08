@@ -37,11 +37,14 @@ export default function CreatePicklistScreen() {
     }
   };
 
+  const [fulfillmentData, setFulfillmentData] = useState<any>(null);
+
   const fetchFulfillment = async (fulfillmentId: string) => {
     try {
       setLoading(true);
       const fulfillment = await picklistApi.getFulfillment(fulfillmentId);
       setItems(fulfillment.items);
+      setFulfillmentData(fulfillment);
     } catch (error) {
       console.error('Failed to fetch fulfillment:', error);
     } finally {
@@ -66,15 +69,15 @@ export default function CreatePicklistScreen() {
       let result;
 
       if (params.fulfillmentId) {
-        // Update existing fulfillment
-        result = await picklistApi.updateFulfillment(params.fulfillmentId as string, items);
+        // Update existing fulfillment using PUT
+        result = await picklistApi.updateFulfillment(params.fulfillmentId as string, items, fulfillmentData);
       } else {
         // Create new fulfillment
         result = await picklistApi.createFulfillment(orderIds, locationId, items);
       }
 
       // Navigate to packing screen with fulfillment ID from response
-      router.push(`/picklist/packing?fulfillmentId=${result.id}&orderIds=${params.orderIds}`);
+      router.push(`/picklist/packing?fulfillmentId=${result.id || params.fulfillmentId}&orderIds=${params.orderIds}`);
     } catch (error) {
       console.error('Failed to process fulfillment:', error);
     }

@@ -135,28 +135,97 @@ export const picklistApi = {
     });
   },
 
-  async updateFulfillment(fulfillmentId: string, items: PicklistItem[]) {
+  async updateFulfillment(fulfillmentId: string, items: PicklistItem[], fulfillmentData?: any) {
     const config = getConfig();
     
-    // Format items with picked count - minimum required fields
-    const formattedItems = items
-      .filter(item => item.pickedQuantity > 0)
-      .map(item => ({
-        item: {
-          itemID: item.productId
-        },
-        pickedCount: item.pickedQuantity
-      }));
+    // Format items with picked count
+    const formattedItems = items.map(item => ({
+      id: item.id,
+      item: {
+        itemID: item.productId,
+        id: item.productId
+      },
+      bin: item.bin ? {
+        id: item.bin.id,
+        name: item.bin.name
+      } : { id: 1, name: "Bin A" },
+      pickedCount: item.pickedQuantity,
+      returnedCount: 0,
+      createdBy: fulfillmentData?.createdBy || {
+        userID: 2,
+        name: "Financial",
+        pinEncrypted: false,
+        id: 2
+      },
+      createdOn: fulfillmentData?.createdOn || new Date().toISOString(),
+      modifiedBy: fulfillmentData?.modifiedBy || {
+        userID: 2,
+        name: "Financial",
+        pinEncrypted: false,
+        id: 2
+      },
+      modifiedOn: new Date().toISOString(),
+      modifiedTime: new Date().toISOString().replace('T', ' ').substring(0, 19)
+    }));
     
     const requestBody = {
-      id: fulfillmentId,
-      items: formattedItems
+      id: parseInt(fulfillmentId),
+      name: fulfillmentData?.name || `Picklist ${fulfillmentId}`,
+      status: "Active",
+      requestKey: fulfillmentData?.requestKey || `A101-${fulfillmentId}`,
+      sources: fulfillmentData?.sources || [],
+      items: formattedItems,
+      createdBy: fulfillmentData?.createdBy || {
+        userID: 2,
+        name: "Financial",
+        pinEncrypted: false,
+        id: 2
+      },
+      createdOn: fulfillmentData?.createdOn || new Date().toISOString(),
+      modifiedBy: fulfillmentData?.modifiedBy || {
+        userID: 2,
+        name: "Financial",
+        pinEncrypted: false,
+        id: 2
+      },
+      modifiedOn: new Date().toISOString(),
+      modifiedTime: new Date().toISOString().replace('T', ' ').substring(0, 19)
     };
     
     return await fetchWithToken(`${config.endpoints.inventoryFulfillments}/${fulfillmentId}`, {
-      method: 'PATCH',
+      method: 'PUT',
       body: JSON.stringify(requestBody),
     });
+  },
+
+  async getFulfillment(fulfillmentId: string) {
+    const config = getConfig();
+    const response = await fetchWithToken(`${config.endpoints.inventoryFulfillments}/${fulfillmentId}`);
+    
+    // Transform the API response to match our PicklistItem format
+    if (response && response.items && Array.isArray(response.items)) {
+      const items = response.items.map((apiItem: any) => ({
+        id: apiItem.item?.id || apiItem.item?.itemID || Math.random().toString(),
+        productId: apiItem.item?.itemID || apiItem.item?.id,
+        productName: apiItem.item?.name || 'Unknown Product',
+        location: apiItem.bin?.location?.name || 'Unknown Location',
+        requiredQuantity: apiItem.requiredCount || apiItem.requiredQuantity || apiItem.quantity || 1,
+        pickedQuantity: apiItem.pickedCount || 0,
+        availableQuantity: apiItem.availableQuantity || 0,
+        upc: apiItem.item?.upc,
+        batch: apiItem.batch,
+        bin: apiItem.bin ? {
+          id: apiItem.bin.id,
+          name: apiItem.bin.name,
+          location: apiItem.bin.location
+        } : undefined,
+        locationHints: apiItem.locationHints || []
+      }));
+      
+      return { ...response, items };
+    }
+    
+    return response;
   },
 
   async finalizePacking(fulfillmentId: string, sources: Array<{type: string, typeID: string}>) {

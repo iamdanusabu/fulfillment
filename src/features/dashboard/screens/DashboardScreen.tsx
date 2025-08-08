@@ -2,26 +2,98 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { dashboardApi } from '../api/dashboardApi';
-import { DashboardStats } from '../../../shared/types';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { fetchWithToken } from '../../../shared/services/fetchWithToken';
+import { getConfig } from '../../../environments';
+
+interface FilterSettings {
+  sources: string[];
+  statuses: string[];
+  paymentStatuses: string[];
+}
+
+interface SourceCount {
+  name: string;
+  count: number;
+}
 
 export default function DashboardScreen() {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [sourceCounts, setSourceCounts] = useState<SourceCount[]>([]);
+  const [readyForPickupCount, setReadyForPickupCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    loadStats();
+    loadDashboardData();
   }, []);
 
-  const loadStats = async () => {
+  const loadDashboardData = async () => {
     try {
-      const data = await dashboardApi.getStats();
-      setStats(data);
+      setLoading(true);
+      await Promise.all([
+        loadSourceCounts(),
+        loadReadyForPickupCount()
+      ]);
     } catch (error) {
-      console.error('Failed to load dashboard stats:', error);
+      console.error('Failed to load dashboard data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadSourceCounts = async () => {
+    try {
+      // Get sources from settings
+      const savedSettings = await AsyncStorage.getItem('orderFilterSettings');
+      let sources: string[] = [];
+      
+      if (savedSettings) {
+        const settings: FilterSettings = JSON.parse(savedSettings);
+        sources = settings.sources;
+      } else {
+        // Default sources if no settings found
+        sources = [
+          'Shopify', 'Tapin2', 'Breakaway', 'bigcommerce', 'Ecwid', 
+          'PHONE ORDER', 'DELIVERY', 'BAR TAB', 'TIKT', 'TABLE', 
+          'OTHER', 'MANUAL', 'FanVista', 'QSR'
+        ];
+      }
+
+      // Get count for each source
+      const config = getConfig();
+      const countPromises = sources.map(async (source) => {
+        try {
+          const url = `${config.endpoints.orders}?source=${encodeURIComponent(source)}&pageNo=1&pageSize=1&hasFulfilmentJob=false&pagination=true`;
+          const response = await fetchWithToken(url);
+          return {
+            name: source,
+            count: response?.totalRecords || 0
+          };
+        } catch (error) {
+          console.error(`Failed to get count for source ${source}:`, error);
+          return {
+            name: source,
+            count: 0
+          };
+        }
+      });
+
+      const counts = await Promise.all(countPromises);
+      setSourceCounts(counts);
+    } catch (error) {
+      console.error('Failed to load source counts:', error);
+    }
+  };
+
+  const loadReadyForPickupCount = async () => {
+    try {
+      const config = getConfig();
+      const url = `${config.endpoints.orders}?status=ready&hasFulfilmentJob=false&pageNo=1&pageSize=1&pagination=true`;
+      const response = await fetchWithToken(url);
+      setReadyForPickupCount(response?.totalRecords || 0);
+    } catch (error) {
+      console.error('Failed to load ready for pickup count:', error);
+      setReadyForPickupCount(0);
     }
   };
 
@@ -43,35 +115,22 @@ export default function DashboardScreen() {
       <Text style={styles.title}>Dashboard</Text>
       
       <View style={styles.statsGrid}>
-        <TouchableOpacity 
-          style={styles.statCard}
-          onPress={() => navigateToOrders('fanvista')}
-        >
-          <Text style={styles.statNumber}>{stats?.orderCounts.fanvista || 0}</Text>
-          <Text style={styles.statLabel}>Fanvista Orders</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={styles.statCard}
-          onPress={() => navigateToOrders('suite')}
-        >
-          <Text style={styles.statNumber}>{stats?.orderCounts.suite || 0}</Text>
-          <Text style={styles.statLabel}>Suite Orders</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={styles.statCard}
-          onPress={() => router.push('/picklist')}
-        >
-          <Text style={styles.statNumber}>{stats?.activePicklists || 0}</Text>
-          <Text style={styles.statLabel}>Active Picklists</Text>
-        </TouchableOpacity>
+        {sourceCounts.map((sourceCount) => (
+          <TouchableOpacity 
+            key={sourceCount.name}
+            style={styles.statCard}
+            onPress={() => navigateToOrders(sourceCount.name)}
+          >
+            <Text style={styles.statNumber}>{sourceCount.count}</Text>
+            <Text style={styles.statLabel}>{sourceCount.name} Orders</Text>
+          </TouchableOpacity>
+        ))}
 
         <TouchableOpacity 
           style={styles.statCard}
           onPress={() => navigateToOrders()}
         >
-          <Text style={styles.statNumber}>{stats?.readyForPickup || 0}</Text>
+          <Text style={styles.statNumber}>{readyForPickupCount}</Text>
           <Text style={styles.statLabel}>Ready for Pickup</Text>
         </TouchableOpacity>
       </View>

@@ -120,7 +120,7 @@ export default function DashboardScreen() {
     try {
       const config = getConfig();
       // Call the fulfillments endpoint to get active picklists
-      const url = `${config.endpoints.inventoryFulfillments}?status=OPEN&pageNo=1&pageSize=1&pagination=true`;
+      const url = `${config.endpoints.inventoryFulfillments}?fulfillmentStatus=UNFULFILLED&pageNo=1&pageSize=1&pagination=true`;
       const response = await fetchWithToken(url);
       setActivePicklistsCount(response?.totalRecords || 0);
     } catch (error) {
@@ -154,7 +154,9 @@ export default function DashboardScreen() {
       <View style={styles.quickStatsContainer}>
         <TouchableOpacity
           style={[styles.quickStatCard, styles.readyForPickupCard]}
-          onPress={() => router.push('/orders?status=Ready&hasFulfilmentJob=true')}
+          onPress={() =>
+            router.push("/orders?status=Ready&hasFulfilmentJob=true")
+          }
         >
           <MaterialIcons
             name="assignment-turned-in"

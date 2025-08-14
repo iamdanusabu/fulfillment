@@ -268,7 +268,7 @@ export default function DashboardScreen() {
 
           <TouchableOpacity
             style={[styles.keyMetricCard, styles.readyMetric]}
-            onPress={() => router.push('/orders?status=Ready')}
+            onPress={() => router.push('/orders?hasFulfilmentJob=true&status=Ready')}
           >
             <MaterialIcons name="local-shipping" size={32} color="#fff" />
             <Text style={styles.keyMetricNumber}>{stats.readyForPickupCount}</Text>

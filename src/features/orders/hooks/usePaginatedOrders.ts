@@ -1,5 +1,5 @@
 import React from 'react';
-import { usePaginatedFetcher } from '../../../shared/services/paginatedFetcher';
+import { PaginatedFetcher, usePaginatedFetcher } from '../../../shared/services/paginatedFetcher';
 import { Order } from '../../../shared/types';
 import { getConfig } from '../../../environments';
 import { useOrderFilters } from './useOrderFilters';
@@ -72,8 +72,10 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
   }
 
 
+  const config = getConfig();
+  
   const paginatedState = usePaginatedFetcher<any>(
-    source ? config.endpoints.orders : null, // Pass null to prevent API call if no source
+    config.endpoints.orders,
     {
       pageSize: 20,
       initialParams,

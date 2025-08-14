@@ -60,15 +60,18 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
     router.replace('/login');
   };
 
-  // Don't render sidebar when closed on mobile, but always render on tablet
-  if (!isOpen && !isTablet) return null;
+  // Always render sidebar container, but control visibility with styles
+  // This ensures proper layout calculation on all devices
 
   return (
     <View style={[
       styles.sidebar, 
       { 
         width: sidebarWidth,
-        display: isOpen ? 'flex' : 'none'
+        display: isOpen ? 'flex' : 'none',
+        position: isTablet ? 'relative' : 'absolute',
+        zIndex: isTablet ? 1 : 1000,
+        height: '100%',
       }
     ]}>
       <View style={styles.menuItems}>

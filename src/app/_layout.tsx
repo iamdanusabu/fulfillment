@@ -41,8 +41,10 @@ function RootLayoutContent() {
     setSidebarOpen(!sidebarOpen);
   };
 
+  // Always show sidebar and header when authenticated, except on login page
   const showSidebarAndHeader = isAuthenticated && pathname !== '/login' && pathname !== '/';
-  const showSidebar = showSidebarAndHeader && (sidebarOpen || isTablet);
+  // On tablets, sidebar is always open; on mobile, it depends on sidebarOpen state
+  const showSidebar = showSidebarAndHeader && (isTablet ? true : sidebarOpen);
   
   // Force re-render when dimensions change to fix Android rendering issues
   const screenKey = `${width}x${height}-${isTablet}-${isLandscape}`;
@@ -55,13 +57,15 @@ function RootLayoutContent() {
       const newIsLandscape = newWidth > newHeight;
       const newIsTablet = newWidth >= 768 || (newIsLandscape && newWidth >= 600);
       
-      // Auto-adjust sidebar based on device size and orientation
-      setSidebarOpen(newIsTablet);
+      // On tablet, keep sidebar open; on mobile, close it by default but allow manual toggle
+      if (newIsTablet) {
+        setSidebarOpen(true);
+      }
+      // Don't auto-close on mobile to preserve user preference
     });
 
-    // Initial setup
-    const isLarge = isTablet;
-    setSidebarOpen(isLarge);
+    // Initial setup - open sidebar on tablets, allow manual control on mobile
+    setSidebarOpen(isTablet);
 
     return () => subscription?.remove();
   }, [isTablet]);
@@ -75,7 +79,7 @@ function RootLayoutContent() {
       {showSidebarAndHeader && (
         <AppToolbar
           onMenuToggle={toggleSidebar}
-          showMenuButton={!isTablet}
+          showMenuButton={isMobile}
         />
       )}
 
@@ -109,7 +113,7 @@ function RootLayoutContent() {
         </View>
       </View>
 
-      {showSidebar && !isTablet && (
+      {showSidebar && isMobile && sidebarOpen && (
         <View style={styles.overlay} onTouchEnd={toggleSidebar} />
       )}
     </View>

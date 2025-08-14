@@ -82,7 +82,7 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true }: AppTo
       }
     ]}>
       <View style={styles.leftSection}>
-        {showMenuButton && !isTablet && (
+        {showMenuButton && (
           <TouchableOpacity style={styles.menuButton} onPress={onMenuToggle}>
             <MaterialIcons name="menu" size={24} color="#333" />
           </TouchableOpacity>

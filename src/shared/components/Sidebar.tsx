@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions } from 'r
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter, usePathname } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { OrderUpLogo } from './OrderUpLogo';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -85,21 +86,27 @@ export function Sidebar({ isOpen, onToggle, isCollapsed, onToggleCollapse }: Sid
           opacity: isOpen ? 1 : 0,
         }
       ]}>
-        {/* Collapse/Expand Toggle Button - Only show on tablets */}
-        {isTablet && (
-        <View style={styles.collapseSection}>
-          <TouchableOpacity 
-            style={styles.collapseButton} 
-            onPress={onToggleCollapse}
-          >
-            <MaterialIcons 
-              name={isCollapsed ? "chevron-right" : "chevron-left"} 
-              size={20} 
-              color="#666" 
-            />
-          </TouchableOpacity>
+        {/* Header with Logo and Collapse Button */}
+        <View style={styles.headerSection}>
+          <View style={styles.brandingContainer}>
+            <OrderUpLogo size={32} />
+            {(!isCollapsed || !isTablet) && (
+              <Text style={styles.brandingText}>OrderUp</Text>
+            )}
+          </View>
+          {isTablet && (
+            <TouchableOpacity 
+              style={styles.collapseButton} 
+              onPress={onToggleCollapse}
+            >
+              <MaterialIcons 
+                name={isCollapsed ? "chevron-right" : "chevron-left"} 
+                size={20} 
+                color="#666" 
+              />
+            </TouchableOpacity>
+          )}
         </View>
-      )}
 
       <View style={styles.menuItems}>
         {menuItems.map((item) => (
@@ -159,10 +166,26 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     transition: 'opacity 0.3s ease-in-out',
   },
-  collapseSection: {
-    alignItems: 'flex-end',
-    paddingHorizontal: 10,
-    paddingBottom: 10,
+  headerSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 15,
+    paddingBottom: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+    marginBottom: 10,
+  },
+  brandingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  brandingText: {
+    marginLeft: 12,
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#007AFF',
   },
   collapseButton: {
     padding: 8,

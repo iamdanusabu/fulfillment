@@ -70,9 +70,12 @@ export function Sidebar({ isOpen, onToggle, isCollapsed, onToggleCollapse }: Sid
       styles.sidebar, 
       { 
         width: isOpen ? sidebarWidth : 0,
+        minWidth: isOpen ? sidebarWidth : 0,
+        maxWidth: isOpen ? sidebarWidth : 0,
         display: 'flex',
         height: '100%',
         overflow: 'hidden',
+        flexShrink: 0, // Prevents sidebar from shrinking
       }
     ]}>
       <View style={[

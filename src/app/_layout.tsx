@@ -104,6 +104,7 @@ function RootLayoutContent() {
             flex: 1,
             paddingHorizontal: isSmallMobile ? 8 : 16,
             paddingVertical: isLandscape && isMobile ? 8 : 16,
+            minWidth: 0, // Prevents flex child from overflowing
           }
         ]}>
           <Stack screenOptions={{ 
@@ -146,11 +147,14 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     flexDirection: 'row',
+    overflow: 'hidden', // Prevents content from overflowing container
   },
   mainContent: {
     flex: 1,
     backgroundColor: '#f8f9fa',
     minHeight: 0, // Helps with flex layout in landscape
+    minWidth: 0, // Prevents flex child from overflowing parent
+    maxWidth: '100%', // Ensures content never exceeds container width
   },
   overlay: {
     position: 'absolute',

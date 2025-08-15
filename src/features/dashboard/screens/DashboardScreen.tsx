@@ -238,10 +238,10 @@ export default function DashboardScreen() {
   // Helper function to get source display name and icon
   const getSourceInfo = (sourceName: string) => {
     const sourceMap: { [key: string]: { displayName: string; icon: string | React.ReactElement } } = {
-      'Shopify': { displayName: 'Shopify', icon: <ShopifyIcon width={20} height={20} /> },
-      'bigcommerce': { displayName: 'BigCommerce', icon: <BigCommerceIcon width={20} height={20} /> },
+      'Shopify': { displayName: 'Shopify', icon: <ShopifyIcon width={28} height={28} /> },
+      'bigcommerce': { displayName: 'BigCommerce', icon: <BigCommerceIcon width={28} height={28} /> },
       'Breakaway': { displayName: 'Breakaway', icon: '🏃' },
-      'Ecwid': { displayName: 'Ecwid', icon: <EcwidIcon width={20} height={20} /> },
+      'Ecwid': { displayName: 'Ecwid', icon: <EcwidIcon width={28} height={28} /> },
       'PHONE ORDER': { displayName: 'Phone Order', icon: '📞' },
       'DELIVERY': { displayName: 'Delivery', icon: '🚚' },
       'BAR TAB': { displayName: 'Bar Tab', icon: '🍺' },
@@ -538,13 +538,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   sourceIconContainer: {
-    width: 20,
-    height: 20,
+    width: 28,
+    height: 28,
     justifyContent: 'center',
     alignItems: 'center',
   },
   sourceIcon: {
-    fontSize: 20,
+    fontSize: 28,
   },
   sourceNumber: {
     fontSize: 24,

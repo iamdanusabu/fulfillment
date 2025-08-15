@@ -20,6 +20,7 @@ import { useQRScanner } from '../../orders/hooks/useQRScanner';
 import { AppToolbar } from '../../../components/layout/AppToolbar';
 import { ShopifyIcon } from '../../../shared/components/ShopifyIcon';
 import { BigCommerceIcon } from '../../../shared/components/BigCommerceIcon';
+import { EcwidIcon } from '../../../shared/components/EcwidIcon';
 
 interface FilterSettings {
   sources: string[];
@@ -240,7 +241,7 @@ export default function DashboardScreen() {
       'Shopify': { displayName: 'Shopify', icon: <ShopifyIcon width={20} height={20} /> },
       'bigcommerce': { displayName: 'BigCommerce', icon: <BigCommerceIcon width={20} height={20} /> },
       'Breakaway': { displayName: 'Breakaway', icon: '🏃' },
-      'Ecwid': { displayName: 'Ecwid', icon: '🛒' },
+      'Ecwid': { displayName: 'Ecwid', icon: <EcwidIcon width={20} height={20} /> },
       'PHONE ORDER': { displayName: 'Phone Order', icon: '📞' },
       'DELIVERY': { displayName: 'Delivery', icon: '🚚' },
       'BAR TAB': { displayName: 'Bar Tab', icon: '🍺' },

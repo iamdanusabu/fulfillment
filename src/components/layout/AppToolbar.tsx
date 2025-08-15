@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, useWindowDimensions } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useRouter, useLocalSearchParams, useSegments } from 'expo-router';
+import { useRouter, useLocalSearchParams, useSegments, usePathname } from 'expo-router';
 import { useTabTitle } from './useTabTitle';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 

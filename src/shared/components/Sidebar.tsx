@@ -47,10 +47,8 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
 
   const handleNavigation = (route: string) => {
     router.push(route);
-    // Auto-close on mobile only
-    if (!isTablet) {
-      onToggle();
-    }
+    // Keep sidebar open after navigation for better UX
+    // Users can manually toggle it if needed
   };
 
   const handleLogout = async () => {
@@ -69,8 +67,8 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
       { 
         width: sidebarWidth,
         display: isOpen ? 'flex' : 'none',
-        position: isTablet ? 'relative' : 'absolute',
-        zIndex: isTablet ? 1 : 1000,
+        position: isTablet ? 'relative' : 'fixed',
+        zIndex: 1000,
         height: '100%',
         top: 0,
         left: 0,
@@ -113,6 +111,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     justifyContent: 'space-between',
     position: 'relative',
+    boxShadow: '2px 0 5px rgba(0,0,0,0.1)',
   },
   menuItems: {
     flex: 1,

@@ -44,7 +44,7 @@ function RootLayoutContent() {
   // Always show sidebar and header when authenticated, except on login page
   const showSidebarAndHeader = isAuthenticated && pathname !== '/login' && pathname !== '/';
   // On tablets, sidebar is always open; on mobile, it can be toggled
-  const showSidebar = showSidebarAndHeader && (isTablet || sidebarOpen);
+  const showSidebar = showSidebarAndHeader && sidebarOpen;
   
   // Force re-render when dimensions change to fix Android rendering issues
   const screenKey = `${width}x${height}-${isTablet}-${isLandscape}`;
@@ -56,7 +56,7 @@ function RootLayoutContent() {
       const newHeight = window.height;
       const newIsTablet = newWidth >= 768;
       
-      // On tablet, keep sidebar open; on mobile, close it by default
+      // On tablet, keep sidebar open; on mobile, start closed but allow toggle
       if (newIsTablet) {
         setSidebarOpen(true);
       } else {
@@ -94,6 +94,8 @@ function RootLayoutContent() {
             flex: 1,
             paddingHorizontal: isSmallMobile ? 8 : 16,
             paddingVertical: isLandscape && isMobile ? 8 : 16,
+            marginLeft: showSidebar && !isTablet ? (isSmallMobile ? 180 : 200) : 0,
+            transition: 'margin-left 0.3s ease-in-out',
           }
         ]}>
           <Stack screenOptions={{ 
@@ -112,10 +114,6 @@ function RootLayoutContent() {
           </Stack>
         </View>
       </View>
-
-      {showSidebar && isMobile && sidebarOpen && (
-        <View style={styles.overlay} onTouchEnd={toggleSidebar} />
-      )}
     </View>
   );
 }
@@ -138,19 +136,11 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     flexDirection: 'row',
+    position: 'relative',
   },
   mainContent: {
     flex: 1,
     backgroundColor: '#f8f9fa',
     minHeight: 0, // Helps with flex layout in landscape
-  },
-  overlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    zIndex: 999,
   },
 });

@@ -113,7 +113,7 @@ function RootLayoutContent() {
     <SafeAreaView style={styles.container} key={screenKey}>
       <StatusBar 
         style="light" 
-        backgroundColor="#2c3e50" 
+        backgroundColor="#1a252f" 
         translucent={false}
       />
       <View style={styles.content}>
@@ -201,7 +201,7 @@ export default function RootLayout() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#2c3e50',
+    backgroundColor: '#1a252f',
   },
   content: {
     flex: 1,

@@ -25,7 +25,7 @@
         "CAMERA"
       ],
       "statusBar": {
-        "backgroundColor": "#2c3e50",
+        "backgroundColor": "#1a252f",
         "barStyle": "light-content",
         "translucent": false
       }

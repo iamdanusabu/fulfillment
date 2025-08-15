@@ -9,6 +9,7 @@ import {
   Alert,
   RefreshControl,
   useWindowDimensions,
+  ActivityIndicator,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -17,6 +18,7 @@ import { Order } from '../../../shared/types';
 import { picklistApi } from '../../picklist/api/picklistApi';
 import { QRCodeScanner } from '../components/QRCodeScanner';
 import { useQRScanner } from '../hooks/useQRScanner';
+import { AppToolbar } from '../../../components/layout/AppToolbar';
 
 export default function OrdersScreen() {
   const params = useLocalSearchParams();
@@ -153,7 +155,13 @@ export default function OrdersScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={{ flex: 1 }}>
+      <AppToolbar 
+        title="Orders"
+        onQRScan={startScanning}
+        showMenuButton={false}
+      />
+      <View style={styles.container}>
       {/* Search Bar */}
       <View style={styles.searchContainer}>
         <MaterialIcons name="search" size={20} color="#666" style={styles.searchIcon} />
@@ -227,6 +235,7 @@ export default function OrdersScreen() {
           </TouchableOpacity>
         </View>
       )}
+    </View>
     </View>
   );
 }

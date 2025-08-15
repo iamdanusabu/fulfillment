@@ -16,6 +16,7 @@ import { fetchWithToken } from "../../../shared/services/fetchWithToken";
 import { getConfig } from "../../../environments";
 import { QRCodeScanner } from '../../orders/components/QRCodeScanner';
 import { useQRScanner } from '../../orders/hooks/useQRScanner';
+import { AppToolbar } from '../../../components/layout/AppToolbar';
 
 
 interface FilterSettings {
@@ -244,12 +245,18 @@ export default function DashboardScreen() {
   const errorSources = stats.sourceCounts.filter(source => source.error);
 
   return (
-    <ScrollView 
-      style={styles.container}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    >
+    <View style={{ flex: 1 }}>
+      <AppToolbar 
+        title="Dashboard"
+        onQRScan={startScanning}
+        showMenuButton={false}
+      />
+      <ScrollView 
+        style={styles.container}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
       {stats.error && (
         <View style={styles.errorBanner}>
           <MaterialIcons name="error" size={20} color="#dc3545" />
@@ -392,6 +399,7 @@ export default function DashboardScreen() {
         </View>
       </View>
     </ScrollView>
+    </View>
   );
 }
 

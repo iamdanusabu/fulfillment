@@ -104,7 +104,7 @@ export function Sidebar({
         {/* Header with Logo and Collapse Button */}
         <View style={styles.headerSection}>
           <View style={styles.brandingContainer}>
-            <OrderUpLogo size={32} />
+            {!isCollapsed && <OrderUpLogo size={32} />}
             {!isCollapsed && <Text style={styles.brandingText}>OrderUp</Text>}
           </View>
           {isTablet && (

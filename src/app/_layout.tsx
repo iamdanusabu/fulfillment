@@ -105,6 +105,7 @@ function RootLayoutContent() {
             paddingHorizontal: isSmallMobile ? 8 : 16,
             paddingVertical: isLandscape && isMobile ? 8 : 16,
             minWidth: 0, // Prevents flex child from overflowing
+            position: 'relative',
           }
         ]}>
           <Stack screenOptions={{ 
@@ -112,6 +113,10 @@ function RootLayoutContent() {
             contentStyle: { 
               backgroundColor: '#f8f9fa',
               paddingHorizontal: isSmallMobile ? 4 : 0,
+              flex: 1,
+              width: '100%',
+              maxWidth: '100%',
+              overflow: 'hidden',
             }
           }}>
             <Stack.Screen name="index" />
@@ -148,6 +153,8 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     overflow: 'hidden', // Prevents content from overflowing container
+    width: '100%',
+    height: '100%',
   },
   mainContent: {
     flex: 1,

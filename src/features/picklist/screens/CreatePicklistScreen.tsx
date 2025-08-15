@@ -217,6 +217,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8f9fa',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    width: '100%',
+    maxWidth: '100%',
+    overflow: 'hidden',
   },
   loadingContainer: {
     flex: 1,
@@ -229,7 +234,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#e9ecef',
   },
-  
+
   subtitle: {
     fontSize: 14,
     color: '#666',

@@ -263,7 +263,7 @@ export default function DashboardScreen() {
     );
   }
 
-  const workingSources = stats.sourceCounts.filter(source => !source.error && source.count > 0);
+  const workingSources = stats.sourceCounts.filter(source => !source.error);
   const errorSources = stats.sourceCounts.filter(source => source.error);
 
   return (

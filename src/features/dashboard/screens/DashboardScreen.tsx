@@ -18,6 +18,7 @@ import { getConfig } from "../../../environments";
 import { QRCodeScanner } from '../../orders/components/QRCodeScanner';
 import { useQRScanner } from '../../orders/hooks/useQRScanner';
 import { AppToolbar } from '../../../components/layout/AppToolbar';
+import { ShopifyIcon } from '../../../shared/components/ShopifyIcon';
 
 interface FilterSettings {
   sources: string[];
@@ -234,8 +235,8 @@ export default function DashboardScreen() {
 
   // Helper function to get source display name and icon
   const getSourceInfo = (sourceName: string) => {
-    const sourceMap: { [key: string]: { displayName: string; icon: string } } = {
-      'Shopify': { displayName: 'Shopify', icon: '🛒' },
+    const sourceMap: { [key: string]: { displayName: string; icon: string | React.ReactElement } } = {
+      'Shopify': { displayName: 'Shopify', icon: <ShopifyIcon width={20} height={20} /> },
       'bigcommerce': { displayName: 'BigCommerce', icon: '🛍️' },
       'Breakaway': { displayName: 'Breakaway', icon: '🏃' },
       'Ecwid': { displayName: 'Ecwid', icon: '🛒' },
@@ -337,7 +338,13 @@ export default function DashboardScreen() {
                     onPress={() => navigateToOrders(sourceCount.name)}
                   >
                     <View style={styles.sourceHeader}>
-                      <Text style={styles.sourceIcon}>{sourceInfo.icon}</Text>
+                      <View style={styles.sourceIconContainer}>
+                        {typeof sourceInfo.icon === 'string' ? (
+                          <Text style={styles.sourceIcon}>{sourceInfo.icon}</Text>
+                        ) : (
+                          sourceInfo.icon
+                        )}
+                      </View>
                       <Text style={styles.sourceNumber}>{sourceCount.count}</Text>
                     </View>
                     <Text style={styles.sourceLabel}>{sourceInfo.displayName}</Text>
@@ -527,6 +534,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 8,
+  },
+  sourceIconContainer: {
+    width: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   sourceIcon: {
     fontSize: 20,

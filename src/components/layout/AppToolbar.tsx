@@ -9,9 +9,10 @@ interface AppToolbarProps {
   title?: string;
   onMenuToggle?: () => void;
   showMenuButton?: boolean;
+  onQRScan?: () => void;
 }
 
-export function AppToolbar({ title, onMenuToggle, showMenuButton = true }: AppToolbarProps) {
+export function AppToolbar({ title, onMenuToggle, showMenuButton = true, onQRScan }: AppToolbarProps) {
   const { width, height } = useWindowDimensions();
   const { tabTitle } = useTabTitle();
   const router = useRouter();
@@ -31,7 +32,18 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true }: AppTo
   const getPageActions = () => {
     const actions = [];
 
-    
+    // Add QR scanner button for order lookup on dashboard and orders pages
+    if (pathname === '/orders' || pathname === '/dashboard') {
+      actions.push(
+        <TouchableOpacity 
+          key="qr-scanner"
+          style={[styles.iconButton, isSmallMobile && styles.smallIconButton]} 
+          onPress={onQRScan}
+        >
+          <MaterialIcons name="qr-code-scanner" size={isSmallMobile ? 20 : 24} color="#007AFF" />
+        </TouchableOpacity>
+      );
+    }
 
     // Add refresh button on dashboard
     if (pathname === '/dashboard') {
@@ -88,7 +100,7 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true }: AppTo
       return 'Orders';
     }
     if (pathname === '/orders/[orderId]') {
-      return params.orderId ? `Order ID: ${params.orderId}` : 'Order Details';
+      return 'Order Details';
     }
     if (pathname === '/picklist' && !pathname.includes('/create') && !pathname.includes('/location') && !pathname.includes('/packing')) {
       return 'Picklist';

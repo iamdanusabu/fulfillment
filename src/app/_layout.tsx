@@ -8,6 +8,7 @@ import { AppToolbar } from '../components/layout/AppToolbar';
 import { ThemeProvider } from '../contexts/ThemeContext';
 import { StoreProvider } from '../contexts/StoreContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { QRCodeScanner } from '../features/orders/components/QRCodeScanner';
 
 function RootLayoutContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -128,7 +129,7 @@ function RootLayoutContent() {
             <AppToolbar
               onMenuToggle={toggleSidebar}
               showMenuButton={isMobile}
-              
+              onQRScan={toggleQRScanner}
             />
           )}
 
@@ -143,7 +144,7 @@ function RootLayoutContent() {
             }
           ]}>
             <Stack screenOptions={{
-              headerShown: false, // Let AppToolbar handle the header display
+              headerShown: false,
               animation: 'none',
               animationDuration: 0,
               contentStyle: {
@@ -159,7 +160,6 @@ function RootLayoutContent() {
               <Stack.Screen name="login" />
               <Stack.Screen name="dashboard" />
               <Stack.Screen name="orders" />
-              <Stack.Screen name="orders/[orderId]" options={{ title: 'Order Details' }} />
               <Stack.Screen name="picklist" />
               <Stack.Screen name="settings" />
             </Stack>
@@ -167,7 +167,13 @@ function RootLayoutContent() {
         </View>
       </View>
 
-      
+      {showQRScanner && (
+        <QRCodeScanner
+          visible={showQRScanner}
+          onClose={handleQRClose}
+          onScan={handleQRScan}
+        />
+      )}
     </SafeAreaView>
   );
 }

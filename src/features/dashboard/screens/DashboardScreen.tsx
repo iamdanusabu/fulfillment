@@ -487,13 +487,13 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
   },
   totalOrdersCard: {
-    backgroundColor: '#4F83FD',
+    backgroundColor: '#2563EB',
   },
   readyForPickupCard: {
-    backgroundColor: '#47B881',
+    backgroundColor: '#16A34A',
   },
   activePicklistsCard: {
-    backgroundColor: '#57C4C4',
+    backgroundColor: '#0891B2',
   },
   metricContent: {
     marginLeft: 16,

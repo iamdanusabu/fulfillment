@@ -7,6 +7,8 @@ import { ThemeProvider } from '../contexts/ThemeContext';
 import { StoreProvider } from '../contexts/StoreContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { QRCodeScanner } from '../features/orders/components/QRCodeScanner';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 
 function RootLayoutContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -107,74 +109,81 @@ function RootLayoutContent() {
   }
 
   return (
-    <View style={styles.container} key={screenKey}>
-      <View style={styles.content}>
-        {showSidebarAndHeader && (
-          <Sidebar
-            isOpen={showSidebar}
-            onToggle={toggleSidebar}
-            isCollapsed={sidebarCollapsed}
-            onToggleCollapse={toggleSidebarCollapse}
-          />
-        )}
-
-        <View style={[
-          styles.rightContent,
-          {
-            flex: 1,
-            minWidth: 0, // Prevents flex child from overflowing
-          }
-        ]}>
-          {/* Toolbar positioned to the right of sidebar */}
+    <SafeAreaProvider>
+      <StatusBar
+        style={isAuthenticated && pathname !== '/login' && pathname !== '/' ? "dark" : "auto"}
+        backgroundColor="#fff"
+        translucent={false}
+      />
+      <SafeAreaView style={styles.container} key={screenKey}>
+        <View style={styles.content}>
           {showSidebarAndHeader && (
-            <AppToolbar
-              onMenuToggle={toggleSidebar}
-              showMenuButton={isMobile}
-              onScanPress={toggleQRScanner}
+            <Sidebar
+              isOpen={showSidebar}
+              onToggle={toggleSidebar}
+              isCollapsed={sidebarCollapsed}
+              onToggleCollapse={toggleSidebarCollapse}
             />
           )}
 
           <View style={[
-            styles.mainContent,
+            styles.rightContent,
             {
               flex: 1,
-              paddingHorizontal: isSmallMobile ? 8 : 16,
-              paddingVertical: isLandscape && isMobile ? 8 : 16,
               minWidth: 0, // Prevents flex child from overflowing
-              position: 'relative',
             }
           ]}>
-            <Stack screenOptions={{
-              headerShown: false,
-              animation: 'none',
-              animationDuration: 0,
-              contentStyle: {
-                backgroundColor: '#f8f9fa',
-                paddingHorizontal: isSmallMobile ? 4 : 0,
+            {/* Toolbar positioned to the right of sidebar */}
+            {showSidebarAndHeader && (
+              <AppToolbar
+                onMenuToggle={toggleSidebar}
+                showMenuButton={isMobile}
+                onQRScan={toggleQRScanner}
+              />
+            )}
+
+            <View style={[
+              styles.mainContent,
+              {
                 flex: 1,
-                width: '100%',
-                maxWidth: '100%',
-                overflow: 'hidden',
+                paddingHorizontal: isSmallMobile ? 8 : 16,
+                paddingVertical: isLandscape && isMobile ? 8 : 16,
+                minWidth: 0, // Prevents flex child from overflowing
+                position: 'relative',
               }
-            }}>
-              <Stack.Screen name="index" />
-              <Stack.Screen name="login" />
-              <Stack.Screen name="dashboard" />
-              <Stack.Screen name="orders" />
-              <Stack.Screen name="picklist" />
-              <Stack.Screen name="settings" />
-            </Stack>
+            ]}>
+              <Stack screenOptions={{
+                headerShown: false,
+                animation: 'none',
+                animationDuration: 0,
+                contentStyle: {
+                  backgroundColor: '#f8f9fa',
+                  paddingHorizontal: isSmallMobile ? 4 : 0,
+                  flex: 1,
+                  width: '100%',
+                  maxWidth: '100%',
+                  overflow: 'hidden',
+                }
+              }}>
+                <Stack.Screen name="index" />
+                <Stack.Screen name="login" />
+                <Stack.Screen name="dashboard" />
+                <Stack.Screen name="orders" />
+                <Stack.Screen name="picklist" />
+                <Stack.Screen name="settings" />
+              </Stack>
+            </View>
           </View>
         </View>
-      </View>
 
-      {showQRScanner && (
-        <QRCodeScanner
-          onClose={handleQRClose}
-          onResult={handleQRResult}
-        />
-      )}
-    </View>
+        {showQRScanner && (
+          <QRCodeScanner
+            onClose={handleQRClose}
+            onResult={handleQRResult}
+          />
+        )}
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 

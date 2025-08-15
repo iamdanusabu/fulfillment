@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, useWindowDimensions } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, useWindowDimensions, Platform } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter, usePathname, useLocalSearchParams } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTabTitle } from './useTabTitle';
 
 interface AppToolbarProps {
@@ -17,6 +18,7 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true, onQRSca
   const router = useRouter();
   const pathname = usePathname();
   const params = useLocalSearchParams();
+  const insets = useSafeAreaInsets();
 
   const isLandscape = width > height;
   const isTablet = width >= 768 || (isLandscape && width >= 600);
@@ -133,6 +135,7 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true, onQRSca
       {
         paddingHorizontal: 16,
         paddingVertical: 12,
+        paddingTop: Platform.OS === 'web' ? 12 : Math.max(12, insets.top),
       }
     ]}>
       <View style={styles.leftSection}>
@@ -146,6 +149,15 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true, onQRSca
           </TouchableOpacity>
         )}
         
+        <Text style={[
+          styles.title,
+          {
+            fontSize: isSmallMobile ? 16 : 18,
+            marginLeft: showBackButton || showMenuButton ? 8 : 0,
+          }
+        ]}>
+          {getDynamicTitle()}
+        </Text>
       </View>
 
       <View style={styles.rightSection}>

@@ -10,7 +10,6 @@ import { StoreProvider } from '../contexts/StoreContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { QRCodeScanner } from '../features/orders/components/QRCodeScanner';
 
-
 function RootLayoutContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);

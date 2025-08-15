@@ -100,6 +100,35 @@ export default function OrdersScreen() {
   }, [hasMore, loading, loadMore]);
 
 
+  const getPaymentStatusColor = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'paid':
+        return { backgroundColor: '#28a745', color: '#fff' };
+      case 'unpaid':
+      case 'pending':
+        return { backgroundColor: '#ffc107', color: '#000' };
+      case 'failed':
+      case 'cancelled':
+        return { backgroundColor: '#dc3545', color: '#fff' };
+      default:
+        return { backgroundColor: '#6c757d', color: '#fff' };
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 24) {
+      return `${diffInHours}h ago`;
+    } else if (diffInHours < 48) {
+      return '1 day ago';
+    } else {
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+  };
+
   const renderOrderItem = ({ item }: { item: Order }) => (
     <TouchableOpacity
       style={[
@@ -109,38 +138,47 @@ export default function OrdersScreen() {
       onPress={() => viewOrderDetail(item)}
     >
       <View style={styles.orderHeader}>
-        <View style={styles.orderInfo}>
-          <Text style={styles.orderNumber}>Order ID: {item.orderID}</Text>
-          <Text style={styles.orderDate}>
-            {new Date(item.date).toLocaleDateString()} at {new Date(item.date).toLocaleTimeString()}
+        <View style={styles.orderMainInfo}>
+          <Text style={styles.customerName}>
+            {item.customer || 'Guest Order'}
           </Text>
-        </View>
-        {isPicklistMode && (
-          <View style={styles.checkboxContainer}>
-            <MaterialIcons
-              name={selectedOrders.includes(item.id) ? 'check-box' : 'check-box-outline-blank'}
-              size={24}
-              color={selectedOrders.includes(item.id) ? '#007AFF' : '#ccc'}
-            />
+          <View style={styles.orderMetaRow}>
+            <Text style={styles.externalOrderId}>#{item.orderNumber}</Text>
+            <View style={styles.paymentStatusTag}>
+              <Text style={[styles.paymentStatusText, getPaymentStatusColor(item.paymentStatus)]}>
+                {item.paymentStatus}
+              </Text>
+            </View>
           </View>
-        )}
-        {!isPicklistMode && (
-          <MaterialIcons name="chevron-right" size={24} color="#ccc" />
-        )}
-      </View>
-
-      <View style={styles.customerSection}>
-        <Text style={styles.customer}>Customer: {item.customer}</Text>
-      </View>
-
-      <View style={styles.orderDetails}>
-        <View style={styles.detailRow}>
-          <Text style={styles.itemCount}>{item.items.length} items</Text>
-          <Text style={styles.source}>Source: {item.source}</Text>
         </View>
-        <View style={styles.detailRow}>
-          <Text style={styles.amount}>Amount: ${item.amount.toFixed(2)}</Text>
-          <Text style={styles.status}>Status: {item.status}</Text>
+        
+        <View style={styles.orderActions}>
+          {isPicklistMode && (
+            <View style={styles.checkboxContainer}>
+              <MaterialIcons
+                name={selectedOrders.includes(item.id) ? 'check-box' : 'check-box-outline-blank'}
+                size={20}
+                color={selectedOrders.includes(item.id) ? '#007AFF' : '#ccc'}
+              />
+            </View>
+          )}
+          {!isPicklistMode && (
+            <MaterialIcons name="chevron-right" size={20} color="#ccc" />
+          )}
+        </View>
+      </View>
+
+      <View style={styles.orderFooter}>
+        <View style={styles.orderTags}>
+          <View style={styles.tag}>
+            <Text style={styles.tagText}>{item.totalItemQuantity || item.items.length} Items</Text>
+          </View>
+          <View style={styles.tag}>
+            <Text style={styles.tagText}>{formatDate(item.date)}</Text>
+          </View>
+          <View style={styles.sourceTag}>
+            <Text style={styles.sourceText}>{item.source}</Text>
+          </View>
         </View>
       </View>
     </TouchableOpacity>
@@ -282,11 +320,12 @@ const styles = StyleSheet.create({
   },
   orderCard: {
     backgroundColor: '#fff',
-    padding: 16,
+    padding: 12,
     borderRadius: 8,
-    marginBottom: 12,
+    marginBottom: 8,
     borderWidth: 1,
     borderColor: '#e9ecef',
+    minHeight: 70,
   },
   selectedCard: {
     borderColor: '#007AFF',
@@ -298,55 +337,72 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginBottom: 8,
   },
-  orderInfo: {
+  orderMainInfo: {
     flex: 1,
   },
-  orderNumber: {
+  customerName: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
     color: '#333',
+    marginBottom: 4,
   },
-  orderDate: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 2,
+  orderMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
-  customerSection: {
-    marginBottom: 8,
-  },
-  customer: {
+  externalOrderId: {
     fontSize: 14,
-    color: '#333',
+    color: '#666',
     fontWeight: '500',
   },
-  checkboxContainer: {
-    padding: 4,
+  paymentStatusTag: {
+    borderRadius: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
   },
-  orderDetails: {
-    gap: 4,
+  paymentStatusText: {
+    fontSize: 10,
+    fontWeight: '600',
+    textTransform: 'uppercase',
   },
-  detailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  orderActions: {
+    justifyContent: 'center',
     alignItems: 'center',
   },
-  source: {
-    fontSize: 12,
-    color: '#666',
+  checkboxContainer: {
+    padding: 2,
   },
-  status: {
-    fontSize: 12,
-    color: '#007AFF',
+  orderFooter: {
+    marginTop: 4,
+  },
+  orderTags: {
+    flexDirection: 'row',
+    gap: 6,
+    flexWrap: 'wrap',
+  },
+  tag: {
+    backgroundColor: '#f8f9fa',
+    borderRadius: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  tagText: {
+    fontSize: 11,
+    color: '#666',
     fontWeight: '500',
   },
-  itemCount: {
-    fontSize: 12,
-    color: '#666',
+  sourceTag: {
+    backgroundColor: '#e7f3ff',
+    borderRadius: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
   },
-  amount: {
-    fontSize: 12,
-    color: '#333',
-    fontWeight: '600',
+  sourceText: {
+    fontSize: 11,
+    color: '#007AFF',
+    fontWeight: '500',
+    textTransform: 'capitalize',
   },
   footer: {
     padding: 20,

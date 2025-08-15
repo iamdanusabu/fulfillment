@@ -125,7 +125,7 @@ export default function OrdersScreen() {
     } else if (diffInHours < 48) {
       return '1 day ago';
     } else {
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     }
   };
 

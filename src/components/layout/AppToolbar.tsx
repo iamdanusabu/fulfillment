@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, useWindowDimensions } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useRouter, useLocalSearchParams, useSegments, usePathname } from 'expo-router';
+import { useRouter, usePathname, useLocalSearchParams } from 'expo-router';
 import { useTabTitle } from './useTabTitle';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -35,9 +35,9 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true, onQRSca
     // Add QR scanner button for order lookup on dashboard and orders pages
     if (pathname === '/orders' || pathname === '/dashboard') {
       actions.push(
-        <TouchableOpacity 
+        <TouchableOpacity
           key="qr-scanner"
-          style={[styles.iconButton, isSmallMobile && styles.smallIconButton]} 
+          style={[styles.iconButton, isSmallMobile && styles.smallIconButton]}
           onPress={onQRScan}
         >
           <MaterialIcons name="qr-code-scanner" size={isSmallMobile ? 20 : 24} color="#007AFF" />
@@ -48,9 +48,9 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true, onQRSca
     // Add refresh button on dashboard
     if (pathname === '/dashboard') {
       actions.push(
-        <TouchableOpacity 
+        <TouchableOpacity
           key="refresh"
-          style={[styles.iconButton, isSmallMobile && styles.smallIconButton]} 
+          style={[styles.iconButton, isSmallMobile && styles.smallIconButton]}
           onPress={() => window.location.reload()}
         >
           <MaterialIcons name="refresh" size={isSmallMobile ? 20 : 24} color="#007AFF" />
@@ -61,9 +61,9 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true, onQRSca
     // Add create picklist button on picklist page
     if (pathname === '/picklist') {
       actions.push(
-        <TouchableOpacity 
+        <TouchableOpacity
           key="create-picklist"
-          style={styles.actionButton} 
+          style={styles.actionButton}
           onPress={() => router.push('/orders?mode=picklist')}
         >
           <MaterialIcons name="add" size={20} color="#fff" />
@@ -75,9 +75,9 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true, onQRSca
     // Add filter/search buttons on orders page
     if (pathname === '/orders') {
       actions.push(
-        <TouchableOpacity 
+        <TouchableOpacity
           key="filter"
-          style={[styles.iconButton, isSmallMobile && styles.smallIconButton]} 
+          style={[styles.iconButton, isSmallMobile && styles.smallIconButton]}
           onPress={() => {/* Add filter functionality */}}
         >
           <MaterialIcons name="filter-list" size={isSmallMobile ? 20 : 24} color="#007AFF" />

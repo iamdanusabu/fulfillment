@@ -6,6 +6,7 @@ import { AppToolbar } from '../components/layout/AppToolbar';
 import { ThemeProvider } from '../contexts/ThemeContext';
 import { StoreProvider } from '../contexts/StoreContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import QRCodeScanner from '../features/orders/components/QRCodeScanner';
 
 
 function RootLayoutContent() {

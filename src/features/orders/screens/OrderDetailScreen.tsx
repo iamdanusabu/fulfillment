@@ -28,6 +28,13 @@ export default function OrderDetailScreen() {
     }
   }, [orderId]);
 
+  // Update router params when order is loaded to show order number in header
+  useEffect(() => {
+    if (order) {
+      router.setParams({ orderNumber: order.orderNumber });
+    }
+  }, [order, router]);
+
   const loadOrderDetail = async () => {
     try {
       setLoading(true);

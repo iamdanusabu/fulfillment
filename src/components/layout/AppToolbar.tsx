@@ -100,7 +100,7 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true, onQRSca
       return 'Orders';
     }
     if (pathname === '/orders/[orderId]') {
-      return 'Order Details';
+      return params.orderNumber ? `#${params.orderNumber}` : 'Order Details';
     }
     if (pathname === '/picklist' && !pathname.includes('/create') && !pathname.includes('/location') && !pathname.includes('/packing')) {
       return 'Picklist';

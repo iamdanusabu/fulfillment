@@ -11,8 +11,6 @@ import {
   useWindowDimensions,
   ScrollView 
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authApi } from '../api/authApi';
@@ -56,19 +54,17 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar style="auto" />
-      <ScrollView 
-        contentContainerStyle={[
-          styles.container,
-          {
-            paddingHorizontal: isSmallMobile ? 16 : isLandscape && !isTablet ? 40 : 20,
-            justifyContent: isLandscape && !isTablet ? 'flex-start' : 'center',
-            paddingTop: isLandscape && !isTablet ? 40 : 0,
-          }
-        ]}
-        keyboardShouldPersistTaps="handled"
-      >
+    <ScrollView 
+      contentContainerStyle={[
+        styles.container,
+        {
+          paddingHorizontal: isSmallMobile ? 16 : isLandscape && !isTablet ? 40 : 20,
+          justifyContent: isLandscape && !isTablet ? 'flex-start' : 'center',
+          paddingTop: isLandscape && !isTablet ? 40 : 0,
+        }
+      ]}
+      keyboardShouldPersistTaps="handled"
+    >
       <View style={[
         styles.formContainer,
         {
@@ -126,15 +122,10 @@ export default function LoginScreen() {
         </TouchableOpacity>
       </View>
     </ScrollView>
-    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#f8f9fa',
-  },
   container: {
     flexGrow: 1,
     alignItems: 'center',

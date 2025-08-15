@@ -143,8 +143,8 @@ export default function OrdersScreen() {
             {item.customer || 'Guest Order'}
           </Text>
           <View style={styles.orderMetaRow}>
-            <Text style={styles.externalOrderId}>#{item.orderNumber}</Text>
-            <Text style={styles.orderInternalId}>ID: {item.orderID}</Text>
+            <Text style={styles.orderMainId}>#{item.orderID}</Text>
+            <Text style={styles.externalOrderId}>Ext: {item.orderNumber}</Text>
             <View style={styles.paymentStatusTag}>
               <Text style={[styles.paymentStatusText, getPaymentStatusColor(item.paymentStatus)]}>
                 {item.paymentStatus}
@@ -352,12 +352,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
-  externalOrderId: {
-    fontSize: 14,
-    color: '#666',
-    fontWeight: '500',
+  orderMainId: {
+    fontSize: 16,
+    color: '#333',
+    fontWeight: '600',
   },
-  orderInternalId: {
+  externalOrderId: {
     fontSize: 12,
     color: '#999',
     fontWeight: '400',

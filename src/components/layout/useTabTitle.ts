@@ -1,36 +1,29 @@
 import { usePathname } from 'expo-router';
 import { useMemo } from 'react';
 
-export function useTabTitle() {
+export const useTabTitle = () => {
   const pathname = usePathname();
 
-  const getTabTitle = (path: string): string => {
+  const getTabInfo = (path: string) => {
     switch (path) {
       case '/dashboard':
-        return 'Dashboard';
+        return { title: 'Dashboard', showBackButton: false };
       case '/orders':
-        return 'Orders';
+        return { title: 'Orders', showBackButton: true };
       case '/picklist':
-        return 'Picklists';
-      case '/picklist/location-selection':
-        return 'Select Location';
-      case '/picklist/create':
-        return 'Create Picklist';
-      case '/picklist/packing':
-        return 'Packing';
+        return { title: 'Picklist', showBackButton: false };
       case '/settings':
-        return 'Settings';
-      case '/login':
-        return 'Login';
+        return { title: 'Settings', showBackButton: false };
       default:
-        if (path.includes('/orders/')) {
-          return 'Order Details';
+        if (path.startsWith('/orders/')) {
+          return { title: 'Order Details', showBackButton: true };
         }
-        return 'OrderUp';
+        if (path.startsWith('/picklist/')) {
+          return { title: 'Picklist', showBackButton: true };
+        }
+        return { title: 'App', showBackButton: false };
     }
   };
 
-  const tabTitle = getTabTitle(pathname);
-
-  return { tabTitle };
-}
+  return getTabInfo(pathname);
+};

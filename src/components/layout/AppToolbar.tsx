@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, useWindowDimensions } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useRouter, usePathname, useLocalSearchParams } from 'expo-router';
 import { useTabTitle } from './useTabTitle';
-import { useRouter, usePathname } from 'expo-router';
 
 interface AppToolbarProps {
   title?: string;
@@ -16,12 +15,11 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true }: AppTo
   const { tabTitle } = useTabTitle();
   const router = useRouter();
   const pathname = usePathname();
+  const params = useLocalSearchParams();
 
   const isLandscape = width > height;
   const isTablet = width >= 768 || (isLandscape && width >= 600);
   const isSmallMobile = width < 480;
-
-  const displayTitle = title || tabTitle || 'OrderUp';
 
   // Determine if we should show a back button
   const showBackButton = pathname !== '/dashboard' && pathname !== '/orders' && pathname !== '/picklist' && pathname !== '/settings';
@@ -35,7 +33,7 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true }: AppTo
         </TouchableOpacity>
       );
     }
-    
+
     if (pathname === '/picklist') {
       return (
         <TouchableOpacity style={styles.actionButton} onPress={() => router.push('/orders?mode=picklist')}>
@@ -48,6 +46,36 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true }: AppTo
     return null;
   };
 
+  // Dynamic title based on route and params
+  const getDynamicTitle = () => {
+    if (pathname === '/orders' && params.mode === 'picklist') {
+      return 'Select Orders for Picklist';
+    }
+    if (pathname === '/orders/[orderId]') {
+      return 'Order Details';
+    }
+    if (pathname === '/picklist/create') {
+      return params.fulfillmentId ? 'Update Picklist' : 'Create Picklist';
+    }
+    if (pathname === '/picklist/location-selection') {
+      return 'Select Location';
+    }
+    if (pathname === '/picklist/packing') {
+      return 'Packing';
+    }
+    // Fallback to existing title logic
+    const displayTitle = title || tabTitle || 'OrderUp';
+    return displayTitle;
+  };
+
+  const handleBackPress = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.push('/dashboard');
+    }
+  };
+
   return (
     <View style={[
       styles.toolbar,
@@ -58,7 +86,7 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true }: AppTo
     ]}>
       <View style={styles.leftSection}>
         {showBackButton ? (
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
             <MaterialIcons name="arrow-back" size={24} color="#333" />
           </TouchableOpacity>
         ) : showMenuButton && (
@@ -72,10 +100,10 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true }: AppTo
             fontSize: isSmallMobile ? 18 : isLandscape && !isTablet ? 20 : 24,
           }
         ]}>
-          {displayTitle}
+          {getDynamicTitle()}
         </Text>
       </View>
-      
+
       <View style={styles.rightSection}>
         {getPageActions()}
         <TouchableOpacity style={[styles.iconButton, isSmallMobile && styles.smallIconButton]}>

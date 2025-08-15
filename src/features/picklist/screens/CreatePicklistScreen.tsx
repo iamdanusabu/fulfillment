@@ -177,9 +177,6 @@ export default function CreatePicklistScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>
-          {params.fulfillmentId ? 'Update Picklist' : 'Create Picklist'}
-        </Text>
         <Text style={styles.subtitle}>{totalItemsCount} items to pick</Text>
 
         {/* Progress Bar */}
@@ -232,11 +229,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#e9ecef',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-  },
+  
   subtitle: {
     fontSize: 14,
     color: '#666',

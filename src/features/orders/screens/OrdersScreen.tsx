@@ -139,14 +139,7 @@ export default function OrdersScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <MaterialIcons name="arrow-back" size={24} color="#333" />
-        </TouchableOpacity>
-        <Text style={styles.title}>
-          {isPicklistMode ? 'Select Orders for Picklist' : 'Orders'}
-        </Text>
-      </View>
+      
 
       <View style={styles.searchContainer}>
         <MaterialIcons name="search" size={24} color="#666" style={styles.searchIcon} />
@@ -219,23 +212,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e9ecef',
-  },
-  backButton: {
-    marginRight: 16,
-    padding: 4,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-  },
+  
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',

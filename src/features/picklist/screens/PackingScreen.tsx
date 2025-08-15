@@ -172,7 +172,6 @@ export default function PackingScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Packing</Text>
         <Text style={styles.subtitle}>{orders.length} orders to pack</Text>
       </View>
 
@@ -215,11 +214,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#e9ecef',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-  },
+  
   subtitle: {
     fontSize: 14,
     color: '#666',

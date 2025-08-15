@@ -15,8 +15,8 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
   const { width, height } = useWindowDimensions();
   
   const isLandscape = width > height;
-  const isTablet = width >= 768 || (isLandscape && width >= 600);
-  const sidebarWidth = isTablet ? 250 : isLandscape ? 220 : 200;
+  const isTablet = width >= 768;
+  const sidebarWidth = isTablet ? 250 : 200;
 
   const menuItems = [
     { 
@@ -72,6 +72,8 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
         position: isTablet ? 'relative' : 'absolute',
         zIndex: isTablet ? 1 : 1000,
         height: '100%',
+        top: 0,
+        left: 0,
       }
     ]}>
       <View style={styles.menuItems}>

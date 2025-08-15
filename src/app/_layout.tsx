@@ -55,26 +55,23 @@ function RootLayoutContent() {
 
   // Effect to handle sidebar visibility based on screen size and orientation
   useEffect(() => {
+    let previousIsTablet = isTablet;
+
     const subscription = Dimensions.addEventListener('change', ({ window }) => {
       const newWidth = window.width;
       const newHeight = window.height;
       const newIsTablet = newWidth >= 768;
-      const prevIsTablet = isTablet;
 
       // Only adjust sidebar state if device type actually changed (mobile <-> tablet)
-      if (newIsTablet !== prevIsTablet) {
+      if (newIsTablet !== previousIsTablet) {
         setSidebarOpen(newIsTablet);
+        previousIsTablet = newIsTablet;
       }
       // If staying on same device type, preserve current sidebar state
     });
 
-    // Initial setup - open sidebar on tablets, close on mobile (only on first load)
-    if (typeof sidebarOpen === 'undefined') {
-      setSidebarOpen(isTablet);
-    }
-
     return () => subscription?.remove();
-  }, [isTablet]);
+  }, []);
 
   if (isLoading) {
     return <View style={styles.container} />;

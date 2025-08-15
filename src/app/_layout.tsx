@@ -111,9 +111,9 @@ function RootLayoutContent() {
 
   return (
     <SafeAreaView style={styles.container} key={screenKey}>
-      <StatusBar 
-        style="light" 
-        backgroundColor="#000000" 
+      <StatusBar
+        style="light"
+        backgroundColor="#000000"
         translucent={false}
       />
       <View style={styles.content}>

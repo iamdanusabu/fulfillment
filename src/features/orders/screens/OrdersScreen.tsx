@@ -144,6 +144,7 @@ export default function OrdersScreen() {
           </Text>
           <View style={styles.orderMetaRow}>
             <Text style={styles.externalOrderId}>#{item.orderNumber}</Text>
+            <Text style={styles.orderInternalId}>ID: {item.orderID}</Text>
             <View style={styles.paymentStatusTag}>
               <Text style={[styles.paymentStatusText, getPaymentStatusColor(item.paymentStatus)]}>
                 {item.paymentStatus}
@@ -355,6 +356,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     fontWeight: '500',
+  },
+  orderInternalId: {
+    fontSize: 12,
+    color: '#999',
+    fontWeight: '400',
   },
   paymentStatusTag: {
     borderRadius: 4,

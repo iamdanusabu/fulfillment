@@ -143,20 +143,7 @@ function RootLayoutContent() {
             }
           ]}>
             <Stack screenOptions={{
-              headerShown: true, // Ensure headers are shown by default
-              header: ({ options }) => {
-                const { title } = options;
-                const orderId = router.query.orderId; // Get order ID from query params
-
-                return (
-                  <AppToolbar
-                    title={orderId ? `Order ${orderId}` : title}
-                    onMenuToggle={toggleSidebar}
-                    showMenuButton={isMobile}
-                    
-                  />
-                );
-              },
+              headerShown: false, // Let AppToolbar handle the header display
               animation: 'none',
               animationDuration: 0,
               contentStyle: {

@@ -138,7 +138,7 @@ function RootLayoutContent() {
             <AppToolbar
               onMenuToggle={toggleSidebar}
               showMenuButton={isMobile}
-              onScanPress={toggleQRScanner}
+              onQRScan={toggleQRScanner}
             />
           )}
 

@@ -69,17 +69,21 @@ export function Sidebar({ isOpen, onToggle, isCollapsed, onToggleCollapse }: Sid
     <View style={[
       styles.sidebar, 
       { 
-        width: sidebarWidth,
-        display: isOpen ? 'flex' : 'none',
-        position: 'fixed',
-        zIndex: 1001,
+        width: isOpen ? sidebarWidth : 0,
+        display: 'flex',
         height: '100%',
-        top: 0,
-        left: 0,
+        overflow: 'hidden',
       }
     ]}>
-      {/* Collapse/Expand Toggle Button - Only show on tablets */}
-      {isTablet && (
+      <View style={[
+        styles.sidebarContent,
+        { 
+          width: sidebarWidth,
+          opacity: isOpen ? 1 : 0,
+        }
+      ]}>
+        {/* Collapse/Expand Toggle Button - Only show on tablets */}
+        {isTablet && (
         <View style={styles.collapseSection}>
           <TouchableOpacity 
             style={styles.collapseButton} 
@@ -133,6 +137,7 @@ export function Sidebar({ isOpen, onToggle, isCollapsed, onToggleCollapse }: Sid
           )}
         </TouchableOpacity>
       </View>
+      </View>
     </View>
   );
 }
@@ -142,9 +147,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRightWidth: 1,
     borderRightColor: '#e9ecef',
+    transition: 'width 0.3s ease-in-out',
+  },
+  sidebarContent: {
+    flex: 1,
     paddingVertical: 20,
     justifyContent: 'space-between',
-    transition: 'width 0.3s ease-in-out',
+    transition: 'opacity 0.3s ease-in-out',
   },
   collapseSection: {
     alignItems: 'flex-end',

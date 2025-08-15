@@ -110,7 +110,11 @@ function RootLayoutContent() {
 
   return (
     <View style={styles.container} key={screenKey}>
-      <StatusBar style="dark" backgroundColor="#ffffff" />
+      <StatusBar 
+        style="dark" 
+        backgroundColor="#ffffff" 
+        translucent={false}
+      />
       <View style={styles.content}>
         {showSidebarAndHeader && (
           <Sidebar

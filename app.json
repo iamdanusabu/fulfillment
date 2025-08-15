@@ -26,7 +26,8 @@
       ],
       "statusBar": {
         "backgroundColor": "#ffffff",
-        "barStyle": "dark-content"
+        "barStyle": "dark-content",
+        "translucent": false
       }
     },
     "web": {

@@ -106,10 +106,12 @@ export function Sidebar({
           styles.headerSection,
           isCollapsed && styles.collapsedHeaderSection
         ]}>
-          <View style={styles.brandingContainer}>
-            {!isCollapsed && <OrderUpLogo size={32} />}
-            {!isCollapsed && <Text style={styles.brandingText}>OrderUp</Text>}
-          </View>
+          {!isCollapsed && (
+            <View style={styles.brandingContainer}>
+              <OrderUpLogo size={32} />
+              <Text style={styles.brandingText}>OrderUp</Text>
+            </View>
+          )}
           {isTablet && (
             <TouchableOpacity
               style={[
@@ -224,9 +226,11 @@ const styles = StyleSheet.create({
   collapsedHeaderSection: {
     justifyContent: "center",
     alignItems: "center",
+    paddingHorizontal: 0,
   },
   collapsedCollapseButton: {
     alignSelf: "center",
+    margin: 0,
   },
   menuItems: {
     flex: 1,

@@ -53,7 +53,7 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true }: AppTo
         <TouchableOpacity style={[styles.iconButton, isSmallMobile && styles.smallIconButton]}>
           <MaterialIcons name="account-circle" size={isSmallMobile ? 20 : 24} color="#666" />
         </TouchableOpacity>
-      </View></div>
+      </View>
       
       
     </View>

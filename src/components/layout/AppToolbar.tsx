@@ -131,8 +131,8 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true, onQRSca
     <View style={[
       styles.toolbar,
       {
-        paddingHorizontal: isSmallMobile ? 12 : 16,
-        paddingVertical: isLandscape && !isTablet ? 8 : 12,
+        paddingHorizontal: 16,
+        paddingVertical: 12,
       }
     ]}>
       <View style={styles.leftSection}>

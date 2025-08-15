@@ -1,9 +1,8 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, useWindowDimensions, Platform, SafeAreaView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, useWindowDimensions } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter, usePathname, useLocalSearchParams } from 'expo-router';
 import { useTabTitle } from './useTabTitle';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface AppToolbarProps {
   title?: string;
@@ -18,7 +17,6 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true, onQRSca
   const router = useRouter();
   const pathname = usePathname();
   const params = useLocalSearchParams();
-  const insets = useSafeAreaInsets();
 
   const isLandscape = width > height;
   const isTablet = width >= 768 || (isLandscape && width >= 600);
@@ -30,7 +28,7 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true, onQRSca
   // Get page-specific actions - keep all navigation buttons
   const getPageActions = () => {
     const actions = [];
-
+    
     // Add QR scanner button for order lookup on dashboard and orders pages
     if (pathname === '/orders' || pathname === '/dashboard') {
       actions.push(
@@ -133,9 +131,8 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true, onQRSca
     <View style={[
       styles.toolbar,
       {
-        paddingHorizontal: isSmallMobile ? 12 : 16,
-        height: isLandscape && !isTablet ? 48 : 56,
-        paddingTop: Platform.OS === 'android' ? 0 : insets.top,
+        paddingHorizontal: 16,
+        paddingVertical: 12,
       }
     ]}>
       <View style={styles.leftSection}>
@@ -148,7 +145,7 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true, onQRSca
             <MaterialIcons name="menu" size={24} color="#333" />
           </TouchableOpacity>
         )}
-        <Text style={[styles.title, isSmallMobile && styles.smallTitle]}>{getDynamicTitle()}</Text>
+        
       </View>
 
       <View style={styles.rightSection}>
@@ -160,27 +157,21 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true, onQRSca
 
 const styles = StyleSheet.create({
   toolbar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    borderBottomColor: '#e9ecef',
+    elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
-    elevation: 3,
     zIndex: 1000,
-    ...Platform.select({
-      android: {
-        elevation: 4,
-        shadowOpacity: 0,
-      },
-      ios: {
-        shadowOpacity: 0.1,
-      },
-    }),
+    height: 56,
+    minHeight: 56,
+    maxHeight: 56,
   },
   leftSection: {
     flexDirection: 'row',
@@ -198,10 +189,6 @@ const styles = StyleSheet.create({
   title: {
     fontWeight: 'bold',
     color: '#333',
-    fontSize: 18,
-  },
-  smallTitle: {
-    fontSize: 16,
   },
   rightSection: {
     flexDirection: 'row',

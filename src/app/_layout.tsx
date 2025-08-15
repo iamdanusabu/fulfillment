@@ -13,6 +13,7 @@ function RootLayoutContent() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [showQRScanner, setShowQRScanner] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
   const { width, height } = useWindowDimensions();
   const pathname = usePathname();

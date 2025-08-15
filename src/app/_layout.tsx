@@ -6,7 +6,7 @@ import { AppToolbar } from '../components/layout/AppToolbar';
 import { ThemeProvider } from '../contexts/ThemeContext';
 import { StoreProvider } from '../contexts/StoreContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import QRCodeScanner from '../components/QRCodeScanner'; // Assuming QRCodeScanner is in this path
+import { QRCodeScanner } from '../features/orders/components/QRCodeScanner';
 
 function RootLayoutContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false);

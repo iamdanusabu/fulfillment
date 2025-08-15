@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, useWindowDimensions, Dimensions } from 'react-native';
 import { Stack, usePathname } from 'expo-router';
@@ -15,7 +14,7 @@ function RootLayoutContent() {
   const [isLoading, setIsLoading] = useState(true);
   const { width, height } = useWindowDimensions();
   const pathname = usePathname();
-  
+
   // More sophisticated responsive breakpoints
   const isLandscape = width > height;
   const isTablet = width >= 768;
@@ -50,7 +49,7 @@ function RootLayoutContent() {
   const showSidebarAndHeader = isAuthenticated && pathname !== '/login' && pathname !== '/';
   // On tablets, sidebar is always open; on mobile, it can be toggled
   const showSidebar = showSidebarAndHeader && (isTablet || sidebarOpen);
-  
+
   // Force re-render when dimensions change to fix Android rendering issues
   const screenKey = `${width}x${height}-${isTablet}-${isLandscape}`;
 
@@ -60,17 +59,19 @@ function RootLayoutContent() {
       const newWidth = window.width;
       const newHeight = window.height;
       const newIsTablet = newWidth >= 768;
-      
-      // On tablet, keep sidebar open; on mobile, close it by default
-      if (newIsTablet) {
-        setSidebarOpen(true);
-      } else {
-        setSidebarOpen(false);
+      const prevIsTablet = isTablet;
+
+      // Only adjust sidebar state if device type actually changed (mobile <-> tablet)
+      if (newIsTablet !== prevIsTablet) {
+        setSidebarOpen(newIsTablet);
       }
+      // If staying on same device type, preserve current sidebar state
     });
 
-    // Initial setup - open sidebar on tablets, close on mobile
-    setSidebarOpen(isTablet);
+    // Initial setup - open sidebar on tablets, close on mobile (only on first load)
+    if (typeof sidebarOpen === 'undefined') {
+      setSidebarOpen(isTablet);
+    }
 
     return () => subscription?.remove();
   }, [isTablet]);
@@ -90,8 +91,8 @@ function RootLayoutContent() {
 
       <View style={styles.content}>
         {showSidebarAndHeader && (
-          <Sidebar 
-            isOpen={showSidebar} 
+          <Sidebar
+            isOpen={showSidebar}
             onToggle={toggleSidebar}
             isCollapsed={sidebarCollapsed}
             onToggleCollapse={toggleSidebarCollapse}
@@ -108,11 +109,11 @@ function RootLayoutContent() {
             position: 'relative',
           }
         ]}>
-          <Stack screenOptions={{ 
+          <Stack screenOptions={{
             headerShown: false,
             animation: 'none',
             animationDuration: 0,
-            contentStyle: { 
+            contentStyle: {
               backgroundColor: '#f8f9fa',
               paddingHorizontal: isSmallMobile ? 4 : 0,
               flex: 1,
@@ -131,7 +132,7 @@ function RootLayoutContent() {
         </View>
       </View>
 
-      
+
     </View>
   );
 }

@@ -80,12 +80,9 @@ function RootLayoutContent() {
 
   return (
     <View style={styles.container} key={screenKey}>
-      {/* Common header for entire app - always shown when authenticated */}
-      {showSidebarAndHeader && <CommonHeader />}
-      
-      {/* Page-specific header with navigation buttons */}
+      {/* Single common header for entire app - contains page title and navigation */}
       {showSidebarAndHeader && (
-        <AppToolbar
+        <CommonHeader 
           onMenuToggle={toggleSidebar}
           showMenuButton={isMobile}
         />

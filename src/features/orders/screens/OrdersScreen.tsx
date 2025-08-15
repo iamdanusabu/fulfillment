@@ -156,11 +156,6 @@ export default function OrdersScreen() {
 
   return (
     <View style={{ flex: 1 }}>
-      <AppToolbar 
-        title="Orders"
-        onQRScan={startScanning}
-        showMenuButton={false}
-      />
       <View style={styles.container}>
       {/* Search Bar */}
       <View style={styles.searchContainer}>

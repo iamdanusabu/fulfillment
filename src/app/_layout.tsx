@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, useWindowDimensions, Dimensions } from 'react-native';
-import { Stack, usePathname } from 'expo-router';
+import { Stack, usePathname, useRouter } from 'expo-router';
 import { Sidebar } from '../shared/components/Sidebar';
 import { AppToolbar } from '../components/layout/AppToolbar';
 import { ThemeProvider } from '../contexts/ThemeContext';
 import { StoreProvider } from '../contexts/StoreContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import QRCodeScanner from '../components/QRCodeScanner'; // Assuming QRCodeScanner is in this path
 
 function RootLayoutContent() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [showQRScanner, setShowQRScanner] = useState(false);
+  const router = useRouter();
   const { width, height } = useWindowDimensions();
   const pathname = usePathname();
 
@@ -43,6 +45,32 @@ function RootLayoutContent() {
 
   const toggleSidebarCollapse = () => {
     setSidebarCollapsed(!sidebarCollapsed);
+  };
+
+  // Function to toggle QR scanner visibility
+  const toggleQRScanner = () => {
+    setShowQRScanner(!showQRScanner);
+  };
+
+  // Handler for when QR scanner is closed
+  const handleQRClose = () => {
+    setShowQRScanner(false);
+  };
+
+  // Handler for when a QR code result is obtained
+  const handleQRResult = (result) => {
+    if (result) {
+      // Navigate or process the scanned data
+      if (result.startsWith('http')) {
+        router.push(result); // Example: Navigate to a URL
+      } else {
+        // Handle other types of data, e.g., product IDs
+        console.log('Scanned data:', result);
+        // Example: navigate to a product detail page if result is a product ID
+        // router.push(`/products/${result}`);
+      }
+    }
+    setShowQRScanner(false); // Close scanner after processing
   };
 
   // Always show sidebar and header when authenticated, except on login page
@@ -81,9 +109,10 @@ function RootLayoutContent() {
     <View style={styles.container} key={screenKey}>
       {/* Single common header for entire app - contains page title and navigation */}
       {showSidebarAndHeader && (
-        <AppToolbar 
+        <AppToolbar
           onMenuToggle={toggleSidebar}
           showMenuButton={isMobile}
+          onScanPress={toggleQRScanner} // Pass the toggle function to AppToolbar
         />
       )}
 
@@ -130,7 +159,12 @@ function RootLayoutContent() {
         </View>
       </View>
 
-
+      {showQRScanner && (
+        <QRCodeScanner
+          onClose={handleQRClose}
+          onResult={handleQRResult}
+        />
+      )}
     </View>
   );
 }

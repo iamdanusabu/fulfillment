@@ -246,11 +246,6 @@ export default function DashboardScreen() {
 
   return (
     <View style={{ flex: 1 }}>
-      <AppToolbar
-        title="Dashboard"
-        onQRScan={startScanning}
-        showMenuButton={false}
-      />
       <ScrollView
         style={styles.container}
         refreshControl={

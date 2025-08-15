@@ -145,14 +145,7 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true, onQRSca
             <MaterialIcons name="menu" size={24} color="#333" />
           </TouchableOpacity>
         )}
-        <Text style={[
-          styles.title,
-          {
-            fontSize: isSmallMobile ? 18 : isLandscape && !isTablet ? 20 : 24,
-          }
-        ]}>
-          {getDynamicTitle()}
-        </Text>
+        
       </View>
 
       <View style={styles.rightSection}>

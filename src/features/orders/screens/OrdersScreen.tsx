@@ -198,10 +198,10 @@ export default function OrdersScreen() {
       <View style={styles.container}>
       {/* Search Bar */}
       <View style={styles.searchContainer}>
-        <MaterialIcons name="search" size={20} color="#666" style={styles.searchIcon} />
+        <MaterialIcons name="search" size={16} color="#666" style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
-          placeholder="Search by order number, customer name..."
+          placeholder="Search orders..."
           value={searchText}
           onChangeText={setSearchText}
           clearButtonMode="while-editing"
@@ -211,7 +211,7 @@ export default function OrdersScreen() {
           onPress={startScanning}
           disabled={qrLoading}
         >
-          <MaterialIcons name="qr-code-scanner" size={20} color="#007AFF" />
+          <MaterialIcons name="qr-code-scanner" size={16} color="#007AFF" />
         </TouchableOpacity>
       </View>
 
@@ -290,30 +290,34 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#fff',
     marginHorizontal: 16,
-    marginTop: 8,
-    marginBottom: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 6,
+    marginTop: 6,
+    marginBottom: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 4,
     borderWidth: 1,
     borderColor: '#e9ecef',
+    position: 'sticky',
+    top: 0,
+    zIndex: 10,
   },
   searchIcon: {
-    marginRight: 12,
+    marginRight: 8,
   },
   searchInput: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 14,
+    paddingVertical: 0,
   },
   qrButton: {
-    padding: 8,
-    marginLeft: 8,
+    padding: 4,
+    marginLeft: 6,
   },
   resultsText: {
     paddingHorizontal: 16,
-    paddingBottom: 4,
+    paddingBottom: 2,
     color: '#666',
-    fontSize: 12,
+    fontSize: 11,
   },
   ordersList: {
     flex: 1,

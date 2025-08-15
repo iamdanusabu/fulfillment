@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -17,7 +18,6 @@ import { getConfig } from "../../../environments";
 import { QRCodeScanner } from '../../orders/components/QRCodeScanner';
 import { useQRScanner } from '../../orders/hooks/useQRScanner';
 import { AppToolbar } from '../../../components/layout/AppToolbar';
-
 
 interface FilterSettings {
   sources: string[];
@@ -57,8 +57,7 @@ export default function DashboardScreen() {
   const { isScanning, startScanning, stopScanning, handleScan } = useQRScanner();
 
   const isLandscape = width > height;
-  const isSmallMobile = width < 400;
-
+  const isTablet = width >= 768;
 
   useEffect(() => {
     loadDashboardData();
@@ -137,7 +136,6 @@ export default function DashboardScreen() {
             error: false,
           };
         } catch (error) {
-          // 404 means no orders for this source, not an error
           if (error instanceof Error && error.message.includes('404')) {
             return {
               name: source,
@@ -232,6 +230,28 @@ export default function DashboardScreen() {
     loadDashboardData(true);
   };
 
+  // Helper function to get source display name and icon
+  const getSourceInfo = (sourceName: string) => {
+    const sourceMap: { [key: string]: { displayName: string; icon: string } } = {
+      'Shopify': { displayName: 'Shopify', icon: '🛒' },
+      'bigcommerce': { displayName: 'BigCommerce', icon: '🛍️' },
+      'Breakaway': { displayName: 'Breakaway', icon: '🏃' },
+      'Ecwid': { displayName: 'Ecwid', icon: '🛒' },
+      'PHONE ORDER': { displayName: 'Phone Order', icon: '📞' },
+      'DELIVERY': { displayName: 'Delivery', icon: '🚚' },
+      'BAR TAB': { displayName: 'Bar Tab', icon: '🍺' },
+      'TIKT': { displayName: 'TIKT', icon: '🎫' },
+      'TABLE': { displayName: 'Table', icon: '🍽️' },
+      'OTHER': { displayName: 'Other', icon: '📦' },
+      'MANUAL': { displayName: 'Manual', icon: '✏️' },
+      'FanVista': { displayName: 'FanVista', icon: '📱' },
+      'QSR': { displayName: 'QSR', icon: '🍔' },
+      'Tapin2': { displayName: 'Tapin2', icon: '💳' },
+    };
+    
+    return sourceMap[sourceName] || { displayName: sourceName, icon: '📦' };
+  };
+
   if (stats.loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -241,7 +261,7 @@ export default function DashboardScreen() {
     );
   }
 
-  const workingSources = stats.sourceCounts.filter(source => !source.error);
+  const workingSources = stats.sourceCounts.filter(source => !source.error && source.count > 0);
   const errorSources = stats.sourceCounts.filter(source => source.error);
 
   return (
@@ -252,148 +272,148 @@ export default function DashboardScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-      {stats.error && (
-        <View style={styles.errorBanner}>
-          <MaterialIcons name="error" size={20} color="#dc3545" />
-          <Text style={styles.errorText}>{stats.error}</Text>
-        </View>
-      )}
-
-      {/* Key Metrics Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Key Metrics</Text>
-        <View style={styles.keyMetricsGrid}>
-          <TouchableOpacity
-            style={[styles.keyMetricCard, styles.primaryMetric]}
-            onPress={() => navigateToOrders()}
-          >
-            <MaterialIcons name="shopping-cart" size={32} color="#fff" />
-            <Text style={styles.keyMetricNumber}>{stats.totalOrdersCount}</Text>
-            <Text style={styles.keyMetricLabel}>Total Orders</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.keyMetricCard, styles.readyMetric]}
-            onPress={() => router.push('/orders?hasFulfilmentJob=true&status=Ready')}
-          >
-            <MaterialIcons name="local-shipping" size={32} color="#fff" />
-            <Text style={styles.keyMetricNumber}>{stats.readyForPickupCount}</Text>
-            <Text style={styles.keyMetricLabel}>Ready for Pickup</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.keyMetricCard, styles.picklistMetric]}
-            onPress={() => router.push('/picklist')}
-          >
-            <MaterialIcons name="inventory" size={32} color="#fff" />
-            <Text style={styles.keyMetricNumber}>{stats.activePicklistsCount}</Text>
-            <Text style={styles.keyMetricLabel}>Active Picklists</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Order Sources Section */}
-      {workingSources.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Orders by Source</Text>
-          <View style={styles.sourcesGrid}>
-            {workingSources.map((sourceCount) => (
-              <TouchableOpacity
-                key={sourceCount.name}
-                style={styles.sourceCard}
-                onPress={() => navigateToOrders(sourceCount.name)}
-              >
-                <Text style={styles.sourceNumber}>{sourceCount.count}</Text>
-                <Text style={styles.sourceLabel}>{sourceCount.name}</Text>
-              </TouchableOpacity>
-            ))}
+        {stats.error && (
+          <View style={styles.errorBanner}>
+            <MaterialIcons name="error" size={20} color="#dc3545" />
+            <Text style={styles.errorText}>{stats.error}</Text>
           </View>
-        </View>
-      )}
+        )}
 
-      {/* Connection Issues Section */}
-      {errorSources.length > 0 && (
+        {/* Key Metrics Section */}
         <View style={styles.section}>
-          <View style={styles.errorSectionHeader}>
-            <MaterialIcons name="warning" size={20} color="#ffc107" />
-            <Text style={styles.errorSectionTitle}>Connection Issues</Text>
-          </View>
-          <View style={styles.errorSourcesList}>
-            {errorSources.map((source) => (
-              <View key={source.name} style={styles.errorSourceItem}>
-                <MaterialIcons name="error-outline" size={16} color="#dc3545" />
-                <Text style={styles.errorSourceText}>{source.name}</Text>
+          <Text style={styles.sectionTitle}>Key Metrics</Text>
+          <View style={[
+            styles.keyMetricsContainer,
+            { flexDirection: isTablet || isLandscape ? 'row' : 'column' }
+          ]}>
+            <TouchableOpacity
+              style={[styles.keyMetricCard, styles.totalOrdersCard, isTablet || isLandscape ? { flex: 1 } : {}]}
+              onPress={() => navigateToOrders()}
+            >
+              <MaterialIcons name="shopping-cart" size={32} color="#fff" />
+              <View style={styles.metricContent}>
+                <Text style={styles.metricNumber}>{stats.totalOrdersCount}</Text>
+                <Text style={styles.metricLabel}>Total Orders</Text>
               </View>
-            ))}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.keyMetricCard, styles.readyForPickupCard, isTablet || isLandscape ? { flex: 1 } : {}]}
+              onPress={() => router.push('/orders?hasFulfilmentJob=true&status=Ready')}
+            >
+              <MaterialIcons name="local-shipping" size={32} color="#fff" />
+              <View style={styles.metricContent}>
+                <Text style={styles.metricNumber}>{stats.readyForPickupCount}</Text>
+                <Text style={styles.metricLabel}>Ready for Pickup</Text>
+              </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.keyMetricCard, styles.activePicklistsCard, isTablet || isLandscape ? { flex: 1 } : {}]}
+              onPress={() => router.push('/picklist')}
+            >
+              <MaterialIcons name="inventory" size={32} color="#fff" />
+              <View style={styles.metricContent}>
+                <Text style={styles.metricNumber}>{stats.activePicklistsCount}</Text>
+                <Text style={styles.metricLabel}>Active Picklists</Text>
+              </View>
+            </TouchableOpacity>
           </View>
-          <Text style={styles.errorHint}>
-            These sources couldn't be loaded. Pull to refresh to try again.
-          </Text>
         </View>
-      )}
 
-      {/* Quick Order Lookup */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Quick Order Lookup</Text>
-        <TouchableOpacity
-          style={styles.qrScanButton}
-          onPress={startScanning}
-        >
-          <MaterialIcons name="qr-code-scanner" size={32} color="#007AFF" />
-          <View style={styles.qrScanContent}>
-            <Text style={styles.qrScanTitle}>Scan QR Code</Text>
-            <Text style={styles.qrScanSubtitle}>Quickly find an order by scanning its QR code</Text>
+        {/* Orders by Source Section */}
+        {workingSources.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Orders by Source</Text>
+            <View style={styles.sourcesGrid}>
+              {workingSources.map((sourceCount) => {
+                const sourceInfo = getSourceInfo(sourceCount.name);
+                return (
+                  <TouchableOpacity
+                    key={sourceCount.name}
+                    style={styles.sourceCard}
+                    onPress={() => navigateToOrders(sourceCount.name)}
+                  >
+                    <View style={styles.sourceHeader}>
+                      <Text style={styles.sourceIcon}>{sourceInfo.icon}</Text>
+                      <Text style={styles.sourceNumber}>{sourceCount.count}</Text>
+                    </View>
+                    <Text style={styles.sourceLabel}>{sourceInfo.displayName}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
           </View>
-          <MaterialIcons name="arrow-forward-ios" size={16} color="#007AFF" />
-        </TouchableOpacity>
-      </View>
+        )}
 
-      {/* QR Code Scanner Modal */}
-      <QRCodeScanner
-        visible={isScanning}
-        onClose={stopScanning}
-        onScan={handleScan}
-      />
+        {/* Connection Issues Section */}
+        {errorSources.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.errorSectionHeader}>
+              <MaterialIcons name="warning" size={20} color="#ffc107" />
+              <Text style={styles.errorSectionTitle}>Connection Issues</Text>
+            </View>
+            <View style={styles.errorSourcesList}>
+              {errorSources.map((source) => (
+                <View key={source.name} style={styles.errorSourceItem}>
+                  <MaterialIcons name="error-outline" size={16} color="#dc3545" />
+                  <Text style={styles.errorSourceText}>{source.name}</Text>
+                </View>
+              ))}
+            </View>
+            <Text style={styles.errorHint}>
+              These sources couldn't be loaded. Pull to refresh to try again.
+            </Text>
+          </View>
+        )}
 
-      {/* Action Buttons */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Quick Actions</Text>
+        {/* Bottom Section with Quick Order Lookup and Quick Actions */}
         <View style={[
-          styles.actionButtonsContainer,
-          {
-            flexDirection: isLandscape && !isSmallMobile ? 'row' : 'column',
-          }
+          styles.bottomSection,
+          { flexDirection: isTablet || isLandscape ? 'row' : 'column' }
         ]}>
-          <TouchableOpacity
-            style={[
-              styles.actionButton,
-              {
-                marginRight: isLandscape && !isSmallMobile ? 16 : 0,
-                marginBottom: isLandscape && !isSmallMobile ? 0 : 16,
-                flex: isLandscape && !isSmallMobile ? 1 : 0,
-              }
-            ]}
-            onPress={() => router.push('/orders')}
-          >
-            <MaterialIcons name="receipt-long" size={24} color="#fff" />
-            <Text style={styles.actionButtonText}>View Orders</Text>
-          </TouchableOpacity>
+          {/* Quick Order Lookup */}
+          <View style={[styles.quickSection, isTablet || isLandscape ? { flex: 1, marginRight: 16 } : {}]}>
+            <Text style={styles.sectionTitle}>Quick Order Lookup</Text>
+            <TouchableOpacity
+              style={styles.scanButton}
+              onPress={startScanning}
+            >
+              <MaterialIcons name="qr-code-scanner" size={24} color="#007AFF" />
+              <Text style={styles.scanButtonText}>Scan QR Code</Text>
+            </TouchableOpacity>
+          </View>
 
-          <TouchableOpacity
-            style={[
-              styles.actionButton,
-              {
-                flex: isLandscape && !isSmallMobile ? 1 : 0,
-              }
-            ]}
-            onPress={() => router.push('/picklist')}
-          >
-            <MaterialIcons name="list-alt" size={24} color="#fff" />
-            <Text style={styles.actionButtonText}>Manage Picklists</Text>
-          </TouchableOpacity>
+          {/* Quick Actions */}
+          <View style={[styles.quickSection, isTablet || isLandscape ? { flex: 1 } : {}]}>
+            <Text style={styles.sectionTitle}>Quick Actions</Text>
+            <View style={styles.actionButtonsRow}>
+              <TouchableOpacity
+                style={[styles.actionButton, { flex: 1, marginRight: 8 }]}
+                onPress={() => router.push('/orders')}
+              >
+                <MaterialIcons name="receipt-long" size={20} color="#fff" />
+                <Text style={styles.actionButtonText}>View Orders</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.actionButton, { flex: 1, marginLeft: 8 }]}
+                onPress={() => router.push('/picklist')}
+              >
+                <MaterialIcons name="list-alt" size={20} color="#fff" />
+                <Text style={styles.actionButtonText}>Manage Picklists</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
-      </View>
-    </ScrollView>
+
+        {/* QR Code Scanner Modal */}
+        <QRCodeScanner
+          visible={isScanning}
+          onClose={stopScanning}
+          onScan={handleScan}
+        />
+      </ScrollView>
     </View>
   );
 }
@@ -401,13 +421,13 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#f5f7fa',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#f5f7fa',
   },
   loadingText: {
     fontSize: 16,
@@ -419,7 +439,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#f8d7da',
     padding: 12,
-    marginHorizontal: 16,
+    marginHorizontal: 20,
     marginTop: 16,
     borderRadius: 8,
     borderWidth: 1,
@@ -431,50 +451,54 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   section: {
-    margin: 16,
+    marginHorizontal: 20,
+    marginTop: 24,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 12,
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1a1a1a',
+    marginBottom: 16,
   },
-  keyMetricsGrid: {
+  keyMetricsContainer: {
     gap: 12,
   },
   keyMetricCard: {
-    backgroundColor: '#007AFF',
-    padding: 20,
-    borderRadius: 12,
     flexDirection: 'row',
     alignItems: 'center',
+    padding: 20,
+    borderRadius: 16,
+    marginBottom: 12,
     elevation: 2,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: 8,
   },
-  primaryMetric: {
-    backgroundColor: '#007AFF',
+  totalOrdersCard: {
+    backgroundColor: '#4F83FD',
   },
-  readyMetric: {
-    backgroundColor: '#28a745',
+  readyForPickupCard: {
+    backgroundColor: '#47B881',
   },
-  picklistMetric: {
-    backgroundColor: '#17a2b8',
+  activePicklistsCard: {
+    backgroundColor: '#57C4C4',
   },
-  keyMetricNumber: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: '#fff',
+  metricContent: {
     marginLeft: 16,
-    marginRight: 12,
+    flex: 1,
   },
-  keyMetricLabel: {
+  metricNumber: {
+    fontSize: 32,
+    fontWeight: "800",
+    color: '#fff',
+    lineHeight: 38,
+  },
+  metricLabel: {
     fontSize: 16,
     color: '#fff',
     fontWeight: '500',
-    flex: 1,
+    opacity: 0.9,
   },
   sourcesGrid: {
     flexDirection: "row",
@@ -484,27 +508,36 @@ const styles = StyleSheet.create({
   sourceCard: {
     backgroundColor: "#fff",
     padding: 16,
-    borderRadius: 8,
-    minWidth: 100,
+    borderRadius: 12,
+    minWidth: 120,
     flex: 1,
     maxWidth: '48%',
-    alignItems: "center",
     elevation: 1,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    borderWidth: 1,
+    borderColor: '#f0f0f0',
+  },
+  sourceHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  sourceIcon: {
+    fontSize: 20,
   },
   sourceNumber: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: "bold",
-    color: "#007AFF",
-    marginBottom: 4,
+    color: "#1a1a1a",
   },
   sourceLabel: {
-    fontSize: 12,
+    fontSize: 14,
     color: "#666",
-    textAlign: "center",
+    fontWeight: '500',
   },
   errorSectionHeader: {
     flexDirection: 'row',
@@ -541,8 +574,35 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontStyle: 'italic',
   },
-  actionButtonsContainer: {
+  bottomSection: {
+    marginHorizontal: 20,
+    marginTop: 24,
+    marginBottom: 32,
     gap: 16,
+  },
+  quickSection: {
+    marginBottom: 16,
+  },
+  scanButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#e8f2ff',
+    borderStyle: 'dashed',
+  },
+  scanButtonText: {
+    color: '#007AFF',
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+  actionButtonsRow: {
+    flexDirection: 'row',
+    gap: 0,
   },
   actionButton: {
     backgroundColor: '#007AFF',
@@ -559,31 +619,8 @@ const styles = StyleSheet.create({
   },
   actionButtonText: {
     color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 12,
-  },
-  qrScanButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#e9ecef',
-  },
-  qrScanContent: {
-    flex: 1,
-    marginLeft: 16,
-  },
-  qrScanTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
-  },
-  qrScanSubtitle: {
     fontSize: 14,
-    color: '#666',
+    fontWeight: '600',
+    marginLeft: 8,
   },
 });

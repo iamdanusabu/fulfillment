@@ -71,8 +71,8 @@ export function Sidebar({ isOpen, onToggle, isCollapsed, onToggleCollapse }: Sid
       { 
         width: sidebarWidth,
         display: isOpen ? 'flex' : 'none',
-        position: isTablet ? 'fixed' : 'absolute',
-        zIndex: isTablet ? 1001 : 1000,
+        position: 'fixed',
+        zIndex: 1001,
         height: '100%',
         top: 0,
         left: 0,
@@ -144,7 +144,6 @@ const styles = StyleSheet.create({
     borderRightColor: '#e9ecef',
     paddingVertical: 20,
     justifyContent: 'space-between',
-    position: 'relative',
     transition: 'width 0.3s ease-in-out',
   },
   collapseSection: {

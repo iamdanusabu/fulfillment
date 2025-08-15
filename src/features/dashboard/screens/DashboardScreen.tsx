@@ -136,13 +136,15 @@ export default function DashboardScreen() {
             error: false,
           };
         } catch (error) {
-          if (error instanceof Error && error.message.includes('404')) {
+          // Handle 404 and other "no orders" scenarios as 0 count, not an error
+          if (error instanceof Error && (error.message.includes('404') || error.message.includes('No orders found'))) {
             return {
               name: source,
               count: 0,
               error: false,
             };
           }
+          // Only treat other errors as actual errors
           console.error(`Failed to get count for source ${source}:`, error);
           return {
             name: source,

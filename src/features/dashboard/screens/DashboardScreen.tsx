@@ -110,7 +110,7 @@ export default function DashboardScreen() {
       } else {
         sources = [
           "Shopify",
-          "Tapin2", 
+          "Tapin2",
           "Breakaway",
           "bigcommerce",
           "Ecwid",
@@ -185,7 +185,7 @@ export default function DashboardScreen() {
         sources = [
           "Shopify",
           "Tapin2",
-          "Breakaway", 
+          "Breakaway",
           "bigcommerce",
           "Ecwid",
           "PHONE ORDER",
@@ -246,12 +246,12 @@ export default function DashboardScreen() {
 
   return (
     <View style={{ flex: 1 }}>
-      <AppToolbar 
+      <AppToolbar
         title="Dashboard"
         onQRScan={startScanning}
         showMenuButton={false}
       />
-      <ScrollView 
+      <ScrollView
         style={styles.container}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -340,8 +340,8 @@ export default function DashboardScreen() {
       {/* Quick Order Lookup */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Quick Order Lookup</Text>
-        <TouchableOpacity 
-          style={styles.qrScanButton} 
+        <TouchableOpacity
+          style={styles.qrScanButton}
           onPress={startScanning}
         >
           <MaterialIcons name="qr-code-scanner" size={32} color="#007AFF" />
@@ -369,7 +369,7 @@ export default function DashboardScreen() {
             flexDirection: isLandscape && !isSmallMobile ? 'row' : 'column',
           }
         ]}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[
               styles.actionButton,
               {
@@ -377,20 +377,20 @@ export default function DashboardScreen() {
                 marginBottom: isLandscape && !isSmallMobile ? 0 : 16,
                 flex: isLandscape && !isSmallMobile ? 1 : 0,
               }
-            ]} 
+            ]}
             onPress={() => router.push('/orders')}
           >
             <MaterialIcons name="receipt-long" size={24} color="#fff" />
             <Text style={styles.actionButtonText}>View Orders</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[
               styles.actionButton,
               {
                 flex: isLandscape && !isSmallMobile ? 1 : 0,
               }
-            ]} 
+            ]}
             onPress={() => router.push('/picklist')}
           >
             <MaterialIcons name="list-alt" size={24} color="#fff" />

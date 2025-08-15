@@ -75,11 +75,20 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true, onQRSca
 
   // Dynamic title based on route and params
   const getDynamicTitle = () => {
+    if (pathname === '/dashboard') {
+      return 'Dashboard';
+    }
     if (pathname === '/orders' && params.mode === 'picklist') {
       return 'Select Orders for Picklist';
     }
+    if (pathname === '/orders' && !params.mode) {
+      return 'Orders';
+    }
     if (pathname === '/orders/[orderId]') {
       return 'Order Details';
+    }
+    if (pathname === '/picklist' && !pathname.includes('/create') && !pathname.includes('/location') && !pathname.includes('/packing')) {
+      return 'Picklist';
     }
     if (pathname === '/picklist/create') {
       return params.fulfillmentId ? 'Update Picklist' : 'Create Picklist';
@@ -89,6 +98,9 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true, onQRSca
     }
     if (pathname === '/picklist/packing') {
       return 'Packing';
+    }
+    if (pathname === '/settings') {
+      return 'Settings';
     }
     // Fallback to existing title logic
     const displayTitle = title || tabTitle || 'OrderUp';
@@ -133,12 +145,6 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true, onQRSca
 
       <View style={styles.rightSection}>
         {getPageActions()}
-        <TouchableOpacity style={[styles.iconButton, isSmallMobile && styles.smallIconButton]}>
-          <MaterialIcons name="notifications" size={isSmallMobile ? 20 : 24} color="#666" />
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.iconButton, isSmallMobile && styles.smallIconButton]}>
-          <MaterialIcons name="account-circle" size={isSmallMobile ? 20 : 24} color="#666" />
-        </TouchableOpacity>
       </View>
     </View>
   );

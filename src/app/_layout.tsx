@@ -146,7 +146,7 @@ function RootLayoutContent() {
             }
           ]}>
             <Stack screenOptions={{
-              headerShown: false,
+              headerShown: true,
               animation: 'none',
               animationDuration: 0,
               contentStyle: {
@@ -156,7 +156,17 @@ function RootLayoutContent() {
                 width: '100%',
                 maxWidth: '100%',
                 overflow: 'hidden',
-              }
+              },
+              headerStyle: {
+                backgroundColor: 'white', // Set header background to white
+              },
+              headerTintColor: 'black', // Set header text color to black for contrast
+              headerTitleStyle: {
+                fontWeight: 'bold',
+              },
+              statusBarTranslucent: true, // Allows status bar to be translucent
+              statusBarColor: 'white', // Set status bar background to white
+              statusBarStyle: 'dark-content', // Set status bar text style to dark
             }}>
               <Stack.Screen name="index" />
               <Stack.Screen name="login" />

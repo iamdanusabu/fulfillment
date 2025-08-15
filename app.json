@@ -20,13 +20,13 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
+      "edgeToEdgeEnabled": false,
       "permissions": [
         "CAMERA"
       ],
       "statusBar": {
-        "backgroundColor": "#ffffff",
-        "barStyle": "dark-content",
+        "backgroundColor": "#2c3e50",
+        "barStyle": "light-content",
         "translucent": false
       }
     },

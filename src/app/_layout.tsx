@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, useWindowDimensions, Dimensions } from 'react-native';
 import { Stack, usePathname, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { Sidebar } from '../shared/components/Sidebar';
 import { AppToolbar } from '../components/layout/AppToolbar';
 import { ThemeProvider } from '../contexts/ThemeContext';
@@ -109,10 +110,10 @@ function RootLayoutContent() {
   }
 
   return (
-    <View style={styles.container} key={screenKey}>
+    <SafeAreaView style={styles.container} key={screenKey}>
       <StatusBar 
-        style="dark" 
-        backgroundColor="#ffffff" 
+        style="light" 
+        backgroundColor="#2c3e50" 
         translucent={false}
       />
       <View style={styles.content}>
@@ -181,24 +182,26 @@ function RootLayoutContent() {
           onResult={handleQRResult}
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 
 export default function RootLayout() {
   return (
-    <StoreProvider>
-      <ThemeProvider>
-        <RootLayoutContent />
-      </ThemeProvider>
-    </StoreProvider>
+    <SafeAreaProvider>
+      <StoreProvider>
+        <ThemeProvider>
+          <RootLayoutContent />
+        </ThemeProvider>
+      </StoreProvider>
+    </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#2c3e50',
   },
   content: {
     flex: 1,

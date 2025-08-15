@@ -222,9 +222,7 @@ export default function OrdersScreen() {
         onScan={handleScan}
       />
 
-      <Text style={styles.resultsText}>
-        {totalRecords} orders found - Page {currentPage} of {totalPages}
-      </Text>
+      
 
       <FlatList
         data={filteredOrders}

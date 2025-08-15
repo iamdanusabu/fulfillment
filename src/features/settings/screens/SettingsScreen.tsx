@@ -50,10 +50,10 @@ const ALL_SOURCES = [
 ];
 
 const ALL_STATUSES = [
-  'Initiated', 'Sent for Processing', 'Completed', 'Cancelled'
+  'Initiated', 'Sent for Processing'
 ];
 
-const ALL_PAYMENT_STATUSES = ['PAID', 'UNPAID', 'PENDING'];
+const ALL_PAYMENT_STATUSES = ['PAID', 'UNPAID'];
 
 export default function SettingsScreen() {
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);

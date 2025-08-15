@@ -99,7 +99,7 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true, onQRSca
     if (pathname === '/orders' && !params.mode) {
       return 'Orders';
     }
-    if (pathname === '/orders/[orderId]') {
+    if (pathname.startsWith('/orders/') && pathname !== '/orders') {
       return 'Order Details';
     }
     if (pathname === '/picklist' && !pathname.includes('/create') && !pathname.includes('/location') && !pathname.includes('/packing')) {

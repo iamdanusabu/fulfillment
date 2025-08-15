@@ -90,7 +90,7 @@ export function Sidebar({ isOpen, onToggle, isCollapsed, onToggleCollapse }: Sid
         <View style={styles.headerSection}>
           <View style={styles.brandingContainer}>
             <OrderUpLogo size={32} />
-            {(!isCollapsed || !isTablet) && (
+            {!isCollapsed && (
               <Text style={styles.brandingText}>OrderUp</Text>
             )}
           </View>

@@ -108,15 +108,6 @@ function RootLayoutContent() {
 
   return (
     <View style={styles.container} key={screenKey}>
-      {/* Single common header for entire app - contains page title and navigation */}
-      {showSidebarAndHeader && (
-        <AppToolbar
-          onMenuToggle={toggleSidebar}
-          showMenuButton={isMobile}
-          onScanPress={toggleQRScanner} // Pass the toggle function to AppToolbar
-        />
-      )}
-
       <View style={styles.content}>
         {showSidebarAndHeader && (
           <Sidebar
@@ -128,35 +119,52 @@ function RootLayoutContent() {
         )}
 
         <View style={[
-          styles.mainContent,
+          styles.rightContent,
           {
             flex: 1,
-            paddingHorizontal: isSmallMobile ? 8 : 16,
-            paddingVertical: isLandscape && isMobile ? 8 : 16,
             minWidth: 0, // Prevents flex child from overflowing
-            position: 'relative',
           }
         ]}>
-          <Stack screenOptions={{
-            headerShown: false,
-            animation: 'none',
-            animationDuration: 0,
-            contentStyle: {
-              backgroundColor: '#f8f9fa',
-              paddingHorizontal: isSmallMobile ? 4 : 0,
+          {/* Toolbar positioned to the right of sidebar */}
+          {showSidebarAndHeader && (
+            <AppToolbar
+              onMenuToggle={toggleSidebar}
+              showMenuButton={isMobile}
+              onScanPress={toggleQRScanner}
+            />
+          )}
+
+          <View style={[
+            styles.mainContent,
+            {
               flex: 1,
-              width: '100%',
-              maxWidth: '100%',
-              overflow: 'hidden',
+              paddingHorizontal: isSmallMobile ? 8 : 16,
+              paddingVertical: isLandscape && isMobile ? 8 : 16,
+              minWidth: 0, // Prevents flex child from overflowing
+              position: 'relative',
             }
-          }}>
-            <Stack.Screen name="index" />
-            <Stack.Screen name="login" />
-            <Stack.Screen name="dashboard" />
-            <Stack.Screen name="orders" />
-            <Stack.Screen name="picklist" />
-            <Stack.Screen name="settings" />
-          </Stack>
+          ]}>
+            <Stack screenOptions={{
+              headerShown: false,
+              animation: 'none',
+              animationDuration: 0,
+              contentStyle: {
+                backgroundColor: '#f8f9fa',
+                paddingHorizontal: isSmallMobile ? 4 : 0,
+                flex: 1,
+                width: '100%',
+                maxWidth: '100%',
+                overflow: 'hidden',
+              }
+            }}>
+              <Stack.Screen name="index" />
+              <Stack.Screen name="login" />
+              <Stack.Screen name="dashboard" />
+              <Stack.Screen name="orders" />
+              <Stack.Screen name="picklist" />
+              <Stack.Screen name="settings" />
+            </Stack>
+          </View>
         </View>
       </View>
 
@@ -191,6 +199,11 @@ const styles = StyleSheet.create({
     overflow: 'hidden', // Prevents content from overflowing container
     width: '100%',
     height: '100%',
+  },
+  rightContent: {
+    flex: 1,
+    flexDirection: 'column',
+    minWidth: 0,
   },
   mainContent: {
     flex: 1,

@@ -154,7 +154,8 @@ const styles = StyleSheet.create({
   },
   sidebarContent: {
     flex: 1,
-    paddingVertical: 20,
+    paddingTop: 20,
+    paddingBottom: 20,
     justifyContent: 'space-between',
     transition: 'opacity 0.3s ease-in-out',
   },

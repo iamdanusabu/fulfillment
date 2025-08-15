@@ -204,16 +204,16 @@ export default function OrderDetailScreen() {
           <View style={styles.customerCard}>
             {customerInfo ? (
               <>
-                <Text style={styles.customerName}>{customerInfo.name}</Text>
-                <Text style={styles.customerDetail}>Email: {customerInfo.email}</Text>
-                <Text style={styles.customerDetail}>Phone: {customerInfo.countryCode} {customerInfo.mobilePhone}</Text>
+                <Text style={styles.customerName}>{customerInfo.name || 'N/A'}</Text>
+                <Text style={styles.customerDetail}>Email: {customerInfo.email || 'N/A'}</Text>
+                <Text style={styles.customerDetail}>Phone: {customerInfo.countryCode || ''} {customerInfo.mobilePhone || 'N/A'}</Text>
                 <Text style={styles.customerDetail}>
-                  Address: {customerInfo.address}, {customerInfo.city}, {customerInfo.state} {customerInfo.zipCode}
+                  Address: {customerInfo.address || 'N/A'}, {customerInfo.city || 'N/A'}, {customerInfo.state || 'N/A'} {customerInfo.zipCode || 'N/A'}
                 </Text>
-                <Text style={styles.customerDetail}>Country: {customerInfo.country}</Text>
+                <Text style={styles.customerDetail}>Country: {customerInfo.country || 'N/A'}</Text>
               </>
             ) : (
-              <Text style={styles.customerName}>{order.customer as string}</Text>
+              <Text style={styles.customerName}>{typeof order.customer === 'string' ? order.customer : 'Unknown Customer'}</Text>
             )}
           </View>
         </View>
@@ -223,8 +223,8 @@ export default function OrderDetailScreen() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Employee Information</Text>
             <View style={styles.customerCard}>
-              <Text style={styles.customerName}>{order.employee.name}</Text>
-              <Text style={styles.customerDetail}>Employee ID: {order.employee.id}</Text>
+              <Text style={styles.customerName}>{order.employee.name || 'N/A'}</Text>
+              <Text style={styles.customerDetail}>Employee ID: {order.employee.id || 'N/A'}</Text>
               {order.employee.email && (
                 <Text style={styles.customerDetail}>Email: {order.employee.email}</Text>
               )}
@@ -237,8 +237,8 @@ export default function OrderDetailScreen() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Store Information</Text>
             <View style={styles.customerCard}>
-              <Text style={styles.customerName}>{order.store.name}</Text>
-              <Text style={styles.customerDetail}>Store ID: {order.store.id}</Text>
+              <Text style={styles.customerName}>{order.store.name || 'N/A'}</Text>
+              <Text style={styles.customerDetail}>Store ID: {order.store.id || 'N/A'}</Text>
               {order.store.address && (
                 <Text style={styles.customerDetail}>Address: {order.store.address}</Text>
               )}
@@ -254,8 +254,8 @@ export default function OrderDetailScreen() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Register Information</Text>
             <View style={styles.customerCard}>
-              <Text style={styles.customerName}>Register #{order.register.id}</Text>
-              <Text style={styles.customerDetail}>Name: {order.register.name}</Text>
+              <Text style={styles.customerName}>Register #{order.register.id || 'N/A'}</Text>
+              <Text style={styles.customerDetail}>Name: {order.register.name || 'N/A'}</Text>
               {order.register.location && (
                 <Text style={styles.customerDetail}>Location: {order.register.location}</Text>
               )}

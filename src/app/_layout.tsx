@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, useWindowDimensions, Dimensions } from 'react-native';
 import { Stack, usePathname } from 'expo-router';
@@ -15,7 +14,7 @@ function RootLayoutContent() {
   const [isLoading, setIsLoading] = useState(true);
   const { width, height } = useWindowDimensions();
   const pathname = usePathname();
-  
+
   // More sophisticated responsive breakpoints
   const isLandscape = width > height;
   const isTablet = width >= 768;
@@ -50,7 +49,7 @@ function RootLayoutContent() {
   const showSidebarAndHeader = isAuthenticated && pathname !== '/login' && pathname !== '/';
   // On tablets, sidebar is always open; on mobile, it can be toggled
   const showSidebar = showSidebarAndHeader && (isTablet || sidebarOpen);
-  
+
   // Force re-render when dimensions change to fix Android rendering issues
   const screenKey = `${width}x${height}-${isTablet}-${isLandscape}`;
 
@@ -91,6 +90,9 @@ function RootLayoutContent() {
             flex: 1,
             paddingHorizontal: isSmallMobile ? 8 : 16,
             paddingVertical: isLandscape && isMobile ? 8 : 16,
+            marginLeft: showSidebarAndHeader ? (
+              isTablet ? (sidebarCollapsed ? 60 : 250) : (sidebarOpen ? 200 : 0)
+            ) : 0,
           }
         ]}>
           <Stack screenOptions={{ 
@@ -110,7 +112,7 @@ function RootLayoutContent() {
         </View>
       </View>
 
-      
+
     </View>
   );
 }

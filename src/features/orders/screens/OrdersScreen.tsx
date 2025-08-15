@@ -1,10 +1,22 @@
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, RefreshControl, ActivityIndicator } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  TextInput,
+  Alert,
+  RefreshControl,
+  useWindowDimensions,
+} from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { usePaginatedOrders } from '../hooks/usePaginatedOrders';
 import { Order } from '../../../shared/types';
 import { picklistApi } from '../../picklist/api/picklistApi';
+import { QRCodeScanner } from '../components/QRCodeScanner';
+import { useQRScanner } from '../hooks/useQRScanner';
 
 export default function OrdersScreen() {
   const params = useLocalSearchParams();
@@ -27,6 +39,9 @@ export default function OrdersScreen() {
   const [isPicklistMode, setIsPicklistMode] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+
+  // QR Scanner integration
+  const { isScanning, isLoading: qrLoading, startScanning, stopScanning, handleScan } = useQRScanner();
 
   useEffect(() => {
     setIsPicklistMode(params.mode === 'picklist');
@@ -139,17 +154,31 @@ export default function OrdersScreen() {
 
   return (
     <View style={styles.container}>
-      
-
+      {/* Search Bar */}
       <View style={styles.searchContainer}>
-        <MaterialIcons name="search" size={24} color="#666" style={styles.searchIcon} />
+        <MaterialIcons name="search" size={20} color="#666" style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
+          placeholder="Search by order number, customer name..."
           value={searchText}
           onChangeText={setSearchText}
-          placeholder="Search orders..."
+          clearButtonMode="while-editing"
         />
+        <TouchableOpacity 
+          style={styles.qrButton} 
+          onPress={startScanning}
+          disabled={qrLoading}
+        >
+          <MaterialIcons name="qr-code-scanner" size={20} color="#007AFF" />
+        </TouchableOpacity>
       </View>
+
+      {/* QR Code Scanner Modal */}
+      <QRCodeScanner
+        visible={isScanning}
+        onClose={stopScanning}
+        onScan={handleScan}
+      />
 
       <Text style={styles.resultsText}>
         {totalRecords} orders found - Page {currentPage} of {totalPages}
@@ -212,7 +241,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  
+
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -230,6 +259,10 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
+  },
+  qrButton: {
+    padding: 8,
+    marginLeft: 8,
   },
   resultsText: {
     paddingHorizontal: 16,

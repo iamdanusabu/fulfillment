@@ -8,9 +8,10 @@ interface AppToolbarProps {
   title?: string;
   onMenuToggle?: () => void;
   showMenuButton?: boolean;
+  onQRScan?: () => void;
 }
 
-export function AppToolbar({ title, onMenuToggle, showMenuButton = true }: AppToolbarProps) {
+export function AppToolbar({ title, onMenuToggle, showMenuButton = true, onQRScan }: AppToolbarProps) {
   const { width, height } = useWindowDimensions();
   const { tabTitle } = useTabTitle();
   const router = useRouter();
@@ -26,24 +27,53 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true }: AppTo
 
   // Get page-specific actions
   const getPageActions = () => {
+    // Show QR scanner on orders page
+    const showQRScanner = pathname === '/orders' || pathname === '/dashboard';
+    
+    const actions = [];
+    
+    // Add QR scanner button for order lookup
+    if (showQRScanner) {
+      actions.push(
+        <TouchableOpacity 
+          key="qr-scanner"
+          style={[styles.iconButton, isSmallMobile && styles.smallIconButton]} 
+          onPress={() => {
+            // We'll handle this through a callback prop
+            if (onQRScan) onQRScan();
+          }}
+        >
+          <MaterialIcons name="qr-code-scanner" size={isSmallMobile ? 20 : 24} color="#007AFF" />
+        </TouchableOpacity>
+      );
+    }
+
     if (pathname === '/dashboard') {
-      return (
-        <TouchableOpacity style={[styles.iconButton, isSmallMobile && styles.smallIconButton]} onPress={() => window.location.reload()}>
+      actions.push(
+        <TouchableOpacity 
+          key="refresh"
+          style={[styles.iconButton, isSmallMobile && styles.smallIconButton]} 
+          onPress={() => window.location.reload()}
+        >
           <MaterialIcons name="refresh" size={isSmallMobile ? 20 : 24} color="#007AFF" />
         </TouchableOpacity>
       );
     }
 
     if (pathname === '/picklist') {
-      return (
-        <TouchableOpacity style={styles.actionButton} onPress={() => router.push('/orders?mode=picklist')}>
+      actions.push(
+        <TouchableOpacity 
+          key="create-picklist"
+          style={styles.actionButton} 
+          onPress={() => router.push('/orders?mode=picklist')}
+        >
           <MaterialIcons name="add" size={20} color="#fff" />
           <Text style={styles.actionButtonText}>Create</Text>
         </TouchableOpacity>
       );
     }
 
-    return null;
+    return actions.length > 0 ? actions : null;
   };
 
   // Dynamic title based on route and params

@@ -3,16 +3,20 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
   ScrollView,
   RefreshControl,
+  TouchableOpacity,
+  useWindowDimensions,
   ActivityIndicator,
 } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { fetchWithToken } from "../../../shared/services/fetchWithToken";
 import { getConfig } from "../../../environments";
-import { MaterialIcons } from "@expo/vector-icons";
+import { QRCodeScanner } from '../../orders/components/QRCodeScanner';
+import { useQRScanner } from '../../orders/hooks/useQRScanner';
+
 
 interface FilterSettings {
   sources: string[];
@@ -46,6 +50,14 @@ export default function DashboardScreen() {
   });
   const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
+  const { width, height } = useWindowDimensions();
+
+  // QR Scanner integration
+  const { isScanning, startScanning, stopScanning, handleScan } = useQRScanner();
+
+  const isLandscape = width > height;
+  const isSmallMobile = width < 400;
+
 
   useEffect(() => {
     loadDashboardData();
@@ -317,6 +329,68 @@ export default function DashboardScreen() {
           </Text>
         </View>
       )}
+
+      {/* Quick Order Lookup */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Quick Order Lookup</Text>
+        <TouchableOpacity 
+          style={styles.qrScanButton} 
+          onPress={startScanning}
+        >
+          <MaterialIcons name="qr-code-scanner" size={32} color="#007AFF" />
+          <View style={styles.qrScanContent}>
+            <Text style={styles.qrScanTitle}>Scan QR Code</Text>
+            <Text style={styles.qrScanSubtitle}>Quickly find an order by scanning its QR code</Text>
+          </View>
+          <MaterialIcons name="arrow-forward-ios" size={16} color="#007AFF" />
+        </TouchableOpacity>
+      </View>
+
+      {/* QR Code Scanner Modal */}
+      <QRCodeScanner
+        visible={isScanning}
+        onClose={stopScanning}
+        onScan={handleScan}
+      />
+
+      {/* Action Buttons */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Quick Actions</Text>
+        <View style={[
+          styles.actionButtonsContainer,
+          {
+            flexDirection: isLandscape && !isSmallMobile ? 'row' : 'column',
+          }
+        ]}>
+          <TouchableOpacity 
+            style={[
+              styles.actionButton,
+              {
+                marginRight: isLandscape && !isSmallMobile ? 16 : 0,
+                marginBottom: isLandscape && !isSmallMobile ? 0 : 16,
+                flex: isLandscape && !isSmallMobile ? 1 : 0,
+              }
+            ]} 
+            onPress={() => router.push('/orders')}
+          >
+            <MaterialIcons name="receipt-long" size={24} color="#fff" />
+            <Text style={styles.actionButtonText}>View Orders</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={[
+              styles.actionButton,
+              {
+                flex: isLandscape && !isSmallMobile ? 1 : 0,
+              }
+            ]} 
+            onPress={() => router.push('/picklist')}
+          >
+            <MaterialIcons name="list-alt" size={24} color="#fff" />
+            <Text style={styles.actionButtonText}>Manage Picklists</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </ScrollView>
   );
 }
@@ -463,5 +537,50 @@ const styles = StyleSheet.create({
     marginTop: 8,
     textAlign: 'center',
     fontStyle: 'italic',
+  },
+  actionButtonsContainer: {
+    gap: 16,
+  },
+  actionButton: {
+    backgroundColor: '#007AFF',
+    padding: 16,
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  actionButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 12,
+  },
+  qrScanButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+  },
+  qrScanContent: {
+    flex: 1,
+    marginLeft: 16,
+  },
+  qrScanTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 4,
+  },
+  qrScanSubtitle: {
+    fontSize: 14,
+    color: '#666',
   },
 });

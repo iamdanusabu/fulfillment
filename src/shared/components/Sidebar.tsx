@@ -49,10 +49,7 @@ export function Sidebar({ isOpen, onToggle, isCollapsed, onToggleCollapse }: Sid
 
   const handleNavigation = (route: string) => {
     router.push(route);
-    // Auto-close on mobile only
-    if (!isTablet) {
-      onToggle();
-    }
+    // Don't auto-close sidebar - let user control it manually
   };
 
   const handleLogout = async () => {

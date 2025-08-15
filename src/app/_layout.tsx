@@ -54,26 +54,13 @@ function RootLayoutContent() {
   // Force re-render when dimensions change to fix Android rendering issues
   const screenKey = `${width}x${height}-${isTablet}-${isLandscape}`;
 
-  // Effect to handle sidebar visibility based on screen size and orientation
+  // Effect to handle initial sidebar state based on screen size
   useEffect(() => {
-    const subscription = Dimensions.addEventListener('change', ({ window }) => {
-      const newWidth = window.width;
-      const newHeight = window.height;
-      const newIsTablet = newWidth >= 768;
-      
-      // On tablet, keep sidebar open; on mobile, close it by default
-      if (newIsTablet) {
-        setSidebarOpen(true);
-      } else {
-        setSidebarOpen(false);
-      }
-    });
-
-    // Initial setup - open sidebar on tablets, close on mobile
-    setSidebarOpen(isTablet);
-
-    return () => subscription?.remove();
-  }, [isTablet]);
+    // Only set initial state, don't change on subsequent dimension changes
+    if (isTablet) {
+      setSidebarOpen(true);
+    }
+  }, []); // Empty dependency array - only run on mount
 
   if (isLoading) {
     return <View style={styles.container} />;

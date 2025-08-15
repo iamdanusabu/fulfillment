@@ -38,10 +38,11 @@ export default function LoginScreen() {
     try {
       const response = await authApi.login({ domain, username, password });
       
-      // Store the token in AsyncStorage
+      // Store the token and username in AsyncStorage
       await AsyncStorage.setItem('access_token', response.access_token);
       await AsyncStorage.setItem('refresh_token', response.refresh_token);
       await AsyncStorage.setItem('token_expires_in', response.expires_in.toString());
+      await AsyncStorage.setItem('username', username);
       
       // Navigate to dashboard
       router.replace('/dashboard');

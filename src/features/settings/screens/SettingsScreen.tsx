@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   View, 
@@ -71,11 +70,11 @@ export default function SettingsScreen() {
         AsyncStorage.getItem('app_settings'),
         AsyncStorage.getItem('orderFilterSettings')
       ]);
-      
+
       if (savedSettings) {
         setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(savedSettings) });
       }
-      
+
       if (savedFilterSettings) {
         setFilterSettings({ ...DEFAULT_FILTER_SETTINGS, ...JSON.parse(savedFilterSettings) });
       }
@@ -115,7 +114,7 @@ export default function SettingsScreen() {
     const newSources = filterSettings.sources.includes(source)
       ? filterSettings.sources.filter(s => s !== source)
       : [...filterSettings.sources, source];
-    
+
     const newFilterSettings = { ...filterSettings, sources: newSources };
     saveFilterSettings(newFilterSettings);
   };
@@ -124,7 +123,7 @@ export default function SettingsScreen() {
     const newStatuses = filterSettings.statuses.includes(status)
       ? filterSettings.statuses.filter(s => s !== status)
       : [...filterSettings.statuses, status];
-    
+
     const newFilterSettings = { ...filterSettings, statuses: newStatuses };
     saveFilterSettings(newFilterSettings);
   };
@@ -133,7 +132,7 @@ export default function SettingsScreen() {
     const newPaymentStatuses = filterSettings.paymentStatuses.includes(paymentStatus)
       ? filterSettings.paymentStatuses.filter(s => s !== paymentStatus)
       : [...filterSettings.paymentStatuses, paymentStatus];
-    
+
     const newFilterSettings = { ...filterSettings, paymentStatuses: newPaymentStatuses };
     saveFilterSettings(newFilterSettings);
   };
@@ -168,7 +167,7 @@ export default function SettingsScreen() {
     saveFilterSettings(newFilterSettings);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     Alert.alert(
       'Logout',
       'Are you sure you want to logout?',
@@ -179,7 +178,13 @@ export default function SettingsScreen() {
           style: 'destructive',
           onPress: async () => {
             try {
-              await AsyncStorage.multiRemove(['access_token', 'refresh_token', 'token_expires_in']);
+              // Clear stored tokens and user data
+              await AsyncStorage.removeItem('access_token');
+              await AsyncStorage.removeItem('refresh_token');
+              await AsyncStorage.removeItem('token_expires_in');
+              await AsyncStorage.removeItem('username');
+
+              // Navigate to login screen
               router.replace('/login');
             } catch (error) {
               console.error('Error during logout:', error);

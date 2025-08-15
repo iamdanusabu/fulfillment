@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, useWindowDimensions } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useRouter, usePathname, useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams, useSegments } from 'expo-router';
 import { useTabTitle } from './useTabTitle';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface AppToolbarProps {
   title?: string;
@@ -22,13 +23,15 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true, onQRSca
   const isTablet = width >= 768 || (isLandscape && width >= 600);
   const isSmallMobile = width < 480;
 
+  const [username, setUsername] = useState<string>('');
+
   // Determine if we should show a back button
   const showBackButton = pathname !== '/dashboard' && pathname !== '/orders' && pathname !== '/picklist' && pathname !== '/settings';
 
   // Get page-specific actions - keep all navigation buttons
   const getPageActions = () => {
     const actions = [];
-    
+
     // Add QR scanner button for order lookup on dashboard and orders pages
     if (pathname === '/orders' || pathname === '/dashboard') {
       actions.push(
@@ -88,7 +91,7 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true, onQRSca
   // Dynamic title based on route and params
   const getDynamicTitle = () => {
     if (pathname === '/dashboard') {
-      return 'Dashboard';
+      return `Welcome, ${username || 'Username'}`;
     }
     if (pathname === '/orders' && params.mode === 'picklist') {
       return 'Select Orders for Picklist';
@@ -127,6 +130,21 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true, onQRSca
     }
   };
 
+  useEffect(() => {
+    const loadUsername = async () => {
+      try {
+        const storedUsername = await AsyncStorage.getItem('username');
+        if (storedUsername) {
+          setUsername(storedUsername);
+        }
+      } catch (error) {
+        console.error('Error loading username:', error);
+      }
+    };
+
+    loadUsername();
+  }, []);
+
   return (
     <View style={[
       styles.toolbar,
@@ -145,7 +163,9 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true, onQRSca
             <MaterialIcons name="menu" size={24} color="#333" />
           </TouchableOpacity>
         )}
-        
+        <Text style={[styles.title, isSmallMobile && styles.smallTitle]}>
+          {getDynamicTitle()}
+        </Text>
       </View>
 
       <View style={styles.rightSection}>
@@ -184,6 +204,10 @@ const styles = StyleSheet.create({
   title: {
     fontWeight: 'bold',
     color: '#333',
+    fontSize: 18,
+  },
+  smallTitle: {
+    fontSize: 16,
   },
   rightSection: {
     flexDirection: 'row',

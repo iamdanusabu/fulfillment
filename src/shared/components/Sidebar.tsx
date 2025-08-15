@@ -7,16 +7,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 interface SidebarProps {
   isOpen: boolean;
   onToggle: () => void;
+  isCollapsed: boolean;
+  onToggleCollapse: () => void;
 }
 
-export function Sidebar({ isOpen, onToggle }: SidebarProps) {
+export function Sidebar({ isOpen, onToggle, isCollapsed, onToggleCollapse }: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { width, height } = useWindowDimensions();
   
   const isLandscape = width > height;
   const isTablet = width >= 768;
-  const sidebarWidth = isTablet ? 250 : 200;
+  const sidebarWidth = isTablet ? (isCollapsed ? 60 : 250) : 200;
 
   const menuItems = [
     { 
@@ -76,11 +78,31 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
         left: 0,
       }
     ]}>
+      {/* Collapse/Expand Toggle Button - Only show on tablets */}
+      {isTablet && (
+        <View style={styles.collapseSection}>
+          <TouchableOpacity 
+            style={styles.collapseButton} 
+            onPress={onToggleCollapse}
+          >
+            <MaterialIcons 
+              name={isCollapsed ? "chevron-right" : "chevron-left"} 
+              size={20} 
+              color="#666" 
+            />
+          </TouchableOpacity>
+        </View>
+      )}
+
       <View style={styles.menuItems}>
         {menuItems.map((item) => (
           <TouchableOpacity
             key={item.route}
-            style={[styles.menuItem, item.isActive && styles.activeMenuItem]}
+            style={[
+              styles.menuItem, 
+              item.isActive && styles.activeMenuItem,
+              isCollapsed && isTablet && styles.collapsedMenuItem
+            ]}
             onPress={() => handleNavigation(item.route)}
           >
             <MaterialIcons 
@@ -88,17 +110,27 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
               size={24} 
               color={item.isActive ? '#007AFF' : '#666'} 
             />
-            <Text style={[styles.menuText, item.isActive && styles.activeMenuText]}>
-              {item.title}
-            </Text>
+            {(!isCollapsed || !isTablet) && (
+              <Text style={[styles.menuText, item.isActive && styles.activeMenuText]}>
+                {item.title}
+              </Text>
+            )}
           </TouchableOpacity>
         ))}
       </View>
 
-      <View style={styles.bottomSection}>
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+      <View style={[styles.bottomSection, isCollapsed && isTablet && styles.collapsedBottomSection]}>
+        <TouchableOpacity 
+          style={[
+            styles.logoutButton, 
+            isCollapsed && isTablet && styles.collapsedLogoutButton
+          ]} 
+          onPress={handleLogout}
+        >
           <MaterialIcons name="logout" size={20} color="#dc3545" />
-          <Text style={styles.logoutText}>Logout</Text>
+          {(!isCollapsed || !isTablet) && (
+            <Text style={styles.logoutText}>Logout</Text>
+          )}
         </TouchableOpacity>
       </View>
     </View>
@@ -114,6 +146,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     position: 'relative',
   },
+  collapseSection: {
+    alignItems: 'flex-end',
+    paddingHorizontal: 10,
+    paddingBottom: 10,
+  },
+  collapseButton: {
+    padding: 8,
+    borderRadius: 4,
+    backgroundColor: '#f8f9fa',
+  },
   menuItems: {
     flex: 1,
   },
@@ -124,6 +166,10 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     marginHorizontal: 10,
     borderRadius: 6,
+  },
+  collapsedMenuItem: {
+    paddingHorizontal: 10,
+    justifyContent: 'center',
   },
   activeMenuItem: {
     backgroundColor: '#f0f8ff',
@@ -142,6 +188,10 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#e9ecef',
   },
+  collapsedBottomSection: {
+    paddingHorizontal: 10,
+    alignItems: 'center',
+  },
   logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -149,6 +199,10 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     backgroundColor: '#ffebee',
     borderRadius: 6,
+  },
+  collapsedLogoutButton: {
+    paddingHorizontal: 10,
+    minWidth: 40,
   },
   logoutText: {
     marginLeft: 8,

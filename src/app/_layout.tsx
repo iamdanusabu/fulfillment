@@ -10,6 +10,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function RootLayoutContent() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { width, height } = useWindowDimensions();
@@ -39,6 +40,10 @@ function RootLayoutContent() {
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
+  };
+
+  const toggleSidebarCollapse = () => {
+    setSidebarCollapsed(!sidebarCollapsed);
   };
 
   // Always show sidebar and header when authenticated, except on login page
@@ -85,7 +90,12 @@ function RootLayoutContent() {
 
       <View style={styles.content}>
         {showSidebarAndHeader && (
-          <Sidebar isOpen={showSidebar} onToggle={toggleSidebar} />
+          <Sidebar 
+            isOpen={showSidebar} 
+            onToggle={toggleSidebar}
+            isCollapsed={sidebarCollapsed}
+            onToggleCollapse={toggleSidebarCollapse}
+          />
         )}
 
         <View style={[

@@ -18,6 +18,7 @@ import { QRCodeScanner } from '../../orders/components/QRCodeScanner';
 import { useQRScanner } from '../../orders/hooks/useQRScanner';
 import { AppToolbar } from '../../../components/layout/AppToolbar';
 
+
 interface FilterSettings {
   sources: string[];
   statuses: string[];
@@ -57,6 +58,7 @@ export default function DashboardScreen() {
 
   const isLandscape = width > height;
   const isSmallMobile = width < 400;
+
 
   useEffect(() => {
     loadDashboardData();
@@ -250,100 +252,148 @@ export default function DashboardScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        {stats.error && (
-          <View style={styles.errorBanner}>
-            <MaterialIcons name="error" size={20} color="#dc3545" />
-            <Text style={styles.errorText}>{stats.error}</Text>
-          </View>
-        )}
+      {stats.error && (
+        <View style={styles.errorBanner}>
+          <MaterialIcons name="error" size={20} color="#dc3545" />
+          <Text style={styles.errorText}>{stats.error}</Text>
+        </View>
+      )}
 
-        {/* Quick Order Lookup Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick Order Lookup</Text>
+      {/* Key Metrics Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Key Metrics</Text>
+        <View style={styles.keyMetricsGrid}>
           <TouchableOpacity
-            style={styles.qrScanCard}
-            onPress={startScanning}
+            style={[styles.keyMetricCard, styles.primaryMetric]}
+            onPress={() => navigateToOrders()}
           >
-            <View style={styles.qrIconContainer}>
-              <MaterialIcons name="qr-code-scanner" size={24} color="#007AFF" />
-            </View>
-            <View style={styles.qrScanContent}>
-              <Text style={styles.qrScanTitle}>Scan QR Code</Text>
-              <Text style={styles.qrScanSubtitle}>Quickly find an order by scanning its QR code</Text>
-            </View>
-            <MaterialIcons name="arrow-forward-ios" size={16} color="#007AFF" />
+            <MaterialIcons name="shopping-cart" size={32} color="#fff" />
+            <Text style={styles.keyMetricNumber}>{stats.totalOrdersCount}</Text>
+            <Text style={styles.keyMetricLabel}>Total Orders</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.keyMetricCard, styles.readyMetric]}
+            onPress={() => router.push('/orders?hasFulfilmentJob=true&status=Ready')}
+          >
+            <MaterialIcons name="local-shipping" size={32} color="#fff" />
+            <Text style={styles.keyMetricNumber}>{stats.readyForPickupCount}</Text>
+            <Text style={styles.keyMetricLabel}>Ready for Pickup</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.keyMetricCard, styles.picklistMetric]}
+            onPress={() => router.push('/picklist')}
+          >
+            <MaterialIcons name="inventory" size={32} color="#fff" />
+            <Text style={styles.keyMetricNumber}>{stats.activePicklistsCount}</Text>
+            <Text style={styles.keyMetricLabel}>Active Picklists</Text>
           </TouchableOpacity>
         </View>
+      </View>
 
-        {/* Quick Actions Section */}
+      {/* Order Sources Section */}
+      {workingSources.length > 0 && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick Actions</Text>
-          <View style={styles.quickActionsContainer}>
-            <TouchableOpacity
-              style={[styles.quickActionButton, styles.viewOrdersButton]}
-              onPress={() => router.push('/orders')}
-            >
-              <MaterialIcons name="receipt-long" size={24} color="#fff" />
-              <Text style={styles.quickActionButtonText}>View Orders</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.quickActionButton, styles.managePicklistsButton]}
-              onPress={() => router.push('/picklist')}
-            >
-              <MaterialIcons name="list-alt" size={24} color="#fff" />
-              <Text style={styles.quickActionButtonText}>Manage Picklists</Text>
-            </TouchableOpacity>
+          <Text style={styles.sectionTitle}>Orders by Source</Text>
+          <View style={styles.sourcesGrid}>
+            {workingSources.map((sourceCount) => (
+              <TouchableOpacity
+                key={sourceCount.name}
+                style={styles.sourceCard}
+                onPress={() => navigateToOrders(sourceCount.name)}
+              >
+                <Text style={styles.sourceNumber}>{sourceCount.count}</Text>
+                <Text style={styles.sourceLabel}>{sourceCount.name}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
         </View>
+      )}
 
-        {/* Order Sources Section */}
-        {workingSources.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Orders by Source</Text>
-            <View style={styles.sourcesGrid}>
-              {workingSources.map((sourceCount) => (
-                <TouchableOpacity
-                  key={sourceCount.name}
-                  style={styles.sourceCard}
-                  onPress={() => navigateToOrders(sourceCount.name)}
-                >
-                  <Text style={styles.sourceNumber}>{sourceCount.count}</Text>
-                  <Text style={styles.sourceLabel}>{sourceCount.name}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+      {/* Connection Issues Section */}
+      {errorSources.length > 0 && (
+        <View style={styles.section}>
+          <View style={styles.errorSectionHeader}>
+            <MaterialIcons name="warning" size={20} color="#ffc107" />
+            <Text style={styles.errorSectionTitle}>Connection Issues</Text>
           </View>
-        )}
-
-        {/* Connection Issues Section */}
-        {errorSources.length > 0 && (
-          <View style={styles.section}>
-            <View style={styles.errorSectionHeader}>
-              <MaterialIcons name="warning" size={20} color="#ffc107" />
-              <Text style={styles.errorSectionTitle}>Connection Issues</Text>
-            </View>
-            <View style={styles.errorSourcesList}>
-              {errorSources.map((source) => (
-                <View key={source.name} style={styles.errorSourceItem}>
-                  <MaterialIcons name="error-outline" size={16} color="#dc3545" />
-                  <Text style={styles.errorSourceText}>{source.name}</Text>
-                </View>
-              ))}
-            </View>
-            <Text style={styles.errorHint}>
-              These sources couldn't be loaded. Pull to refresh to try again.
-            </Text>
+          <View style={styles.errorSourcesList}>
+            {errorSources.map((source) => (
+              <View key={source.name} style={styles.errorSourceItem}>
+                <MaterialIcons name="error-outline" size={16} color="#dc3545" />
+                <Text style={styles.errorSourceText}>{source.name}</Text>
+              </View>
+            ))}
           </View>
-        )}
+          <Text style={styles.errorHint}>
+            These sources couldn't be loaded. Pull to refresh to try again.
+          </Text>
+        </View>
+      )}
 
-        {/* QR Code Scanner Modal */}
-        <QRCodeScanner
-          visible={isScanning}
-          onClose={stopScanning}
-          onScan={handleScan}
-        />
-      </ScrollView>
+      {/* Quick Order Lookup */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Quick Order Lookup</Text>
+        <TouchableOpacity
+          style={styles.qrScanButton}
+          onPress={startScanning}
+        >
+          <MaterialIcons name="qr-code-scanner" size={32} color="#007AFF" />
+          <View style={styles.qrScanContent}>
+            <Text style={styles.qrScanTitle}>Scan QR Code</Text>
+            <Text style={styles.qrScanSubtitle}>Quickly find an order by scanning its QR code</Text>
+          </View>
+          <MaterialIcons name="arrow-forward-ios" size={16} color="#007AFF" />
+        </TouchableOpacity>
+      </View>
+
+      {/* QR Code Scanner Modal */}
+      <QRCodeScanner
+        visible={isScanning}
+        onClose={stopScanning}
+        onScan={handleScan}
+      />
+
+      {/* Action Buttons */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Quick Actions</Text>
+        <View style={[
+          styles.actionButtonsContainer,
+          {
+            flexDirection: isLandscape && !isSmallMobile ? 'row' : 'column',
+          }
+        ]}>
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              {
+                marginRight: isLandscape && !isSmallMobile ? 16 : 0,
+                marginBottom: isLandscape && !isSmallMobile ? 0 : 16,
+                flex: isLandscape && !isSmallMobile ? 1 : 0,
+              }
+            ]}
+            onPress={() => router.push('/orders')}
+          >
+            <MaterialIcons name="receipt-long" size={24} color="#fff" />
+            <Text style={styles.actionButtonText}>View Orders</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              {
+                flex: isLandscape && !isSmallMobile ? 1 : 0,
+              }
+            ]}
+            onPress={() => router.push('/picklist')}
+          >
+            <MaterialIcons name="list-alt" size={24} color="#fff" />
+            <Text style={styles.actionButtonText}>Manage Picklists</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </ScrollView>
     </View>
   );
 }
@@ -381,77 +431,50 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   section: {
-    marginHorizontal: 16,
-    marginVertical: 12,
+    margin: 16,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
     color: '#333',
-    marginBottom: 16,
+    marginBottom: 12,
   },
-  qrScanCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#e9ecef',
-    elevation: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  qrIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 8,
-    backgroundColor: '#f0f8ff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  qrScanContent: {
-    flex: 1,
-  },
-  qrScanTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
-  },
-  qrScanSubtitle: {
-    fontSize: 14,
-    color: '#666',
-  },
-  quickActionsContainer: {
+  keyMetricsGrid: {
     gap: 12,
   },
-  quickActionButton: {
+  keyMetricCard: {
+    backgroundColor: '#007AFF',
+    padding: 20,
+    borderRadius: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    padding: 16,
-    borderRadius: 12,
     elevation: 2,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
-  viewOrdersButton: {
+  primaryMetric: {
     backgroundColor: '#007AFF',
   },
-  managePicklistsButton: {
-    backgroundColor: '#007AFF',
+  readyMetric: {
+    backgroundColor: '#28a745',
   },
-  quickActionButtonText: {
+  picklistMetric: {
+    backgroundColor: '#17a2b8',
+  },
+  keyMetricNumber: {
+    fontSize: 24,
+    fontWeight: "bold",
     color: '#fff',
+    marginLeft: 16,
+    marginRight: 12,
+  },
+  keyMetricLabel: {
     fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 12,
+    color: '#fff',
+    fontWeight: '500',
+    flex: 1,
   },
   sourcesGrid: {
     flexDirection: "row",
@@ -517,5 +540,50 @@ const styles = StyleSheet.create({
     marginTop: 8,
     textAlign: 'center',
     fontStyle: 'italic',
+  },
+  actionButtonsContainer: {
+    gap: 16,
+  },
+  actionButton: {
+    backgroundColor: '#007AFF',
+    padding: 16,
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  actionButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 12,
+  },
+  qrScanButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+  },
+  qrScanContent: {
+    flex: 1,
+    marginLeft: 16,
+  },
+  qrScanTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 4,
+  },
+  qrScanSubtitle: {
+    fontSize: 14,
+    color: '#666',
   },
 });

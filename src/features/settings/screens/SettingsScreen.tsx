@@ -48,6 +48,30 @@ const ALL_SOURCES = [
   'OTHER', 'MANUAL', 'FanVista', 'QSR'
 ];
 
+const capitalizeSourceName = (source: string): string => {
+  // Handle special cases
+  const specialCases: { [key: string]: string } = {
+    'bigcommerce': 'BigCommerce',
+    'PHONE ORDER': 'Phone Order',
+    'DELIVERY': 'Delivery',
+    'BAR TAB': 'Bar Tab',
+    'TIKT': 'TIKT',
+    'TABLE': 'Table',
+    'OTHER': 'Other',
+    'MANUAL': 'Manual',
+    'QSR': 'QSR'
+  };
+
+  if (specialCases[source]) {
+    return specialCases[source];
+  }
+
+  // For other sources, capitalize first letter of each word
+  return source.split(' ').map(word => 
+    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+  ).join(' ');
+};
+
 const ALL_STATUSES = [
   'Initiated', 'Sent for Processing'
 ];
@@ -224,7 +248,7 @@ export default function SettingsScreen() {
             style={styles.filterItem}
             onPress={() => toggleSource(source)}
           >
-            <Text style={styles.filterLabel}>{source}</Text>
+            <Text style={styles.filterLabel}>{capitalizeSourceName(source)}</Text>
             <MaterialIcons 
               name={filterSettings.sources.includes(source) ? "check-box" : "check-box-outline-blank"} 
               size={24} 

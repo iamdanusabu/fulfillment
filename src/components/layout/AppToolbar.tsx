@@ -38,10 +38,7 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true, onQRSca
         <TouchableOpacity 
           key="qr-scanner"
           style={[styles.iconButton, isSmallMobile && styles.smallIconButton]} 
-          onPress={() => {
-            // We'll handle this through a callback prop
-            if (onQRScan) onQRScan();
-          }}
+          onPress={onQRScan}
         >
           <MaterialIcons name="qr-code-scanner" size={isSmallMobile ? 20 : 24} color="#007AFF" />
         </TouchableOpacity>

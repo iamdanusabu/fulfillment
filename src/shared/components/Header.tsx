@@ -4,31 +4,23 @@ import { MaterialIcons } from '@expo/vector-icons';
 
 interface HeaderProps {
   title: string;
-  onMenuToggle: () => void;
+  onMenuToggle?: () => void;
+  showMenuButton?: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({ title, onMenuToggle }) => {
+export const Header: React.FC<HeaderProps> = ({ title, onMenuToggle, showMenuButton = false }) => {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
 
   return (
     <View style={styles.header}>
       <View style={styles.leftSection}>
-        {!isTablet && (
+        {showMenuButton && !isTablet && onMenuToggle && (
           <TouchableOpacity onPress={onMenuToggle} style={styles.menuButton}>
             <MaterialIcons name="menu" size={24} color="#333" />
           </TouchableOpacity>
         )}
         <Text style={styles.title}>{title}</Text>
-      </View>
-
-      <View style={styles.rightSection}>
-        <TouchableOpacity style={styles.iconButton}>
-          <MaterialIcons name="notifications" size={24} color="#666" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.iconButton}>
-          <MaterialIcons name="account-circle" size={24} color="#666" />
-        </TouchableOpacity>
       </View>
     </View>
   );
@@ -37,7 +29,7 @@ export const Header: React.FC<HeaderProps> = ({ title, onMenuToggle }) => {
 const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -63,13 +55,5 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
-  },
-  rightSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  iconButton: {
-    padding: 8,
-    marginLeft: 8,
   },
 });

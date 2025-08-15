@@ -110,6 +110,8 @@ function RootLayoutContent() {
         ]}>
           <Stack screenOptions={{ 
             headerShown: false,
+            animation: 'none',
+            animationDuration: 0,
             contentStyle: { 
               backgroundColor: '#f8f9fa',
               paddingHorizontal: isSmallMobile ? 4 : 0,

@@ -43,8 +43,8 @@ function RootLayoutContent() {
 
   // Always show sidebar and header when authenticated, except on login page
   const showSidebarAndHeader = isAuthenticated && pathname !== '/login' && pathname !== '/';
-  // On tablets, sidebar is always open; on mobile, it can be toggled
-  const showSidebar = showSidebarAndHeader && sidebarOpen;
+  // Sidebar is always visible when authenticated, but can be expanded/collapsed
+  const showSidebar = showSidebarAndHeader;
   
   // Force re-render when dimensions change to fix Android rendering issues
   const screenKey = `${width}x${height}-${isTablet}-${isLandscape}`;
@@ -94,7 +94,7 @@ function RootLayoutContent() {
             flex: 1,
             paddingHorizontal: isSmallMobile ? 8 : 16,
             paddingVertical: isLandscape && isMobile ? 8 : 16,
-            marginLeft: showSidebar && isMobile ? (isSmallMobile ? 180 : 200) : 0,
+            marginLeft: showSidebar && isMobile ? (sidebarOpen ? (isSmallMobile ? 180 : 200) : 60) : 0,
           }
         ]}>
           <Stack screenOptions={{ 

@@ -16,7 +16,9 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
   
   const isLandscape = width > height;
   const isTablet = width >= 768;
+  const isMobile = width < 768;
   const sidebarWidth = isTablet ? 250 : 200;
+  const collapsedWidth = 60;
 
   const menuItems = [
     { 
@@ -58,15 +60,15 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
     router.replace('/login');
   };
 
-  // Always render sidebar container, but control visibility with styles
-  // This ensures proper layout calculation on all devices
+  // Always render sidebar, but show collapsed version when not open
+  const currentWidth = isOpen ? sidebarWidth : collapsedWidth;
+  const showLabels = isOpen;
 
   return (
     <View style={[
       styles.sidebar, 
       { 
-        width: sidebarWidth,
-        display: isOpen ? 'flex' : 'none',
+        width: currentWidth,
         position: 'relative',
         zIndex: 1,
         height: '100%',
@@ -78,7 +80,11 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
         {menuItems.map((item) => (
           <TouchableOpacity
             key={item.route}
-            style={[styles.menuItem, item.isActive && styles.activeMenuItem]}
+            style={[
+              styles.menuItem, 
+              !showLabels && styles.menuItemCollapsed,
+              item.isActive && styles.activeMenuItem
+            ]}
             onPress={() => handleNavigation(item.route)}
           >
             <MaterialIcons 
@@ -86,17 +92,22 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
               size={24} 
               color={item.isActive ? '#007AFF' : '#666'} 
             />
-            <Text style={[styles.menuText, item.isActive && styles.activeMenuText]}>
-              {item.title}
-            </Text>
+            {showLabels && (
+              <Text style={[styles.menuText, item.isActive && styles.activeMenuText]}>
+                {item.title}
+              </Text>
+            )}
           </TouchableOpacity>
         ))}
       </View>
 
-      <View style={styles.bottomSection}>
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+      <View style={[styles.bottomSection, !showLabels && styles.bottomSectionCollapsed]}>
+        <TouchableOpacity 
+          style={[styles.logoutButton, !showLabels && styles.logoutButtonCollapsed]} 
+          onPress={handleLogout}
+        >
           <MaterialIcons name="logout" size={20} color="#dc3545" />
-          <Text style={styles.logoutText}>Logout</Text>
+          {showLabels && <Text style={styles.logoutText}>Logout</Text>}
         </TouchableOpacity>
       </View>
     </View>
@@ -124,6 +135,11 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     borderRadius: 6,
   },
+  menuItemCollapsed: {
+    paddingHorizontal: 0,
+    justifyContent: 'center',
+    marginHorizontal: 8,
+  },
   activeMenuItem: {
     backgroundColor: '#f0f8ff',
   },
@@ -141,6 +157,9 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#e9ecef',
   },
+  bottomSectionCollapsed: {
+    padding: 8,
+  },
   logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -148,6 +167,10 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     backgroundColor: '#ffebee',
     borderRadius: 6,
+  },
+  logoutButtonCollapsed: {
+    paddingHorizontal: 8,
+    paddingVertical: 8,
   },
   logoutText: {
     marginLeft: 8,

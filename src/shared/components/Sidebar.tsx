@@ -102,14 +102,20 @@ export function Sidebar({
         ]}
       >
         {/* Header with Logo and Collapse Button */}
-        <View style={styles.headerSection}>
+        <View style={[
+          styles.headerSection,
+          isCollapsed && styles.collapsedHeaderSection
+        ]}>
           <View style={styles.brandingContainer}>
             {!isCollapsed && <OrderUpLogo size={32} />}
             {!isCollapsed && <Text style={styles.brandingText}>OrderUp</Text>}
           </View>
           {isTablet && (
             <TouchableOpacity
-              style={styles.collapseButton}
+              style={[
+                styles.collapseButton,
+                isCollapsed && styles.collapsedCollapseButton
+              ]}
               onPress={onToggleCollapse}
             >
               <MaterialIcons
@@ -214,6 +220,13 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 4,
     backgroundColor: "#34495e",
+  },
+  collapsedHeaderSection: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  collapsedCollapseButton: {
+    alignSelf: "center",
   },
   menuItems: {
     flex: 1,

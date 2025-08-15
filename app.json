@@ -23,7 +23,11 @@
       "edgeToEdgeEnabled": true,
       "permissions": [
         "CAMERA"
-      ]
+      ],
+      "statusBar": {
+        "backgroundColor": "#ffffff",
+        "barStyle": "dark-content"
+      }
     },
     "web": {
       "bundler": "metro",

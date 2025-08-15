@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, useWindowDimensions, Dimensions } from 'react-native';
 import { Stack, usePathname, useRouter } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { Sidebar } from '../shared/components/Sidebar';
 import { AppToolbar } from '../components/layout/AppToolbar';
 import { ThemeProvider } from '../contexts/ThemeContext';
@@ -109,6 +110,7 @@ function RootLayoutContent() {
 
   return (
     <View style={styles.container} key={screenKey}>
+      <StatusBar style="dark" backgroundColor="#ffffff" />
       <View style={styles.content}>
         {showSidebarAndHeader && (
           <Sidebar

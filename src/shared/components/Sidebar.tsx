@@ -49,7 +49,10 @@ export function Sidebar({ isOpen, onToggle, isCollapsed, onToggleCollapse }: Sid
 
   const handleNavigation = (route: string) => {
     router.push(route);
-    // Don't auto-close sidebar - let user control it manually
+    // Auto-close on mobile only
+    if (!isTablet) {
+      onToggle();
+    }
   };
 
   const handleLogout = async () => {
@@ -144,11 +147,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRightWidth: 1,
     borderRightColor: '#e9ecef',
+    transition: 'width 0.3s ease-in-out',
   },
   sidebarContent: {
     flex: 1,
     paddingVertical: 20,
     justifyContent: 'space-between',
+    transition: 'opacity 0.3s ease-in-out',
   },
   collapseSection: {
     alignItems: 'flex-end',

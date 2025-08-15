@@ -102,7 +102,7 @@ export function Sidebar({ isOpen, onToggle, isCollapsed, onToggleCollapse }: Sid
               <MaterialIcons 
                 name={isCollapsed ? "chevron-right" : "chevron-left"} 
                 size={20} 
-                color="#666" 
+                color="#bdc3c7" 
               />
             </TouchableOpacity>
           )}
@@ -122,7 +122,7 @@ export function Sidebar({ isOpen, onToggle, isCollapsed, onToggleCollapse }: Sid
             <MaterialIcons 
               name={item.icon as any} 
               size={24} 
-              color={item.isActive ? '#007AFF' : '#666'} 
+              color={item.isActive ? '#ecf0f1' : '#95a5a6'} 
             />
             {(!isCollapsed || !isTablet) && (
               <Text style={[styles.menuText, item.isActive && styles.activeMenuText]}>
@@ -141,7 +141,7 @@ export function Sidebar({ isOpen, onToggle, isCollapsed, onToggleCollapse }: Sid
           ]} 
           onPress={handleLogout}
         >
-          <MaterialIcons name="logout" size={20} color="#dc3545" />
+          <MaterialIcons name="logout" size={20} color="#ecf0f1" />
           {(!isCollapsed || !isTablet) && (
             <Text style={styles.logoutText}>Logout</Text>
           )}
@@ -154,9 +154,9 @@ export function Sidebar({ isOpen, onToggle, isCollapsed, onToggleCollapse }: Sid
 
 const styles = StyleSheet.create({
   sidebar: {
-    backgroundColor: '#fff',
+    backgroundColor: '#2c3e50',
     borderRightWidth: 1,
-    borderRightColor: '#e9ecef',
+    borderRightColor: '#34495e',
     transition: 'width 0.3s ease-in-out',
   },
   sidebarContent: {
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingBottom: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: '#34495e',
     marginBottom: 10,
   },
   brandingContainer: {
@@ -185,12 +185,12 @@ const styles = StyleSheet.create({
     marginLeft: 12,
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#007AFF',
+    color: '#ecf0f1',
   },
   collapseButton: {
     padding: 8,
     borderRadius: 4,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#34495e',
   },
   menuItems: {
     flex: 1,
@@ -208,21 +208,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   activeMenuItem: {
-    backgroundColor: '#f0f8ff',
+    backgroundColor: '#34495e',
   },
   menuText: {
     marginLeft: 12,
     fontSize: 16,
-    color: '#666',
+    color: '#bdc3c7',
   },
   activeMenuText: {
-    color: '#007AFF',
+    color: '#ecf0f1',
     fontWeight: '600',
   },
   bottomSection: {
     padding: 20,
     borderTopWidth: 1,
-    borderTopColor: '#e9ecef',
+    borderTopColor: '#34495e',
   },
   collapsedBottomSection: {
     paddingHorizontal: 10,
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 10,
-    backgroundColor: '#ffebee',
+    backgroundColor: '#e74c3c',
     borderRadius: 6,
   },
   collapsedLogoutButton: {
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
   },
   logoutText: {
     marginLeft: 8,
-    color: '#dc3545',
+    color: '#ecf0f1',
     fontSize: 16,
     fontWeight: '600',
   },

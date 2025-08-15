@@ -128,7 +128,7 @@ function RootLayoutContent() {
             <AppToolbar
               onMenuToggle={toggleSidebar}
               showMenuButton={isMobile}
-              onQRScan={toggleQRScanner}
+              
             />
           )}
 
@@ -146,14 +146,14 @@ function RootLayoutContent() {
               headerShown: true, // Ensure headers are shown by default
               header: ({ options }) => {
                 const { title } = options;
-                const orderId = router.query.id; // Get order ID from query params
+                const orderId = router.query.orderId; // Get order ID from query params
 
                 return (
                   <AppToolbar
                     title={orderId ? `Order ${orderId}` : title}
                     onMenuToggle={toggleSidebar}
                     showMenuButton={isMobile}
-                    onQRScan={toggleQRScanner}
+                    
                   />
                 );
               },
@@ -172,7 +172,7 @@ function RootLayoutContent() {
               <Stack.Screen name="login" />
               <Stack.Screen name="dashboard" />
               <Stack.Screen name="orders" />
-              <Stack.Screen name="orders/[id]" options={{ title: 'Order Details' }} />
+              <Stack.Screen name="orders/[orderId]" options={{ title: 'Order Details' }} />
               <Stack.Screen name="picklist" />
               <Stack.Screen name="settings" />
             </Stack>
@@ -180,13 +180,7 @@ function RootLayoutContent() {
         </View>
       </View>
 
-      {showQRScanner && (
-        <QRCodeScanner
-          visible={showQRScanner}
-          onClose={handleQRClose}
-          onScan={handleQRScan}
-        />
-      )}
+      
     </SafeAreaView>
   );
 }

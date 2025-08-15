@@ -132,7 +132,7 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true, onQRSca
       styles.toolbar,
       {
         paddingHorizontal: 16,
-        paddingVertical: 12,
+        paddingVertical: 16,
       }
     ]}>
       <View style={styles.leftSection}>
@@ -164,9 +164,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#e9ecef',
     zIndex: 1000,
-    height: 56,
-    minHeight: 56,
-    maxHeight: 56,
+    height: 72,
+    minHeight: 72,
+    maxHeight: 72,
   },
   leftSection: {
     flexDirection: 'row',

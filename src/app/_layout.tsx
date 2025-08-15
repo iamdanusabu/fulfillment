@@ -8,7 +8,7 @@ import { AppToolbar } from '../components/layout/AppToolbar';
 import { ThemeProvider } from '../contexts/ThemeContext';
 import { StoreProvider } from '../contexts/StoreContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import QRCodeScanner from '../features/orders/components/QRCodeScanner';
+import { QRCodeScanner } from '../features/orders/components/QRCodeScanner';
 
 
 function RootLayoutContent() {
@@ -61,20 +61,12 @@ function RootLayoutContent() {
     setShowQRScanner(false);
   };
 
-  // Handler for when a QR code result is obtained
-  const handleQRResult = (result) => {
-    if (result) {
-      // Navigate or process the scanned data
-      if (result.startsWith('http')) {
-        router.push(result); // Example: Navigate to a URL
-      } else {
-        // Handle other types of data, e.g., product IDs
-        console.log('Scanned data:', result);
-        // Example: navigate to a product detail page if result is a product ID
-        // router.push(`/products/${result}`);
-      }
-    }
-    setShowQRScanner(false); // Close scanner after processing
+  // Handler for when a QR code is scanned
+  const handleQRScan = (orderNumber: string) => {
+    console.log('Scanned order number:', orderNumber);
+    // Navigate to order details
+    router.push(`/orders/${orderNumber}`);
+    setShowQRScanner(false);
   };
 
   // Always show sidebar and header when authenticated, except on login page
@@ -178,8 +170,9 @@ function RootLayoutContent() {
 
       {showQRScanner && (
         <QRCodeScanner
+          visible={showQRScanner}
           onClose={handleQRClose}
-          onResult={handleQRResult}
+          onScan={handleQRScan}
         />
       )}
     </SafeAreaView>

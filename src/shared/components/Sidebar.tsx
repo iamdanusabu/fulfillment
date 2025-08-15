@@ -67,8 +67,8 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
       { 
         width: sidebarWidth,
         display: isOpen ? 'flex' : 'none',
-        position: isTablet ? 'relative' : 'fixed',
-        zIndex: 1000,
+        position: 'relative',
+        zIndex: 1,
         height: '100%',
         top: 0,
         left: 0,

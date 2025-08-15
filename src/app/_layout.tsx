@@ -94,8 +94,7 @@ function RootLayoutContent() {
             flex: 1,
             paddingHorizontal: isSmallMobile ? 8 : 16,
             paddingVertical: isLandscape && isMobile ? 8 : 16,
-            marginLeft: showSidebar && !isTablet ? (isSmallMobile ? 180 : 200) : 0,
-            transition: 'margin-left 0.3s ease-in-out',
+            marginLeft: showSidebar && isMobile ? (isSmallMobile ? 180 : 200) : 0,
           }
         ]}>
           <Stack screenOptions={{ 

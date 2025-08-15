@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -239,13 +238,6 @@ export default function DashboardScreen() {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
-      <View style={styles.header}>
-        <Text style={styles.title}>Dashboard</Text>
-        <TouchableOpacity onPress={onRefresh} style={styles.refreshButton}>
-          <MaterialIcons name="refresh" size={24} color="#007AFF" />
-        </TouchableOpacity>
-      </View>
-
       {stats.error && (
         <View style={styles.errorBanner}>
           <MaterialIcons name="error" size={20} color="#dc3545" />
@@ -344,23 +336,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#666",
     marginTop: 16,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e9ecef',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  refreshButton: {
-    padding: 8,
   },
   errorBanner: {
     flexDirection: 'row',

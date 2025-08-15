@@ -1,6 +1,5 @@
-
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList, Modal, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList, Modal, Alert, ActivityIndicator } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { ordersApi, transformOrder } from '../api/ordersApi';
@@ -49,10 +48,10 @@ export default function OrderDetailScreen() {
 
     try {
       await ordersApi.updateOrderStatus(order.orderID.toString(), newStatus);
-      
+
       // Update local state
       setOrder(prev => prev ? { ...prev, status: newStatus } : null);
-      
+
       Alert.alert('Success', 'Order status updated successfully');
     } catch (error) {
       console.error('Failed to update order status:', error);

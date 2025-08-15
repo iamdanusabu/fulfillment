@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useStores, useWarehouses } from '../hooks/usePicklist';
@@ -20,7 +20,7 @@ export default function LocationSelectionScreen() {
     const { orderIds } = params;
     const selectedLocationData = currentData.find(item => item.id === selectedLocation);
     const locationType = selectedLocationData?.type.toUpperCase() || '';
-    
+
     router.push(`/picklist/create?orderIds=${orderIds}&locationId=${selectedLocation}&locationType=${locationType}`);
   };
 
@@ -56,89 +56,84 @@ export default function LocationSelectionScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <MaterialIcons name="arrow-back" size={24} color="#333" />
-        </TouchableOpacity>
-        <Text style={styles.title}>Select Location</Text>
-      </View>
-
-      {/* Tab Navigation */}
-      <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'stores' && styles.activeTab]}
-          onPress={() => {
-            setActiveTab('stores');
-            setSelectedLocation(null);
-          }}
-        >
-          <MaterialIcons 
-            name="store" 
-            size={20} 
-            color={activeTab === 'stores' ? '#007AFF' : '#666'} 
-          />
-          <Text style={[styles.tabText, activeTab === 'stores' && styles.activeTabText]}>
-            Stores ({stores.length})
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'warehouses' && styles.activeTab]}
-          onPress={() => {
-            setActiveTab('warehouses');
-            setSelectedLocation(null);
-          }}
-        >
-          <MaterialIcons 
-            name="warehouse" 
-            size={20} 
-            color={activeTab === 'warehouses' ? '#007AFF' : '#666'} 
-          />
-          <Text style={[styles.tabText, activeTab === 'warehouses' && styles.activeTabText]}>
-            Warehouses ({warehouses.length})
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Content */}
-      {currentLoading ? (
+      {(storesLoading || warehousesLoading) ? (
         <View style={styles.loadingContainer}>
-          <Text>Loading {activeTab}...</Text>
+          <ActivityIndicator size="large" color="#007AFF" />
         </View>
       ) : (
-        <FlatList
-          data={currentData}
-          renderItem={renderLocationItem}
-          keyExtractor={(item) => item.id}
-          style={styles.locationsList}
-          contentContainerStyle={styles.locationsContent}
-          ListEmptyComponent={() => (
-            <View style={styles.emptyContainer}>
-              <MaterialIcons 
-                name={activeTab === 'stores' ? 'store' : 'warehouse'} 
-                size={48} 
-                color="#ccc" 
+        <>
+          {/* Tab Navigation */}
+          <View style={styles.tabContainer}>
+            <TouchableOpacity
+              style={[styles.tab, activeTab === 'stores' && styles.activeTab]}
+              onPress={() => {
+                setActiveTab('stores');
+                setSelectedLocation(null);
+              }}
+            >
+              <MaterialIcons
+                name="store"
+                size={20}
+                color={activeTab === 'stores' ? '#007AFF' : '#666'}
               />
-              <Text style={styles.emptyText}>
-                No {activeTab} available for fulfillment
+              <Text style={[styles.tabText, activeTab === 'stores' && styles.activeTabText]}>
+                Stores ({stores.length})
               </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.tab, activeTab === 'warehouses' && styles.activeTab]}
+              onPress={() => {
+                setActiveTab('warehouses');
+                setSelectedLocation(null);
+              }}
+            >
+              <MaterialIcons
+                name="warehouse"
+                size={20}
+                color={activeTab === 'warehouses' ? '#007AFF' : '#666'}
+              />
+              <Text style={[styles.tabText, activeTab === 'warehouses' && styles.activeTabText]}>
+                Warehouses ({warehouses.length})
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Content */}
+          <FlatList
+            data={currentData}
+            renderItem={renderLocationItem}
+            keyExtractor={(item) => item.id}
+            style={styles.locationsList}
+            contentContainerStyle={styles.locationsContent}
+            ListEmptyComponent={() => (
+              <View style={styles.emptyContainer}>
+                <MaterialIcons
+                  name={activeTab === 'stores' ? 'store' : 'warehouse'}
+                  size={48}
+                  color="#ccc"
+                />
+                <Text style={styles.emptyText}>
+                  No {activeTab} available for fulfillment
+                </Text>
+              </View>
+            )}
+          />
+
+          {selectedLocation && (
+            <View style={styles.bottomBar}>
+              <Text style={styles.selectedInfo}>
+                Selected: {currentData.find(item => item.id === selectedLocation)?.name}
+              </Text>
+              <TouchableOpacity
+                style={styles.proceedButton}
+                onPress={proceedToPicklist}
+              >
+                <Text style={styles.proceedText}>Create Picklist</Text>
+              </TouchableOpacity>
             </View>
           )}
-        />
-      )}
-
-      {selectedLocation && (
-        <View style={styles.bottomBar}>
-          <Text style={styles.selectedInfo}>
-            Selected: {currentData.find(item => item.id === selectedLocation)?.name}
-          </Text>
-          <TouchableOpacity
-            style={styles.proceedButton}
-            onPress={proceedToPicklist}
-          >
-            <Text style={styles.proceedText}>Create Picklist</Text>
-          </TouchableOpacity>
-        </View>
+        </>
       )}
     </View>
   );

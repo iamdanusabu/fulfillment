@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -28,13 +27,13 @@ export default function PicklistIndexScreen() {
           <Text style={styles.statusText}>{item.fulfillmentStatus}</Text>
         </View>
       </View>
-      
+
       <View style={styles.picklistDetails}>
         <Text style={styles.orderCount}>{item.orderCount} orders</Text>
         <Text style={styles.itemCount}>{item.totalItemCount} items</Text>
         <Text style={styles.createdAt}>Created: {new Date(item.createdOn).toLocaleDateString()}</Text>
       </View>
-      
+
       <View style={styles.locationInfo}>
         <MaterialIcons name="location-on" size={16} color="#666" />
         <Text style={styles.locationText}>{item.fulfillmentLocation.name}</Text>
@@ -52,14 +51,6 @@ export default function PicklistIndexScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Picklists</Text>
-        <TouchableOpacity style={styles.createButton} onPress={createNewPicklist}>
-          <MaterialIcons name="add" size={24} color="#fff" />
-          <Text style={styles.createButtonText}>Create Picklist</Text>
-        </TouchableOpacity>
-      </View>
-
       {loading && fulfillments.length === 0 ? (
         <View style={styles.loadingState}>
           <ActivityIndicator size="large" color="#007AFF" />

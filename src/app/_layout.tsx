@@ -8,7 +8,6 @@ import { AppToolbar } from '../components/layout/AppToolbar';
 import { ThemeProvider } from '../contexts/ThemeContext';
 import { StoreProvider } from '../contexts/StoreContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { QRCodeScanner } from '../features/orders/components/QRCodeScanner';
 
 function RootLayoutContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -144,7 +143,20 @@ function RootLayoutContent() {
             }
           ]}>
             <Stack screenOptions={{
-              headerShown: false,
+              headerShown: true, // Ensure headers are shown by default
+              header: ({ options }) => {
+                const { title } = options;
+                const orderId = router.query.id; // Get order ID from query params
+
+                return (
+                  <AppToolbar
+                    title={orderId ? `Order ${orderId}` : title}
+                    onMenuToggle={toggleSidebar}
+                    showMenuButton={isMobile}
+                    onQRScan={toggleQRScanner}
+                  />
+                );
+              },
               animation: 'none',
               animationDuration: 0,
               contentStyle: {
@@ -160,6 +172,7 @@ function RootLayoutContent() {
               <Stack.Screen name="login" />
               <Stack.Screen name="dashboard" />
               <Stack.Screen name="orders" />
+              <Stack.Screen name="orders/[id]" options={{ title: 'Order Details' }} />
               <Stack.Screen name="picklist" />
               <Stack.Screen name="settings" />
             </Stack>

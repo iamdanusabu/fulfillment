@@ -19,7 +19,7 @@ export function Sidebar({ isOpen, onToggle, isCollapsed, onToggleCollapse }: Sid
   
   const isLandscape = width > height;
   const isTablet = width >= 768;
-  const sidebarWidth = isTablet ? (isCollapsed ? 60 : 250) : 200;
+  const sidebarWidth = isTablet ? (isCollapsed ? 80 : 250) : 200;
 
   const menuItems = [
     { 

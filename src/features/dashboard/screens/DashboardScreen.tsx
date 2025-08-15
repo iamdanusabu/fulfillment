@@ -19,6 +19,7 @@ import { QRCodeScanner } from '../../orders/components/QRCodeScanner';
 import { useQRScanner } from '../../orders/hooks/useQRScanner';
 import { AppToolbar } from '../../../components/layout/AppToolbar';
 import { ShopifyIcon } from '../../../shared/components/ShopifyIcon';
+import { BigCommerceIcon } from '../../../shared/components/BigCommerceIcon';
 
 interface FilterSettings {
   sources: string[];
@@ -237,7 +238,7 @@ export default function DashboardScreen() {
   const getSourceInfo = (sourceName: string) => {
     const sourceMap: { [key: string]: { displayName: string; icon: string | React.ReactElement } } = {
       'Shopify': { displayName: 'Shopify', icon: <ShopifyIcon width={20} height={20} /> },
-      'bigcommerce': { displayName: 'BigCommerce', icon: '🛍️' },
+      'bigcommerce': { displayName: 'BigCommerce', icon: <BigCommerceIcon width={20} height={20} /> },
       'Breakaway': { displayName: 'Breakaway', icon: '🏃' },
       'Ecwid': { displayName: 'Ecwid', icon: '🛒' },
       'PHONE ORDER': { displayName: 'Phone Order', icon: '📞' },

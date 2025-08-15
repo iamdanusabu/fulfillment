@@ -25,15 +25,12 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true, onQRSca
   // Determine if we should show a back button
   const showBackButton = pathname !== '/dashboard' && pathname !== '/orders' && pathname !== '/picklist' && pathname !== '/settings';
 
-  // Get page-specific actions
+  // Get page-specific actions - keep all navigation buttons
   const getPageActions = () => {
-    // Show QR scanner on orders page
-    const showQRScanner = pathname === '/orders' || pathname === '/dashboard';
-    
     const actions = [];
     
-    // Add QR scanner button for order lookup
-    if (showQRScanner) {
+    // Add QR scanner button for order lookup on dashboard and orders pages
+    if (pathname === '/orders' || pathname === '/dashboard') {
       actions.push(
         <TouchableOpacity 
           key="qr-scanner"
@@ -45,6 +42,7 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true, onQRSca
       );
     }
 
+    // Add refresh button on dashboard
     if (pathname === '/dashboard') {
       actions.push(
         <TouchableOpacity 
@@ -57,6 +55,7 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true, onQRSca
       );
     }
 
+    // Add create picklist button on picklist page
     if (pathname === '/picklist') {
       actions.push(
         <TouchableOpacity 
@@ -66,6 +65,19 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true, onQRSca
         >
           <MaterialIcons name="add" size={20} color="#fff" />
           <Text style={styles.actionButtonText}>Create</Text>
+        </TouchableOpacity>
+      );
+    }
+
+    // Add filter/search buttons on orders page
+    if (pathname === '/orders') {
+      actions.push(
+        <TouchableOpacity 
+          key="filter"
+          style={[styles.iconButton, isSmallMobile && styles.smallIconButton]} 
+          onPress={() => {/* Add filter functionality */}}
+        >
+          <MaterialIcons name="filter-list" size={isSmallMobile ? 20 : 24} color="#007AFF" />
         </TouchableOpacity>
       );
     }

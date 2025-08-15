@@ -3,6 +3,7 @@ import { View, StyleSheet, useWindowDimensions, Dimensions } from 'react-native'
 import { Stack, usePathname } from 'expo-router';
 import { Sidebar } from '../shared/components/Sidebar';
 import { AppToolbar } from '../components/layout/AppToolbar';
+import { CommonHeader } from '../shared/components/CommonHeader';
 import { ThemeProvider } from '../contexts/ThemeContext';
 import { StoreProvider } from '../contexts/StoreContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -79,6 +80,10 @@ function RootLayoutContent() {
 
   return (
     <View style={styles.container} key={screenKey}>
+      {/* Common header for entire app - always shown when authenticated */}
+      {showSidebarAndHeader && <CommonHeader />}
+      
+      {/* Page-specific header with navigation buttons */}
       {showSidebarAndHeader && (
         <AppToolbar
           onMenuToggle={toggleSidebar}

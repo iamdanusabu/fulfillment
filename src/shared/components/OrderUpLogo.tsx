@@ -65,9 +65,9 @@ export function OrderUpLogo({ size = 24 }: OrderUpLogoProps) {
             y2="51.4873" 
             gradientUnits="userSpaceOnUse"
           >
-            <Stop stopColor="#ecf0f1"/>
-            <Stop offset="0.295696" stopColor="#bdc3c7"/>
-            <Stop offset="1" stopColor="#95a5a6"/>
+            <Stop stopColor="#A6D3FF"/>
+            <Stop offset="0.295696" stopColor="#7FBDFB"/>
+            <Stop offset="1" stopColor="#0077ED"/>
           </LinearGradient>
           <LinearGradient 
             id="paint1_linear_7717_9093" 
@@ -77,8 +77,8 @@ export function OrderUpLogo({ size = 24 }: OrderUpLogoProps) {
             y2="16.728" 
             gradientUnits="userSpaceOnUse"
           >
-            <Stop stopColor="#95a5a6"/>
-            <Stop offset="1" stopColor="#ecf0f1"/>
+            <Stop stopColor="#0077ED"/>
+            <Stop offset="1" stopColor="#A6D3FF"/>
           </LinearGradient>
           <LinearGradient 
             id="paint2_linear_7717_9093" 
@@ -88,9 +88,9 @@ export function OrderUpLogo({ size = 24 }: OrderUpLogoProps) {
             y2="36.3466" 
             gradientUnits="userSpaceOnUse"
           >
-            <Stop stopColor="#ecf0f1"/>
-            <Stop offset="0.295696" stopColor="#bdc3c7"/>
-            <Stop offset="1" stopColor="#95a5a6"/>
+            <Stop stopColor="#A6D3FF"/>
+            <Stop offset="0.295696" stopColor="#7FBDFB"/>
+            <Stop offset="1" stopColor="#0077ED"/>
           </LinearGradient>
           <LinearGradient 
             id="paint3_linear_7717_9093" 
@@ -100,9 +100,9 @@ export function OrderUpLogo({ size = 24 }: OrderUpLogoProps) {
             y2="90.3413" 
             gradientUnits="userSpaceOnUse"
           >
-            <Stop stopColor="#ecf0f1"/>
-            <Stop offset="0.295696" stopColor="#bdc3c7"/>
-            <Stop offset="1" stopColor="#95a5a6"/>
+            <Stop stopColor="#A6D3FF"/>
+            <Stop offset="0.295696" stopColor="#7FBDFB"/>
+            <Stop offset="1" stopColor="#0077ED"/>
           </LinearGradient>
           <LinearGradient 
             id="paint4_linear_7717_9093" 
@@ -112,9 +112,9 @@ export function OrderUpLogo({ size = 24 }: OrderUpLogoProps) {
             y2="111.498" 
             gradientUnits="userSpaceOnUse"
           >
-            <Stop stopColor="#ecf0f1"/>
-            <Stop offset="0.295696" stopColor="#bdc3c7"/>
-            <Stop offset="1" stopColor="#95a5a6"/>
+            <Stop stopColor="#A6D3FF"/>
+            <Stop offset="0.295696" stopColor="#7FBDFB"/>
+            <Stop offset="1" stopColor="#0077ED"/>
           </LinearGradient>
           <ClipPath id="clip0_7717_9093">
             <Rect width="117.537" height="117.537" fill="white"/>

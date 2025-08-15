@@ -169,6 +169,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
     zIndex: 1000,
+    height: 56,
+    minHeight: 56,
+    maxHeight: 56,
   },
   leftSection: {
     flexDirection: 'row',

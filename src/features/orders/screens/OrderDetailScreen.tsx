@@ -28,10 +28,10 @@ export default function OrderDetailScreen() {
     }
   }, [orderId]);
 
-  // Update router params when order is loaded to show order number in header
+  // Update router params when order is loaded to show order ID in header
   useEffect(() => {
     if (order) {
-      router.setParams({ orderNumber: order.orderNumber });
+      router.setParams({ orderId: order.orderID.toString() });
     }
   }, [order, router]);
 

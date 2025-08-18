@@ -12,7 +12,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { usePaginatedOrders } from '../hooks/usePaginatedOrders';
 import { Order } from '../../../shared/types';
 import { picklistApi } from '../../picklist/api/picklistApi';
@@ -48,6 +48,16 @@ export default function OrdersScreen() {
   useEffect(() => {
     setIsPicklistMode(params.mode === 'picklist');
   }, [params.mode]);
+
+  // Refresh orders when screen comes into focus (e.g., returning from order detail)
+  useFocusEffect(
+    useCallback(() => {
+      // Only refresh if we have existing orders (not on initial load)
+      if (orders.length > 0) {
+        refresh();
+      }
+    }, [orders.length, refresh])
+  );
 
   const toggleOrderSelection = (orderId: string) => {
     if (!isPicklistMode) return;

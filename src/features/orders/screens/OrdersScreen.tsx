@@ -119,7 +119,7 @@ export default function OrdersScreen() {
     const date = new Date(dateString);
     const now = new Date();
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    
+
     if (diffInHours < 24) {
       return `${diffInHours}h ago`;
     } else if (diffInHours < 48) {
@@ -152,7 +152,7 @@ export default function OrdersScreen() {
             </View>
           </View>
         </View>
-        
+
         <View style={styles.orderActions}>
           {isPicklistMode && (
             <View style={styles.checkboxContainer}>
@@ -222,7 +222,7 @@ export default function OrdersScreen() {
         onScan={handleScan}
       />
 
-      
+
 
       <FlatList
         data={filteredOrders}

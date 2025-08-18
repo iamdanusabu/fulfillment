@@ -8,8 +8,8 @@ import {
   ScrollView,
   Switch
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 
 interface Settings {
@@ -352,7 +352,7 @@ export default function SettingsScreen() {
         <Text style={styles.sectionTitle}>Account</Text>
         <TouchableOpacity style={styles.settingItem} onPress={handleLogout}>
           <Text style={[styles.settingLabel, styles.logoutText]}>Logout</Text>
-          <MaterialIcons name="logout" size={20} color="#dc3545" />
+          <MaterialIcons name="logout" size={20} color="#dc3545" style={styles.logoutIcon} />
         </TouchableOpacity>
       </View>
 
@@ -451,5 +451,8 @@ const styles = StyleSheet.create({
   },
   logoutText: {
     color: '#dc3545',
+  },
+  logoutIcon: {
+    marginRight: 15,
   },
 });

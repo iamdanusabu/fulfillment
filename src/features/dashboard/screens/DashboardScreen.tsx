@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -253,7 +252,7 @@ export default function DashboardScreen() {
       'QSR': { displayName: 'QSR', icon: '🍔' },
       'Tapin2': { displayName: 'Tapin2', icon: '💳' },
     };
-    
+
     return sourceMap[sourceName] || { displayName: sourceName, icon: '📦' };
   };
 
@@ -639,5 +638,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     marginLeft: 8,
+  },
+  actionIcon: {
+    marginBottom: 8,
+    alignSelf: 'center',
   },
 });

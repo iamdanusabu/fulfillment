@@ -30,7 +30,11 @@ export default function LoginScreen() {
   const isSmallMobile = width < 480;
 
   const handleLogin = async () => {
-    if (!domain || !username || !password) {
+    const trimmedDomain = domain.trim();
+    const trimmedUsername = username.trim();
+    const trimmedPassword = password.trim();
+    
+    if (!trimmedDomain || !trimmedUsername || !trimmedPassword) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
@@ -38,13 +42,17 @@ export default function LoginScreen() {
     setLoading(true);
     
     try {
-      const response = await authApi.login({ domain, username, password });
+      const response = await authApi.login({ 
+        domain: trimmedDomain, 
+        username: trimmedUsername, 
+        password: trimmedPassword 
+      });
       
       // Store the token and username in AsyncStorage
       await AsyncStorage.setItem('access_token', response.access_token);
       await AsyncStorage.setItem('refresh_token', response.refresh_token);
       await AsyncStorage.setItem('token_expires_in', response.expires_in.toString());
-      await AsyncStorage.setItem('username', username);
+      await AsyncStorage.setItem('username', trimmedUsername);
       
       // Navigate to dashboard
       router.replace('/dashboard');

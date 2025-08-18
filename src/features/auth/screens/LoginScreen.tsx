@@ -9,7 +9,9 @@ import {
   Alert,
   ActivityIndicator,
   useWindowDimensions,
-  ScrollView 
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform 
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -55,17 +57,23 @@ export default function LoginScreen() {
   };
 
   return (
-    <ScrollView 
-      contentContainerStyle={[
-        styles.container,
-        {
-          paddingHorizontal: isSmallMobile ? 16 : isLandscape && !isTablet ? 40 : 20,
-          justifyContent: isLandscape && !isTablet ? 'flex-start' : 'center',
-          paddingTop: isLandscape && !isTablet ? 40 : 0,
-        }
-      ]}
-      keyboardShouldPersistTaps="handled"
+    <KeyboardAvoidingView 
+      style={styles.keyboardContainer}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
+      <ScrollView 
+        contentContainerStyle={[
+          styles.container,
+          {
+            paddingHorizontal: isSmallMobile ? 16 : isLandscape && !isTablet ? 40 : 20,
+            justifyContent: isLandscape && !isTablet ? 'flex-start' : 'center',
+            paddingTop: isLandscape && !isTablet ? 40 : 0,
+          }
+        ]}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
       <View style={[
         styles.formContainer,
         {
@@ -123,10 +131,15 @@ export default function LoginScreen() {
         </TouchableOpacity>
       </View>
     </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
+  keyboardContainer: {
+    flex: 1,
+    backgroundColor: '#f8f9fa',
+  },
   container: {
     flexGrow: 1,
     alignItems: 'center',

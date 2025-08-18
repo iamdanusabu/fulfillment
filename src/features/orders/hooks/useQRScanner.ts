@@ -40,13 +40,8 @@ export function useQRScanner() {
         if (numberMatch) {
           orderNumber = numberMatch[0];
         } else {
-          throw new Error('INVALID_QR_CODE');
+          throw new Error('No valid order number found in QR code');
         }
-      }
-
-      // Validate that we have a reasonable order number (not too short/long)
-      if (orderNumber.length < 1 || orderNumber.length > 20) {
-        throw new Error('INVALID_ORDER_ID');
       }
 
       // Try to fetch the order to validate it exists
@@ -56,42 +51,24 @@ export function useQRScanner() {
         // Navigate to order details
         router.push(`/orders/${orderNumber}`);
       } else {
-        throw new Error('ORDER_NOT_FOUND');
+        throw new Error('Order not found');
       }
       
     } catch (error) {
       console.error('QR scan error:', error);
       
-      let errorTitle = 'QR Code Error';
-      let errorMessage = 'Failed to process QR code. Please try again.';
-      
+      let errorMessage = 'Failed to find order';
       if (error instanceof Error) {
-        switch (error.message) {
-          case 'INVALID_QR_CODE':
-            errorTitle = 'Invalid QR Code';
-            errorMessage = 'This QR code does not contain a valid order ID. Please scan a QR code that contains an order number.';
-            break;
-          case 'INVALID_ORDER_ID':
-            errorTitle = 'Invalid Order ID';
-            errorMessage = 'The Order ID from this QR code is not valid. Please scan a QR code with a valid order number.';
-            break;
-          case 'ORDER_NOT_FOUND':
-            errorTitle = 'Order Not Found';
-            errorMessage = 'The Order ID from this QR code was not found in the system. Please check the QR code and try again.';
-            break;
-          default:
-            if (error.message.includes('not found') || error.message.includes('404')) {
-              errorTitle = 'Order Not Found';
-              errorMessage = 'The Order ID from this QR code was not found in the system. Please check the QR code and try again.';
-            } else if (error.message.includes('Network')) {
-              errorTitle = 'Network Error';
-              errorMessage = 'Unable to validate the order. Please check your connection and try again.';
-            }
-            break;
+        if (error.message.includes('not found') || error.message.includes('404')) {
+          errorMessage = 'Order not found. Please check the QR code and try again.';
+        } else if (error.message.includes('No valid order number')) {
+          errorMessage = 'Invalid QR code. Please scan a valid order QR code.';
+        } else {
+          errorMessage = 'Failed to process QR code. Please try again.';
         }
       }
       
-      Alert.alert(errorTitle, errorMessage, [
+      Alert.alert('QR Code Error', errorMessage, [
         {
           text: 'Try Again',
           onPress: () => setIsScanning(true),

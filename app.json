@@ -23,12 +23,7 @@
       "edgeToEdgeEnabled": false,
       "permissions": [
         "CAMERA"
-      ],
-      "statusBar": {
-        "backgroundColor": "#000000",
-        "barStyle": "light-content",
-        "translucent": false
-      }
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -50,7 +45,8 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true

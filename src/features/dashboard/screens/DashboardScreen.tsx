@@ -27,6 +27,7 @@ import { DeliveryIcon } from '../../../shared/components/DeliveryIcon';
 import { PhoneIcon } from '../../../shared/components/PhoneIcon';
 import { OtherIcon } from '../../../shared/components/OtherIcon';
 import { QSRIcon } from '../../../shared/components/QSRIcon';
+import { Tapin2Icon } from '../../../shared/components/Tapin2Icon';
 import { TableIcon } from '../../../shared/components/TableIcon';
 
 interface FilterSettings {
@@ -258,7 +259,7 @@ export default function DashboardScreen() {
       'MANUAL': { displayName: 'Manual', icon: '✏️' },
       'FanVista': { displayName: 'FanVista', icon: '📱' },
       'QSR': { displayName: 'QSR', icon: <QSRIcon width={24} height={24} /> },
-      'Tapin2': { displayName: 'Tapin2', icon: '💳' },
+      'Tapin2': { displayName: 'Tapin2', icon: <Tapin2Icon width={24} height={24} /> },
     };
 
     return sourceMap[sourceName] || { displayName: sourceName, icon: '📦' };

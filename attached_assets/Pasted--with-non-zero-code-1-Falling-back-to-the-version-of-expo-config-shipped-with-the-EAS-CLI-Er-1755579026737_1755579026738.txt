@@ -1,0 +1,110 @@
+ with non-zero code: 1.
+Falling back to the version of "@expo/config" shipped with the EAS CLI.
+Error parsing JSON: {
+  "expo": {
+    "name": "expo-on-replit",
+    "slug": "expo-on-replit",
+    "version": "1.0.0",
+    "orientation": "default",
+    "icon": "./assets/images/icon.png",
+    "scheme": "myapp",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app uses the camera to scan QR codes for quick order lookup."
+      }
+    },
+    "android": {
+      "package": "com.expoonreplit.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": false,
+      "permissions": [
+        "CAMERA"
+      ],
+      "statusBar": {
+        "backgroundColor": "#000000",
+        "barStyle": "light-content",
+        "translucent": false
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-router",
+        {
+          "root": "./src/app"
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
+{
+  "expo": {
+    "name": "orderup-app",
+    "slug": "orderup-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "myapp",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "usesCleartextTraffic": true,
+      "networkSecurityConfig": "./network_security_config.xml"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
+
+├─ File: /home/runner/workspace/app.json
+└─ Cause: SyntaxError: JSON5: invalid character '{' at 60:1
+  58 |   }
+  59 | }
+> 60 | {
+     | ^
+  61 |   "expo": {
+  62 |     "name": "orderup-app",
+  63 |     "slug": "orderup-app",
+    Error: build command failed.

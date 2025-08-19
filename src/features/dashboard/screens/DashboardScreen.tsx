@@ -25,6 +25,7 @@ import { BarTabIcon } from '../../../shared/components/BarTabIcon';
 import { TikTokIcon } from '../../../shared/components/TikTokIcon';
 import { DeliveryIcon } from '../../../shared/components/DeliveryIcon';
 import { PhoneIcon } from '../../../shared/components/PhoneIcon';
+import { OtherIcon } from '../../../shared/components/OtherIcon';
 
 interface FilterSettings {
   sources: string[];
@@ -251,7 +252,7 @@ export default function DashboardScreen() {
       'BAR TAB': { displayName: 'Bar Tab', icon: <BarTabIcon width={24} height={24} /> },
       'TIKT': { displayName: 'TIKT', icon: <TikTokIcon width={28} height={28} /> },
       'TABLE': { displayName: 'Table', icon: '🍽️' },
-      'OTHER': { displayName: 'Other', icon: '📦' },
+      'OTHER': { displayName: 'Other', icon: <OtherIcon width={24} height={24} /> },
       'MANUAL': { displayName: 'Manual', icon: '✏️' },
       'FanVista': { displayName: 'FanVista', icon: '📱' },
       'QSR': { displayName: 'QSR', icon: '🍔' },

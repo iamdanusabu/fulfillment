@@ -20,6 +20,7 @@ import { AppToolbar } from '../../../components/layout/AppToolbar';
 import { ShopifyIcon } from '../../../shared/components/ShopifyIcon';
 import { BigCommerceIcon } from '../../../shared/components/BigCommerceIcon';
 import { EcwidIcon } from '../../../shared/components/EcwidIcon';
+import { BreakawayIcon } from '../../../shared/components/BreakawayIcon';
 
 interface FilterSettings {
   sources: string[];
@@ -239,7 +240,7 @@ export default function DashboardScreen() {
     const sourceMap: { [key: string]: { displayName: string; icon: string | React.ReactElement } } = {
       'Shopify': { displayName: 'Shopify', icon: <ShopifyIcon width={28} height={28} /> },
       'bigcommerce': { displayName: 'BigCommerce', icon: <BigCommerceIcon width={28} height={28} /> },
-      'Breakaway': { displayName: 'Breakaway', icon: '🏃' },
+      'Breakaway': { displayName: 'Breakaway', icon: <BreakawayIcon width={28} height={28} /> },
       'Ecwid': { displayName: 'Ecwid', icon: <EcwidIcon width={28} height={28} /> },
       'PHONE ORDER': { displayName: 'Phone Order', icon: '📞' },
       'DELIVERY': { displayName: 'Delivery', icon: '🚚' },

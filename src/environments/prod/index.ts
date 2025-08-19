@@ -1,6 +1,6 @@
 
 export const PROD_CONFIG = {
-  baseURL: "https://www.console.retailcloud.com",
+  baseURL: "https://console.retailcloud.com",
   grantType: "password",
   clientId: "rc-app-live",
   clientSecret: "secret",

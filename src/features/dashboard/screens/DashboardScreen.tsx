@@ -27,6 +27,7 @@ import { DeliveryIcon } from '../../../shared/components/DeliveryIcon';
 import { PhoneIcon } from '../../../shared/components/PhoneIcon';
 import { OtherIcon } from '../../../shared/components/OtherIcon';
 import { QSRIcon } from '../../../shared/components/QSRIcon';
+import { TableIcon } from '../../../shared/components/TableIcon';
 
 interface FilterSettings {
   sources: string[];
@@ -252,7 +253,7 @@ export default function DashboardScreen() {
       'DELIVERY': { displayName: 'Delivery', icon: <DeliveryIcon width={24} height={24} /> },
       'BAR TAB': { displayName: 'Bar Tab', icon: <BarTabIcon width={24} height={24} /> },
       'TIKT': { displayName: 'TIKT', icon: <TikTokIcon width={28} height={28} /> },
-      'TABLE': { displayName: 'Table', icon: '🍽️' },
+      'TABLE': { displayName: 'Table', icon: <TableIcon width={24} height={24} /> },
       'OTHER': { displayName: 'Other', icon: <OtherIcon width={24} height={24} /> },
       'MANUAL': { displayName: 'Manual', icon: '✏️' },
       'FanVista': { displayName: 'FanVista', icon: '📱' },

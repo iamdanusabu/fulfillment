@@ -18,7 +18,7 @@ export const COMMON_ENDPOINTS = {
 };
 
 export const getConfig = () => {
-  const env = process.env.NODE_ENV || "development";
+  const env = process.env.NODE_ENV || "production";
   switch (env) {
     case "production":
       return { ...PROD_CONFIG, endpoints: COMMON_ENDPOINTS };

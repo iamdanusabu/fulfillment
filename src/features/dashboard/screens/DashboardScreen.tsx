@@ -24,6 +24,7 @@ import { BreakawayIcon } from '../../../shared/components/BreakawayIcon';
 import { BarTabIcon } from '../../../shared/components/BarTabIcon';
 import { TikTokIcon } from '../../../shared/components/TikTokIcon';
 import { DeliveryIcon } from '../../../shared/components/DeliveryIcon';
+import { PhoneIcon } from '../../../shared/components/PhoneIcon';
 
 interface FilterSettings {
   sources: string[];
@@ -245,9 +246,9 @@ export default function DashboardScreen() {
       'bigcommerce': { displayName: 'BigCommerce', icon: <BigCommerceIcon width={28} height={28} /> },
       'Breakaway': { displayName: 'Breakaway', icon: <BreakawayIcon width={28} height={28} /> },
       'Ecwid': { displayName: 'Ecwid', icon: <EcwidIcon width={28} height={28} /> },
-      'PHONE ORDER': { displayName: 'Phone Order', icon: '📞' },
-      'DELIVERY': { displayName: 'Delivery', icon: '🚚' },
-      'BAR TAB': { displayName: 'Bar Tab', icon: <BarTabIcon width={28} height={28} /> },
+      'PHONE ORDER': { displayName: 'Phone Order', icon: <PhoneIcon width={24} height={24} /> },
+      'DELIVERY': { displayName: 'Delivery', icon: <DeliveryIcon width={24} height={24} /> },
+      'BAR TAB': { displayName: 'Bar Tab', icon: <BarTabIcon width={24} height={24} /> },
       'TIKT': { displayName: 'TIKT', icon: <TikTokIcon width={28} height={28} /> },
       'TABLE': { displayName: 'Table', icon: '🍽️' },
       'OTHER': { displayName: 'Other', icon: '📦' },
@@ -645,6 +646,6 @@ const styles = StyleSheet.create({
   },
   actionIcon: {
     marginBottom: 8,
-    alignSelf: 'center',
+    selfAlign: 'center',
   },
 });

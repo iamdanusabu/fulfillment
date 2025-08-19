@@ -21,6 +21,7 @@ import { ShopifyIcon } from '../../../shared/components/ShopifyIcon';
 import { BigCommerceIcon } from '../../../shared/components/BigCommerceIcon';
 import { EcwidIcon } from '../../../shared/components/EcwidIcon';
 import { BreakawayIcon } from '../../../shared/components/BreakawayIcon';
+import { TikTokIcon } from '../../../shared/components/TikTokIcon';
 
 interface FilterSettings {
   sources: string[];
@@ -245,7 +246,7 @@ export default function DashboardScreen() {
       'PHONE ORDER': { displayName: 'Phone Order', icon: '📞' },
       'DELIVERY': { displayName: 'Delivery', icon: '🚚' },
       'BAR TAB': { displayName: 'Bar Tab', icon: '🍺' },
-      'TIKT': { displayName: 'TIKT', icon: '🎫' },
+      'TIKT': { displayName: 'TIKT', icon: <TikTokIcon width={28} height={28} /> },
       'TABLE': { displayName: 'Table', icon: '🍽️' },
       'OTHER': { displayName: 'Other', icon: '📦' },
       'MANUAL': { displayName: 'Manual', icon: '✏️' },

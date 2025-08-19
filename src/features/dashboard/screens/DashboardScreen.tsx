@@ -24,7 +24,6 @@ import { BreakawayIcon } from '../../../shared/components/BreakawayIcon';
 import { BarTabIcon } from '../../../shared/components/BarTabIcon';
 import { TikTokIcon } from '../../../shared/components/TikTokIcon';
 import { DeliveryIcon } from '../../../shared/components/DeliveryIcon';
-import { FanVistaIcon } from '../../../shared/components/FanVistaIcon';
 
 interface FilterSettings {
   sources: string[];
@@ -253,7 +252,7 @@ export default function DashboardScreen() {
       'TABLE': { displayName: 'Table', icon: '🍽️' },
       'OTHER': { displayName: 'Other', icon: '📦' },
       'MANUAL': { displayName: 'Manual', icon: '✏️' },
-      'FanVista': { displayName: 'FanVista', icon: <FanVistaIcon width={28} height={28} /> },
+      'FanVista': { displayName: 'FanVista', icon: '📱' },
       'QSR': { displayName: 'QSR', icon: '🍔' },
       'Tapin2': { displayName: 'Tapin2', icon: '💳' },
     };

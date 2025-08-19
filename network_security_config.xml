@@ -1,0 +1,9 @@
+
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">betaaccount.retailcloud.com</domain>
+        <domain includeSubdomains="true">www.console.retailcloud.com</domain>
+        <domain includeSubdomains="true">uataccount.retailcloud.com</domain>
+    </domain-config>
+</network-security-config>

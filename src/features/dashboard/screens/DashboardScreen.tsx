@@ -29,6 +29,7 @@ import { OtherIcon } from '../../../shared/components/OtherIcon';
 import { QSRIcon } from '../../../shared/components/QSRIcon';
 import { Tapin2Icon } from '../../../shared/components/Tapin2Icon';
 import { TableIcon } from '../../../shared/components/TableIcon';
+import { ManualIcon } from '../../../shared/components/ManualIcon';
 
 interface FilterSettings {
   sources: string[];
@@ -256,7 +257,7 @@ export default function DashboardScreen() {
       'TIKT': { displayName: 'TIKT', icon: <TikTokIcon width={28} height={28} /> },
       'TABLE': { displayName: 'Table', icon: <TableIcon width={24} height={24} /> },
       'OTHER': { displayName: 'Other', icon: <OtherIcon width={24} height={24} /> },
-      'MANUAL': { displayName: 'Manual', icon: '✏️' },
+      'MANUAL': { displayName: 'Manual', icon: <ManualIcon width={24} height={24} /> },
       'FanVista': { displayName: 'FanVista', icon: '📱' },
       'QSR': { displayName: 'QSR', icon: <QSRIcon width={24} height={24} /> },
       'Tapin2': { displayName: 'Tapin2', icon: <Tapin2Icon width={24} height={24} /> },

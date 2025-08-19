@@ -17,6 +17,15 @@ export interface AuthResponse {
 export const authApi = {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     const config = getConfig();
+    
+    // Debug logging
+    console.log('Environment:', process.env.NODE_ENV || 'undefined');
+    console.log('Config:', {
+      baseURL: config.baseURL,
+      clientId: config.clientId,
+      endpoint: config.endpoints.token
+    });
+    
     const authCredentials = btoa(`${config.clientId}:${config.clientSecret}`);
     
     const formData = new URLSearchParams();
@@ -26,22 +35,32 @@ export const authApi = {
     formData.append('domain', credentials.domain);
     formData.append('scope', 'write');
 
-    const response = await fetch(`${config.baseURL}${config.endpoints.token}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${authCredentials}`,
-      },
-      body: formData.toString(),
-    });
+    const fullUrl = `${config.baseURL}${config.endpoints.token}`;
+    console.log('Making request to:', fullUrl);
+    
+    try {
+      const response = await fetch(fullUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': `Basic ${authCredentials}`,
+        },
+        body: formData.toString(),
+      });
 
-    const data = await response.json();
+      console.log('Response status:', response.status);
+      const data = await response.json();
 
-    if (!response.ok) {
-      throw new Error(data.error_description || 'Login failed');
+      if (!response.ok) {
+        console.log('Response error:', data);
+        throw new Error(data.error_description || 'Login failed');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Network error details:', error);
+      throw error;
     }
-
-    return data;
   },
 
   async refreshToken(refreshToken: string): Promise<AuthResponse> {

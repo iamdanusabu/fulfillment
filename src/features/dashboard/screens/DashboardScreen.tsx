@@ -30,6 +30,7 @@ import { QSRIcon } from '../../../shared/components/QSRIcon';
 import { Tapin2Icon } from '../../../shared/components/Tapin2Icon';
 import { TableIcon } from '../../../shared/components/TableIcon';
 import { ManualIcon } from '../../../shared/components/ManualIcon';
+import { FanVistaIcon } from '../../../shared/components/FanVistaIcon';
 
 interface FilterSettings {
   sources: string[];
@@ -258,7 +259,7 @@ export default function DashboardScreen() {
       'TABLE': { displayName: 'Table', icon: <TableIcon width={24} height={24} /> },
       'OTHER': { displayName: 'Other', icon: <OtherIcon width={24} height={24} /> },
       'MANUAL': { displayName: 'Manual', icon: <ManualIcon width={24} height={24} /> },
-      'FanVista': { displayName: 'FanVista', icon: '📱' },
+      'FanVista': { displayName: 'FanVista', icon: <FanVistaIcon width={28} height={28} /> },
       'QSR': { displayName: 'QSR', icon: <QSRIcon width={24} height={24} /> },
       'Tapin2': { displayName: 'Tapin2', icon: <Tapin2Icon width={24} height={24} /> },
     };

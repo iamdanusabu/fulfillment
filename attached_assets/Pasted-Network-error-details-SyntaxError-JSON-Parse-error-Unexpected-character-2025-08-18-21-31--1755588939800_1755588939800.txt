@@ -1,0 +1,20 @@
+Network error details:', [SyntaxError: JSON Parse error: Unexpected character: <]
+2025-08-18 21:31:45.765  9878-9901  ReactNativeJS           com.expoonreplit.app                 E  'Login error:', [SyntaxError: JSON Parse error: Unexpected character: <]
+2025-08-18 21:31:45.766  9878-9902  unknown:ReactNative     com.expoonreplit.app                 E  console.error: Network error details: SyntaxError: JSON Parse error: Unexpected character: <, js engine: hermes, stack:
+                                                                                                    _construct@1:120695
+                                                                                                    Wrapper@1:120349
+                                                                                                    _callSuper@1:118185
+                                                                                                    SyntheticError@1:119836
+                                                                                                    reactConsoleErrorHandler@1:119447
+                                                                                                    ?anon_0_@1:1350295
+                                                                                                    asyncGeneratorStep@1:549832
+                                                                                                    _throw@1:550137
+2025-08-18 21:31:45.768  9878-9902  unknown:ReactNative     com.expoonreplit.app                 E  console.error: Login error: SyntaxError: JSON Parse error: Unexpected character: <, js engine: hermes, stack:
+                                                                                                    _construct@1:120695
+                                                                                                    Wrapper@1:120349
+                                                                                                    _callSuper@1:118185
+                                                                                                    SyntheticError@1:119836
+                                                                                                    reactConsoleErrorHandler@1:119447
+                                                                                                    ?anon_0_@1:1349365
+                                                                                                    asyncGeneratorStep@1:549832
+                                                                                                    _throw@1:550137

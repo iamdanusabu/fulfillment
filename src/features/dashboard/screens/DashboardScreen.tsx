@@ -23,6 +23,7 @@ import { EcwidIcon } from '../../../shared/components/EcwidIcon';
 import { BreakawayIcon } from '../../../shared/components/BreakawayIcon';
 import { BarTabIcon } from '../../../shared/components/BarTabIcon';
 import { TikTokIcon } from '../../../shared/components/TikTokIcon';
+import { DeliveryIcon } from '../../../shared/components/DeliveryIcon';
 
 interface FilterSettings {
   sources: string[];

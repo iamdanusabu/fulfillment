@@ -24,17 +24,9 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": false,
       "permissions": [
         "CAMERA"
-      ],
-      "statusBar": {
-        "backgroundColor": "#000000",
-        "barStyle": "light-content",
-        "translucent": false
-      },
-      "usesCleartextTraffic": true,
-      "networkSecurityConfig": "./network_security_config.xml"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -51,7 +43,8 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true

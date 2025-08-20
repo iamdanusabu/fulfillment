@@ -10,9 +10,6 @@ interface UsePaginatedOrdersParams {
   source?: string;
   status?: string;
   hasFulfilmentJob?: string;
-  searchText?: string;
-  customerName?: string;
-  orderID?: string;
 }
 
 export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
@@ -48,51 +45,16 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
       result.status = params.status;
     }
 
-    // Add search parameters
-    if (params.searchText && params.searchText.trim()) {
-      const searchValue = params.searchText.trim();
-      result.searchMode = 'contains';
-      result.matchWith = 'any';
-      
-      // Always add customerName for text searches, and orderID for numeric searches
-      if (/^\d+$/.test(searchValue)) {
-        result.orderID = searchValue;
-      } else {
-        result.customerName = searchValue;
-      }
-    }
-
-    // Add specific search parameters if provided
-    if (params.customerName) {
-      result.customerName = params.customerName;
-      result.searchMode = 'contains';
-      result.matchWith = 'any';
-    }
-    if (params.orderID) {
-      result.orderID = params.orderID;
-      result.searchMode = 'contains';
-      result.matchWith = 'any';
-    }
-
     return result;
-  }, [settings, params.source, params.status, params.hasFulfilmentJob, params.searchText, params.customerName, params.orderID, getFilterParams]);
+  }, [settings, params.source, params.status, params.hasFulfilmentJob, getFilterParams]);
 
   const paginatedState = usePaginatedFetcher<any>(
     config.endpoints.orders,
     {
       pageSize: 20,
-      initialParams: {
-        hasFulfilmentJob: 'false',
-        expand: 'item,bin,location_hint,payment',
-        pagination: 'true',
-      },
+      initialParams: apiParams,
     }
   );
-
-  // Update parameters when apiParams change
-  React.useEffect(() => {
-    paginatedState.updateParams(apiParams);
-  }, [apiParams]);
 
   // Transform the raw data to Order objects
   const transformedOrders = React.useMemo(() => 

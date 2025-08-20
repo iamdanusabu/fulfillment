@@ -111,7 +111,7 @@ export class PaginatedFetcher<T> {
 
   async loadMore(): Promise<void> {
     if (!this.state.hasMore || this.state.loading) return;
-
+    
     // Only load the next page if we haven't already loaded it
     const nextPage = this.state.currentPage + 1;
     if (nextPage <= this.state.totalPages) {
@@ -177,38 +177,25 @@ export const usePaginatedFetcher = <T>(
   });
 
   const [params, setParams] = useState<Record<string, string | number>>(options.initialParams || {});
-
+  
   // Create a stable string representation of params to prevent unnecessary re-renders
   const paramsString = React.useMemo(() => JSON.stringify(params), [params]);
-  const prevParamsRef = useRef<string>('');
 
   useEffect(() => {
     if (baseUrl) {
-      // Check if params actually changed
-      const paramsChanged = paramsString !== prevParamsRef.current;
-      
-      // Only recreate fetcher if URL changed
+      // Only recreate fetcher if URL or params actually changed
       if (!fetcherRef.current || fetcherRef.current['url'] !== baseUrl) {
         fetcherRef.current = new PaginatedFetcher<T>(baseUrl, { ...options, initialParams: params });
-        prevParamsRef.current = paramsString;
-        
-        fetcherRef.current.fetchPage(1, false).then(() => {
-          setState(fetcherRef.current!.getState());
-        });
-      } else if (paramsChanged) {
-        // Update params and refresh data
+      } else {
+        // Just update params without recreating fetcher
         fetcherRef.current.updateParams(params);
-        prevParamsRef.current = paramsString;
-        
-        // Reset and fetch with new params
-        fetcherRef.current.reset();
-        fetcherRef.current.fetchPage(1, false).then(() => {
-          setState(fetcherRef.current!.getState());
-        });
       }
+      
+      fetcherRef.current.fetchPage(1, false).then(() => {
+        setState(fetcherRef.current!.getState());
+      });
     } else {
       fetcherRef.current = null;
-      prevParamsRef.current = '';
       setState({
         data: [],
         currentPage: 0,
@@ -240,12 +227,12 @@ export const usePaginatedFetcher = <T>(
   const updateParamsAndFetch = useCallback((newParams: Record<string, string | number>) => {
     setParams(prevParams => {
       const updatedParams = { ...prevParams, ...newParams };
-
+      
       // Only update fetcher if params actually changed
       const hasChanged = Object.keys(updatedParams).some(key => 
         updatedParams[key] !== prevParams[key]
       );
-
+      
       if (hasChanged && fetcherRef.current) {
         fetcherRef.current.updateParams(updatedParams);
         // Reset pagination and refresh for filter changes

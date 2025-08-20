@@ -105,7 +105,7 @@ const OrderSearchModal = ({ visible, onClose, onOrderSelect }) => {
 };
 
 export default function OrdersScreen() {
-  const params = useLocalSearchParams();
+  const params = useLocalSearchParams() || {};
   const router = useRouter();
   const { 
     orders, 
@@ -131,8 +131,8 @@ export default function OrdersScreen() {
   const { isScanning, isLoading: qrLoading, startScanning, stopScanning, handleScan } = useQRScanner();
 
   useEffect(() => {
-    setIsPicklistMode(params.mode === 'picklist');
-  }, [params.mode]);
+    setIsPicklistMode(params?.mode === 'picklist');
+  }, [params?.mode]);
 
   const handleSearchModalOpen = () => {
     setShowSearchModal(true);

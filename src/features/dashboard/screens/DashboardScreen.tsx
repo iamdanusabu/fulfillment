@@ -32,7 +32,11 @@ import { TableIcon } from '../../../shared/components/TableIcon';
 import { ManualIcon } from '../../../shared/components/ManualIcon';
 import { FanVistaIcon } from '../../../shared/components/FanVistaIcon';
 
-
+interface FilterSettings {
+  sources: string[];
+  statuses: string[];
+  paymentStatuses: string[];
+}
 
 interface SourceCount {
   name: string;
@@ -109,49 +113,61 @@ export default function DashboardScreen() {
 
   const loadSourceCounts = async (): Promise<SourceCount[]> => {
     try {
-      const allSources = [
-        "Shopify",
-        "Tapin2",
-        "Breakaway",
-        "bigcommerce",
-        "Ecwid",
-        "PHONE ORDER",
-        "DELIVERY",
-        "BAR TAB",
-        "TIKT",
-        "TABLE",
-        "OTHER",
-        "MANUAL",
-        "FanVista",
-        "QSR",
-      ];
+      const savedSettings = await AsyncStorage.getItem("orderFilterSettings");
+      let sources: string[] = [];
+
+      if (savedSettings) {
+        const settings: FilterSettings = JSON.parse(savedSettings);
+        sources = settings.sources;
+      } else {
+        sources = [
+          "Shopify",
+          "Tapin2",
+          "Breakaway",
+          "bigcommerce",
+          "Ecwid",
+          "PHONE ORDER",
+          "DELIVERY",
+          "BAR TAB",
+          "TIKT",
+          "TABLE",
+          "OTHER",
+          "MANUAL",
+          "FanVista",
+          "QSR",
+        ];
+      }
 
       const config = getConfig();
-      const countPromises = allSources.map(async (source) => {
+      const countPromises = sources.map(async (source) => {
         try {
           const url = `${config.endpoints.orders}?source=${encodeURIComponent(source)}&pageNo=1&pageSize=1&hasFulfilmentJob=false&pagination=true`;
           const response = await fetchWithToken(url);
-          const count = response?.totalRecords || 0;
           return {
             name: source,
-            count,
+            count: response?.totalRecords || 0,
             error: false,
           };
         } catch (error) {
-          // Handle 404 and other "no orders" scenarios as 0 count
-          console.log(`Source ${source} has no orders or is not available`);
+          // Handle 404 and other "no orders" scenarios as 0 count, not an error
+          if (error instanceof Error && (error.message.includes('404') || error.message.includes('No orders found'))) {
+            return {
+              name: source,
+              count: 0,
+              error: false,
+            };
+          }
+          // Only treat other errors as actual errors
+          console.error(`Failed to get count for source ${source}:`, error);
           return {
             name: source,
             count: 0,
-            error: false,
+            error: true,
           };
         }
       });
 
-      const results = await Promise.all(countPromises);
-      
-      // Only return sources that have orders (count > 0)
-      return results.filter(source => source.count > 0);
+      return await Promise.all(countPromises);
     } catch (error) {
       console.error("Failed to load source counts:", error);
       return [];
@@ -172,25 +188,33 @@ export default function DashboardScreen() {
 
   const loadReadyForPickupCount = async (): Promise<number> => {
     try {
-      const allSources = [
-        "Shopify",
-        "Tapin2",
-        "Breakaway",
-        "bigcommerce",
-        "Ecwid",
-        "PHONE ORDER",
-        "DELIVERY",
-        "BAR TAB",
-        "TIKT",
-        "TABLE",
-        "OTHER",
-        "MANUAL",
-        "FanVista",
-        "QSR",
-      ];
+      const savedSettings = await AsyncStorage.getItem("orderFilterSettings");
+      let sources: string[] = [];
+
+      if (savedSettings) {
+        const settings: FilterSettings = JSON.parse(savedSettings);
+        sources = settings.sources;
+      } else {
+        sources = [
+          "Shopify",
+          "Tapin2",
+          "Breakaway",
+          "bigcommerce",
+          "Ecwid",
+          "PHONE ORDER",
+          "DELIVERY",
+          "BAR TAB",
+          "TIKT",
+          "TABLE",
+          "OTHER",
+          "MANUAL",
+          "FanVista",
+          "QSR",
+        ];
+      }
 
       const config = getConfig();
-      const sourceParam = allSources.join(",");
+      const sourceParam = sources.join(",");
       const url = `${config.endpoints.orders}?pageNo=1&pageSize=20&hasFulfilmentJob=true&expand=item%2Cbin%2Clocation_hint%2Cpayment&pagination=true&source=${encodeURIComponent(sourceParam)}&status=Ready&paymentStatus=PAID%2CUNPAID`;
       const response = await fetchWithToken(url);
       return response?.totalRecords || 0;
@@ -252,6 +276,9 @@ export default function DashboardScreen() {
     );
   }
 
+  const workingSources = stats.sourceCounts.filter(source => !source.error);
+  const errorSources = stats.sourceCounts.filter(source => source.error);
+
   return (
     <View style={{ flex: 1 }}>
       <ScrollView
@@ -310,11 +337,11 @@ export default function DashboardScreen() {
         </View>
 
         {/* Orders by Source Section */}
-        {stats.sourceCounts.length > 0 && (
+        {workingSources.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Orders by Source</Text>
             <View style={styles.sourcesGrid}>
-              {stats.sourceCounts.map((sourceCount) => {
+              {workingSources.map((sourceCount) => {
                 const sourceInfo = getSourceInfo(sourceCount.name);
                 return (
                   <TouchableOpacity
@@ -337,6 +364,27 @@ export default function DashboardScreen() {
                 );
               })}
             </View>
+          </View>
+        )}
+
+        {/* Connection Issues Section */}
+        {errorSources.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.errorSectionHeader}>
+              <MaterialIcons name="warning" size={20} color="#ffc107" />
+              <Text style={styles.errorSectionTitle}>Connection Issues</Text>
+            </View>
+            <View style={styles.errorSourcesList}>
+              {errorSources.map((source) => (
+                <View key={source.name} style={styles.errorSourceItem}>
+                  <MaterialIcons name="error-outline" size={16} color="#dc3545" />
+                  <Text style={styles.errorSourceText}>{source.name}</Text>
+                </View>
+              ))}
+            </View>
+            <Text style={styles.errorHint}>
+              These sources couldn't be loaded. Pull to refresh to try again.
+            </Text>
           </View>
         )}
 

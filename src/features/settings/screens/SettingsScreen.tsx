@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   View, 
@@ -7,22 +6,23 @@ import {
   TouchableOpacity, 
   Alert,
   ScrollView,
-  Switch,
-  Modal,
-  FlatList,
-  SafeAreaView,
-  Dimensions
+  Switch
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import { FilterSettings } from '../../orders/hooks/useOrderFilters';
 
 interface Settings {
   notifications: boolean;
   autoRefresh: boolean;
   theme: 'light' | 'dark';
   refreshInterval: number;
+}
+
+interface FilterSettings {
+  sources: string[];
+  statuses: string[];
+  paymentStatuses: string[];
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -48,18 +48,40 @@ const ALL_SOURCES = [
   'OTHER', 'MANUAL', 'FanVista', 'QSR'
 ];
 
-const ALL_STATUSES = ['Initiated', 'Sent for Processing', 'Processing', 'Ready', 'Delivered', 'Cancelled'];
+const capitalizeSourceName = (source: string): string => {
+  // Handle special cases
+  const specialCases: { [key: string]: string } = {
+    'bigcommerce': 'BigCommerce',
+    'PHONE ORDER': 'Phone Order',
+    'DELIVERY': 'Delivery',
+    'BAR TAB': 'Bar Tab',
+    'TIKT': 'TIKT',
+    'TABLE': 'Table',
+    'OTHER': 'Other',
+    'MANUAL': 'Manual',
+    'QSR': 'QSR'
+  };
 
-const ALL_PAYMENT_STATUSES = ['PAID', 'UNPAID', 'PENDING', 'REFUNDED'];
+  if (specialCases[source]) {
+    return specialCases[source];
+  }
 
-const { height } = Dimensions.get('window');
+  // For other sources, capitalize first letter of each word
+  return source.split(' ').map(word => 
+    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+  ).join(' ');
+};
+
+const ALL_STATUSES = [
+  'Initiated', 'Sent for Processing'
+];
+
+const ALL_PAYMENT_STATUSES = ['PAID', 'UNPAID'];
 
 export default function SettingsScreen() {
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const [filterSettings, setFilterSettings] = useState<FilterSettings>(DEFAULT_FILTER_SETTINGS);
   const [loading, setLoading] = useState(true);
-  const [showFilterModal, setShowFilterModal] = useState(false);
-  const [activeFilterType, setActiveFilterType] = useState<'sources' | 'statuses' | 'paymentStatuses'>('sources');
   const router = useRouter();
 
   useEffect(() => {
@@ -97,11 +119,6 @@ export default function SettingsScreen() {
     }
   };
 
-  const updateSetting = <K extends keyof Settings>(key: K, value: Settings[K]) => {
-    const newSettings = { ...settings, [key]: value };
-    saveSettings(newSettings);
-  };
-
   const saveFilterSettings = async (newFilterSettings: FilterSettings) => {
     try {
       await AsyncStorage.setItem('orderFilterSettings', JSON.stringify(newFilterSettings));
@@ -112,47 +129,66 @@ export default function SettingsScreen() {
     }
   };
 
-  const openFilterModal = (filterType: 'sources' | 'statuses' | 'paymentStatuses') => {
-    setActiveFilterType(filterType);
-    setShowFilterModal(true);
+  const updateSetting = <K extends keyof Settings>(key: K, value: Settings[K]) => {
+    const newSettings = { ...settings, [key]: value };
+    saveSettings(newSettings);
   };
 
-  const toggleFilterItem = (item: string) => {
-    const currentArray = filterSettings[activeFilterType];
-    const newArray = currentArray.includes(item)
-      ? currentArray.filter(i => i !== item)
-      : [...currentArray, item];
-    
-    const newFilterSettings = { ...filterSettings, [activeFilterType]: newArray };
+  const toggleSource = (source: string) => {
+    const newSources = filterSettings.sources.includes(source)
+      ? filterSettings.sources.filter(s => s !== source)
+      : [...filterSettings.sources, source];
+
+    const newFilterSettings = { ...filterSettings, sources: newSources };
     saveFilterSettings(newFilterSettings);
   };
 
-  const selectAllFilters = () => {
-    const allItems = activeFilterType === 'sources' ? ALL_SOURCES : 
-                    activeFilterType === 'statuses' ? ALL_STATUSES : ALL_PAYMENT_STATUSES;
-    const newFilterSettings = { ...filterSettings, [activeFilterType]: [...allItems] };
+  const toggleStatus = (status: string) => {
+    const newStatuses = filterSettings.statuses.includes(status)
+      ? filterSettings.statuses.filter(s => s !== status)
+      : [...filterSettings.statuses, status];
+
+    const newFilterSettings = { ...filterSettings, statuses: newStatuses };
     saveFilterSettings(newFilterSettings);
   };
 
-  const clearAllFilters = () => {
-    const newFilterSettings = { ...filterSettings, [activeFilterType]: [] };
+  const togglePaymentStatus = (paymentStatus: string) => {
+    const newPaymentStatuses = filterSettings.paymentStatuses.includes(paymentStatus)
+      ? filterSettings.paymentStatuses.filter(s => s !== paymentStatus)
+      : [...filterSettings.paymentStatuses, paymentStatus];
+
+    const newFilterSettings = { ...filterSettings, paymentStatuses: newPaymentStatuses };
     saveFilterSettings(newFilterSettings);
   };
 
-  const getFilterTitle = () => {
-    switch (activeFilterType) {
-      case 'sources': return 'Order Sources';
-      case 'statuses': return 'Order Statuses';
-      case 'paymentStatuses': return 'Payment Statuses';
-    }
+  const selectAllSources = () => {
+    const newFilterSettings = { ...filterSettings, sources: [...ALL_SOURCES] };
+    saveFilterSettings(newFilterSettings);
   };
 
-  const getFilterOptions = () => {
-    switch (activeFilterType) {
-      case 'sources': return ALL_SOURCES;
-      case 'statuses': return ALL_STATUSES;
-      case 'paymentStatuses': return ALL_PAYMENT_STATUSES;
-    }
+  const deselectAllSources = () => {
+    const newFilterSettings = { ...filterSettings, sources: [] };
+    saveFilterSettings(newFilterSettings);
+  };
+
+  const selectAllStatuses = () => {
+    const newFilterSettings = { ...filterSettings, statuses: [...ALL_STATUSES] };
+    saveFilterSettings(newFilterSettings);
+  };
+
+  const deselectAllStatuses = () => {
+    const newFilterSettings = { ...filterSettings, statuses: [] };
+    saveFilterSettings(newFilterSettings);
+  };
+
+  const selectAllPaymentStatuses = () => {
+    const newFilterSettings = { ...filterSettings, paymentStatuses: [...ALL_PAYMENT_STATUSES] };
+    saveFilterSettings(newFilterSettings);
+  };
+
+  const deselectAllPaymentStatuses = () => {
+    const newFilterSettings = { ...filterSettings, paymentStatuses: [] };
+    saveFilterSettings(newFilterSettings);
   };
 
   const handleLogout = async () => {
@@ -166,10 +202,13 @@ export default function SettingsScreen() {
           style: 'destructive',
           onPress: async () => {
             try {
+              // Clear stored tokens and user data
               await AsyncStorage.removeItem('access_token');
               await AsyncStorage.removeItem('refresh_token');
               await AsyncStorage.removeItem('token_expires_in');
               await AsyncStorage.removeItem('username');
+
+              // Navigate to login screen
               router.replace('/login');
             } catch (error) {
               console.error('Error during logout:', error);
@@ -188,190 +227,142 @@ export default function SettingsScreen() {
     );
   }
 
-  const renderFilterOption = ({ item }: { item: string }) => {
-    const isSelected = filterSettings[activeFilterType].includes(item);
-    
-    return (
-      <TouchableOpacity 
-        style={styles.filterOption}
-        onPress={() => toggleFilterItem(item)}
-        activeOpacity={0.7}
-      >
-        <Text style={[styles.filterOptionText, isSelected && styles.filterOptionTextSelected]}>
-          {item}
-        </Text>
-        <View style={[styles.checkbox, isSelected && styles.checkboxSelected]}>
-          {isSelected && (
-            <MaterialIcons name="check" size={14} color="#fff" />
-          )}
-        </View>
-      </TouchableOpacity>
-    );
-  };
-
   return (
     <ScrollView style={styles.container}>
-      {/* Filter Settings Section */}
+      {/* Order Filter Settings */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Order Filters</Text>
-        
-        <TouchableOpacity 
-          style={styles.settingItem} 
-          onPress={() => openFilterModal('sources')}
-          activeOpacity={0.7}
-        >
-          <View style={styles.settingLabelContainer}>
-            <View style={[styles.iconContainer, { backgroundColor: '#e3f2fd' }]}>
-              <MaterialIcons name="store" size={18} color="#1976d2" />
-            </View>
-            <Text style={styles.settingLabel}>Order Sources</Text>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Order Sources</Text>
+          <View style={styles.selectButtons}>
+            <TouchableOpacity onPress={selectAllSources} style={styles.selectButton}>
+              <Text style={styles.selectButtonText}>All</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={deselectAllSources} style={styles.selectButton}>
+              <Text style={styles.selectButtonText}>None</Text>
+            </TouchableOpacity>
           </View>
-          <View style={styles.filterSummary}>
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>
-                {filterSettings.sources.length}/{ALL_SOURCES.length}
-              </Text>
-            </View>
-            <MaterialIcons name="chevron-right" size={20} color="#9e9e9e" />
-          </View>
-        </TouchableOpacity>
+        </View>
+        {ALL_SOURCES.map((source) => (
+          <TouchableOpacity
+            key={source}
+            style={styles.filterItem}
+            onPress={() => toggleSource(source)}
+          >
+            <Text style={styles.filterLabel}>{capitalizeSourceName(source)}</Text>
+            <MaterialIcons 
+              name={filterSettings.sources.includes(source) ? "check-box" : "check-box-outline-blank"} 
+              size={24} 
+              color={filterSettings.sources.includes(source) ? "#007AFF" : "#ccc"} 
+            />
+          </TouchableOpacity>
+        ))}
+      </View>
 
-        <TouchableOpacity 
-          style={styles.settingItem} 
-          onPress={() => openFilterModal('statuses')}
-          activeOpacity={0.7}
-        >
-          <View style={styles.settingLabelContainer}>
-            <View style={[styles.iconContainer, { backgroundColor: '#f3e5f5' }]}>
-              <MaterialIcons name="flag" size={18} color="#7b1fa2" />
-            </View>
-            <Text style={styles.settingLabel}>Order Statuses</Text>
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Order Status</Text>
+          <View style={styles.selectButtons}>
+            <TouchableOpacity onPress={selectAllStatuses} style={styles.selectButton}>
+              <Text style={styles.selectButtonText}>All</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={deselectAllStatuses} style={styles.selectButton}>
+              <Text style={styles.selectButtonText}>None</Text>
+            </TouchableOpacity>
           </View>
-          <View style={styles.filterSummary}>
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>
-                {filterSettings.statuses.length}/{ALL_STATUSES.length}
-              </Text>
-            </View>
-            <MaterialIcons name="chevron-right" size={20} color="#9e9e9e" />
-          </View>
-        </TouchableOpacity>
+        </View>
+        {ALL_STATUSES.map((status) => (
+          <TouchableOpacity
+            key={status}
+            style={styles.filterItem}
+            onPress={() => toggleStatus(status)}
+          >
+            <Text style={styles.filterLabel}>{status}</Text>
+            <MaterialIcons 
+              name={filterSettings.statuses.includes(status) ? "check-box" : "check-box-outline-blank"} 
+              size={24} 
+              color={filterSettings.statuses.includes(status) ? "#007AFF" : "#ccc"} 
+            />
+          </TouchableOpacity>
+        ))}
+      </View>
 
-        <TouchableOpacity 
-          style={[styles.settingItem, styles.lastSettingItem]} 
-          onPress={() => openFilterModal('paymentStatuses')}
-          activeOpacity={0.7}
-        >
-          <View style={styles.settingLabelContainer}>
-            <View style={[styles.iconContainer, { backgroundColor: '#e8f5e8' }]}>
-              <MaterialIcons name="payment" size={18} color="#388e3c" />
-            </View>
-            <Text style={styles.settingLabel}>Payment Statuses</Text>
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Payment Status</Text>
+          <View style={styles.selectButtons}>
+            <TouchableOpacity onPress={selectAllPaymentStatuses} style={styles.selectButton}>
+              <Text style={styles.selectButtonText}>All</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={deselectAllPaymentStatuses} style={styles.selectButton}>
+              <Text style={styles.selectButtonText}>None</Text>
+            </TouchableOpacity>
           </View>
-          <View style={styles.filterSummary}>
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>
-                {filterSettings.paymentStatuses.length}/{ALL_PAYMENT_STATUSES.length}
-              </Text>
-            </View>
-            <MaterialIcons name="chevron-right" size={20} color="#9e9e9e" />
+        </View>
+        {ALL_PAYMENT_STATUSES.map((paymentStatus) => (
+          <TouchableOpacity
+            key={paymentStatus}
+            style={styles.filterItem}
+            onPress={() => togglePaymentStatus(paymentStatus)}
+          >
+            <Text style={styles.filterLabel}>{paymentStatus}</Text>
+            <MaterialIcons 
+              name={filterSettings.paymentStatuses.includes(paymentStatus) ? "check-box" : "check-box-outline-blank"} 
+              size={24} 
+              color={filterSettings.paymentStatuses.includes(paymentStatus) ? "#007AFF" : "#ccc"} 
+            />
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      {/* App Settings */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Notifications</Text>
+        <View style={styles.settingItem}>
+          <Text style={styles.settingLabel}>Enable Notifications</Text>
+          <Switch
+            value={settings.notifications}
+            onValueChange={(value) => updateSetting('notifications', value)}
+          />
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Data & Sync</Text>
+        <View style={styles.settingItem}>
+          <Text style={styles.settingLabel}>Auto Refresh</Text>
+          <Switch
+            value={settings.autoRefresh}
+            onValueChange={(value) => updateSetting('autoRefresh', value)}
+          />
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Appearance</Text>
+        <TouchableOpacity style={styles.settingItem}>
+          <Text style={styles.settingLabel}>Theme</Text>
+          <View style={styles.settingValue}>
+            <Text style={styles.settingValueText}>{settings.theme === 'light' ? 'Light' : 'Dark'}</Text>
+            <MaterialIcons name="chevron-right" size={20} color="#666" />
           </View>
         </TouchableOpacity>
       </View>
 
-      {/* Account Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Account</Text>
-        <TouchableOpacity 
-          style={[styles.settingItem, styles.lastSettingItem]} 
-          onPress={handleLogout}
-          activeOpacity={0.7}
-        >
-          <View style={styles.settingLabelContainer}>
-            <View style={[styles.iconContainer, { backgroundColor: '#ffebee' }]}>
-              <MaterialIcons name="logout" size={18} color="#d32f2f" />
-            </View>
-            <Text style={[styles.settingLabel, styles.logoutText]}>Logout</Text>
-          </View>
-          <MaterialIcons name="chevron-right" size={20} color="#9e9e9e" />
+        <TouchableOpacity style={styles.settingItem} onPress={handleLogout}>
+          <Text style={[styles.settingLabel, styles.logoutText]}>Logout</Text>
+          <MaterialIcons name="logout" size={20} color="#dc3545" style={styles.logoutIcon} />
         </TouchableOpacity>
       </View>
 
-      {/* About Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>About</Text>
-        <View style={[styles.settingItem, styles.lastSettingItem]}>
-          <View style={styles.settingLabelContainer}>
-            <View style={[styles.iconContainer, { backgroundColor: '#f5f5f5' }]}>
-              <MaterialIcons name="info" size={18} color="#616161" />
-            </View>
-            <Text style={styles.settingLabel}>Version</Text>
-          </View>
+        <View style={styles.settingItem}>
+          <Text style={styles.settingLabel}>Version</Text>
           <Text style={styles.settingValueText}>1.0.0</Text>
         </View>
       </View>
-
-      {/* Filter Selection Modal */}
-      <Modal
-        visible={showFilterModal}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setShowFilterModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            {/* Modal Header */}
-            <View style={styles.modalHeader}>
-              <TouchableOpacity 
-                style={styles.headerButton}
-                onPress={() => setShowFilterModal(false)}
-                activeOpacity={0.7}
-              >
-                <MaterialIcons name="close" size={20} color="#666" />
-              </TouchableOpacity>
-              <Text style={styles.modalTitle}>{getFilterTitle()}</Text>
-              <View style={styles.headerButton} />
-            </View>
-
-            {/* Quick Actions */}
-            <View style={styles.quickActions}>
-              <TouchableOpacity 
-                style={[styles.quickActionButton, styles.primaryButton]}
-                onPress={selectAllFilters}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.primaryButtonText}>All</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.quickActionButton, styles.secondaryButton]}
-                onPress={clearAllFilters}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.secondaryButtonText}>None</Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Filter Options */}
-            <View style={styles.listContainer}>
-              <FlatList
-                data={getFilterOptions()}
-                keyExtractor={(item) => item}
-                renderItem={renderFilterOption}
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={styles.listContent}
-                ItemSeparatorComponent={() => <View style={styles.separator} />}
-              />
-            </View>
-
-            {/* Selection Summary */}
-            <View style={styles.selectionSummary}>
-              <Text style={styles.summaryText}>
-                {filterSettings[activeFilterType].length}/{getFilterOptions().length} selected
-              </Text>
-            </View>
-          </View>
-        </View>
-      </Modal>
     </ScrollView>
   );
 }
@@ -380,214 +371,88 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8f9fa',
+    paddingTop: 20,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  
   section: {
     backgroundColor: '#fff',
-    marginHorizontal: 16,
-    marginTop: 24,
-    borderRadius: 16,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
+    marginBottom: 20,
+    paddingVertical: 16,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    marginBottom: 12,
   },
   sectionTitle: {
-    fontSize: 13,
+    fontSize: 16,
     fontWeight: '600',
-    color: '#8e8e93',
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 8,
+    color: '#333',
     textTransform: 'uppercase',
-    letterSpacing: 0.8,
+    letterSpacing: 0.5,
+  },
+  selectButtons: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  selectButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: '#007AFF',
+    borderRadius: 4,
+  },
+  selectButtonText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  filterItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#e9ecef',
+  },
+  filterLabel: {
+    fontSize: 16,
+    color: '#333',
+    flex: 1,
   },
   settingItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#f0f0f0',
-  },
-  lastSettingItem: {
-    borderBottomWidth: 0,
-  },
-  settingLabelContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  iconContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
+    borderBottomColor: '#e9ecef',
   },
   settingLabel: {
     fontSize: 16,
-    color: '#1a1a1a',
-    fontWeight: '500',
+    color: '#333',
+    flex: 1,
+  },
+  settingValue: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   settingValueText: {
     fontSize: 16,
-    color: '#8e8e93',
-    fontWeight: '400',
+    color: '#666',
+    marginRight: 8,
   },
   logoutText: {
-    color: '#d32f2f',
+    color: '#dc3545',
   },
-  filterSummary: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  badge: {
-    backgroundColor: '#f0f0f0',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  badgeText: {
-    fontSize: 12,
-    color: '#666',
-    fontWeight: '500',
-  },
-
-  // Modal Styles
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'transparent',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  modalContainer: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    width: '100%',
-    maxWidth: 400,
-    maxHeight: height * 0.7,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-    elevation: 10,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#e5e5ea',
-  },
-  headerButton: {
-    width: 28,
-    height: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1a1a1a',
-  },
-  quickActions: {
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 8,
-  },
-  quickActionButton: {
-    flex: 1,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  primaryButton: {
-    backgroundColor: '#007aff',
-  },
-  secondaryButton: {
-    backgroundColor: '#f0f0f0',
-  },
-  primaryButtonText: {
-    fontSize: 13,
-    color: '#fff',
-    fontWeight: '600',
-  },
-  secondaryButtonText: {
-    fontSize: 13,
-    color: '#333',
-    fontWeight: '600',
-  },
-  listContainer: {
-    flex: 1,
-    paddingHorizontal: 16,
-    minHeight: 200,
-    maxHeight: 300,
-  },
-  listContent: {
-    paddingVertical: 4,
-  },
-  filterOption: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 4,
-  },
-  filterOptionText: {
-    fontSize: 15,
-    color: '#1a1a1a',
-    fontWeight: '400',
-    flex: 1,
-  },
-  filterOptionTextSelected: {
-    color: '#007aff',
-    fontWeight: '500',
-  },
-  checkbox: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    borderWidth: 2,
-    borderColor: '#d1d1d6',
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkboxSelected: {
-    backgroundColor: '#007aff',
-    borderColor: '#007aff',
-  },
-  separator: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: '#f0f0f0',
-    marginLeft: 4,
-  },
-  selectionSummary: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#e5e5ea',
-    alignItems: 'center',
-  },
-  summaryText: {
-    fontSize: 13,
-    color: '#8e8e93',
-    fontWeight: '500',
+  logoutIcon: {
+    marginRight: 15,
   },
 });

@@ -30,7 +30,6 @@ export default function OrdersScreen() {
     totalRecords,
     currentPage,
     totalPages,
-    hasNoResults,
     loadMore, 
     refresh 
   } = usePaginatedOrders({ 
@@ -142,21 +141,17 @@ export default function OrdersScreen() {
     >
       <View style={styles.orderHeader}>
         <View style={styles.orderMainInfo}>
-          {item.customer && (
-            <Text style={styles.customerName}>
-              {item.customer}
-            </Text>
-          )}
+          <Text style={styles.customerName}>
+            {item.customer || 'Guest Order'}
+          </Text>
           <View style={styles.orderMetaRow}>
-            {item.orderID && <Text style={styles.orderMainId}>#{item.orderID}</Text>}
-            {item.orderNumber && <Text style={styles.externalOrderId}>Ext: {item.orderNumber}</Text>}
-            {item.paymentStatus && (
-              <View style={styles.paymentStatusTag}>
-                <Text style={[styles.paymentStatusText, getPaymentStatusColor(item.paymentStatus)]}>
-                  {item.paymentStatus}
-                </Text>
-              </View>
-            )}
+            <Text style={styles.orderMainId}>#{item.orderID}</Text>
+            <Text style={styles.externalOrderId}>Ext: {item.orderNumber}</Text>
+            <View style={styles.paymentStatusTag}>
+              <Text style={[styles.paymentStatusText, getPaymentStatusColor(item.paymentStatus)]}>
+                {item.paymentStatus}
+              </Text>
+            </View>
           </View>
         </View>
 
@@ -178,28 +173,21 @@ export default function OrdersScreen() {
 
       <View style={styles.orderFooter}>
         <View style={styles.orderTags}>
-          {(item.totalItemQuantity || item.items.length > 0) && (
-            <View style={styles.tag}>
-              <Text style={styles.tagText}>{item.totalItemQuantity || item.items.length} Items</Text>
-            </View>
-          )}
-          {item.date && (
-            <View style={styles.tag}>
-              <Text style={styles.tagText}>{formatDate(item.date)}</Text>
-            </View>
-          )}
-          {item.source && (
-            <View style={styles.sourceTag}>
-              <Text style={styles.sourceText}>{item.source}</Text>
-            </View>
-          )}
+          <View style={styles.tag}>
+            <Text style={styles.tagText}>{item.totalItemQuantity || item.items.length} Items</Text>
+          </View>
+          <View style={styles.tag}>
+            <Text style={styles.tagText}>{formatDate(item.date)}</Text>
+          </View>
+          <View style={styles.sourceTag}>
+            <Text style={styles.sourceText}>{item.source}</Text>
+          </View>
         </View>
       </View>
     </TouchableOpacity>
   );
 
-  // Show loading only for initial load or when no data exists
-  if (loading && orders.length === 0 && !hasNoResults) {
+  if (loading && orders.length === 0) {
     return (
       <View style={styles.loadingContainer}>
         <Text>Loading orders...</Text>
@@ -259,25 +247,8 @@ export default function OrdersScreen() {
               </View>
             );
           }
-          if (!hasMore && orders.length > 0 && totalRecords > 20) {
-            return <Text style={styles.endText}>End of results • {totalRecords} total orders</Text>;
-          }
-          return null;
-        }}
-        ListEmptyComponent={() => {
-          // Show empty state if no results from API or no filtered results
-          if ((!loading && filteredOrders.length === 0) || hasNoResults) {
-            return (
-              <View style={styles.emptyContainer}>
-                <MaterialIcons name="inbox" size={48} color="#ccc" style={styles.emptyIcon} />
-                <Text style={styles.emptyText}>
-                  {searchText.trim() ? 'No orders match your search' : 'No orders found'}
-                </Text>
-                {searchText.trim() && (
-                  <Text style={styles.emptySubtext}>Try adjusting your search terms</Text>
-                )}
-              </View>
-            );
+          if (!hasMore && orders.length > 0) {
+            return <Text style={styles.endText}>No more orders</Text>;
           }
           return null;
         }}
@@ -466,26 +437,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingVertical: 20,
     fontSize: 14,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 60,
-  },
-  emptyIcon: {
-    marginBottom: 16,
-  },
-  emptyText: {
-    color: '#666',
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  emptySubtext: {
-    color: '#999',
-    fontSize: 14,
-    textAlign: 'center',
   },
   bottomBar: {
     flexDirection: 'row',

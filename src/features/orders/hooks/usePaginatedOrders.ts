@@ -24,41 +24,48 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
     console.log('Current settings in usePaginatedOrders:', settings);
     console.log('Filter params from getFilterParams:', filterParams);
     
-    const result: Record<string, string | number> = {
-      hasFulfilmentJob: params.hasFulfilmentJob || 'false',
-      expand: 'item,bin,location_hint,payment',
-      pagination: 'true',
-    };
-
     // Only add filter params if user has actually made selections or URL params exist
     const hasUserFilters = filterParams.source || filterParams.status || filterParams.paymentStatus;
     const hasUrlParams = params.source || params.status;
     
-    // Only proceed with API params if there are actual filters to apply
-    if (hasUserFilters || hasUrlParams) {
-      // Add filter params if they exist (user has made selections)
-      if (filterParams.source) {
-        result.source = filterParams.source;
-        console.log('Added source to API params:', filterParams.source);
-      }
-      if (filterParams.status) {
-        result.status = filterParams.status;
-        console.log('Added status to API params:', filterParams.status);
-      }
-      if (filterParams.paymentStatus) {
-        result.paymentStatus = filterParams.paymentStatus;
-        console.log('Added paymentStatus to API params:', filterParams.paymentStatus);
-      }
+    // Only build params if there are actual filters to apply
+    if (!hasUserFilters && !hasUrlParams) {
+      console.log('No filters applied by user, returning empty params');
+      return {};
+    }
 
-      // Override with URL params if provided (URL params take precedence)
-      if (params.source) {
-        result.source = params.source;
-        console.log('Overridden source with URL param:', params.source);
-      }
-      if (params.status) {
-        result.status = params.status;
-        console.log('Overridden status with URL param:', params.status);
-      }
+    const result: Record<string, string | number> = {
+      expand: 'item,bin,location_hint,payment',
+      pagination: 'true',
+    };
+
+    // Add hasFulfilmentJob only if explicitly provided
+    if (params.hasFulfilmentJob) {
+      result.hasFulfilmentJob = params.hasFulfilmentJob;
+    }
+
+    // Add filter params if they exist (user has made selections)
+    if (filterParams.source) {
+      result.source = filterParams.source;
+      console.log('Added source to API params:', filterParams.source);
+    }
+    if (filterParams.status) {
+      result.status = filterParams.status;
+      console.log('Added status to API params:', filterParams.status);
+    }
+    if (filterParams.paymentStatus) {
+      result.paymentStatus = filterParams.paymentStatus;
+      console.log('Added paymentStatus to API params:', filterParams.paymentStatus);
+    }
+
+    // Override with URL params if provided (URL params take precedence)
+    if (params.source) {
+      result.source = params.source;
+      console.log('Overridden source with URL param:', params.source);
+    }
+    if (params.status) {
+      result.status = params.status;
+      console.log('Overridden status with URL param:', params.status);
     }
 
     console.log('Final API params object:', result);
@@ -80,7 +87,9 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
     const hasUrlParams = params.source || params.status;
     
     // Skip initial fetch if no filters are applied
-    return !hasUserFilters && !hasUrlParams;
+    const shouldSkip = !hasUserFilters && !hasUrlParams;
+    console.log('Should skip initial fetch:', shouldSkip);
+    return shouldSkip;
   }, [
     settings?.sources, 
     settings?.statuses, 

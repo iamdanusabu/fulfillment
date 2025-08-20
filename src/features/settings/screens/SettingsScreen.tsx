@@ -6,8 +6,7 @@ import {
   StyleSheet, 
   TouchableOpacity, 
   Alert,
-  ScrollView,
-  Switch
+  ScrollView
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -20,12 +19,6 @@ interface Settings {
   refreshInterval: number;
 }
 
-interface FilterSettings {
-  sources: string[];
-  statuses: string[];
-  paymentStatuses: string[];
-}
-
 const DEFAULT_SETTINGS: Settings = {
   notifications: true,
   autoRefresh: false,
@@ -33,53 +26,8 @@ const DEFAULT_SETTINGS: Settings = {
   refreshInterval: 30,
 };
 
-const DEFAULT_FILTER_SETTINGS: FilterSettings = {
-  sources: [
-    'Shopify', 'Tapin2', 'Breakaway', 'bigcommerce', 'Ecwid', 
-    'PHONE ORDER', 'DELIVERY', 'BAR TAB', 'TIKT', 'TABLE', 
-    'OTHER', 'MANUAL', 'FanVista', 'QSR'
-  ],
-  statuses: ['Initiated', 'Sent for Processing'],
-  paymentStatuses: ['PAID', 'UNPAID']
-};
-
-const ALL_SOURCES = [
-  'Shopify', 'Tapin2', 'Breakaway', 'bigcommerce', 'Ecwid', 
-  'PHONE ORDER', 'DELIVERY', 'BAR TAB', 'TIKT', 'TABLE', 
-  'OTHER', 'MANUAL', 'FanVista', 'QSR'
-];
-
-const capitalizeSourceName = (source: string): string => {
-  const specialCases: { [key: string]: string } = {
-    'bigcommerce': 'BigCommerce',
-    'PHONE ORDER': 'Phone Order',
-    'DELIVERY': 'Delivery',
-    'BAR TAB': 'Bar Tab',
-    'TIKT': 'TIKT',
-    'TABLE': 'Table',
-    'OTHER': 'Other',
-    'MANUAL': 'Manual',
-    'QSR': 'QSR'
-  };
-
-  if (specialCases[source]) {
-    return specialCases[source];
-  }
-
-  return source.split(' ').map(word => 
-    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-  ).join(' ');
-};
-
-const ALL_STATUSES = [
-  'Initiated', 'Sent for Processing'
-];
-
-const ALL_PAYMENT_STATUSES = ['PAID', 'UNPAID'];
-
 export default function SettingsScreen() {
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
-  const [filterSettings, setFilterSettings] = useState<FilterSettings>(DEFAULT_FILTER_SETTINGS);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -89,17 +37,10 @@ export default function SettingsScreen() {
 
   const loadSettings = async () => {
     try {
-      const [savedSettings, savedFilterSettings] = await Promise.all([
-        AsyncStorage.getItem('app_settings'),
-        AsyncStorage.getItem('orderFilterSettings')
-      ]);
+      const savedSettings = await AsyncStorage.getItem('app_settings');
 
       if (savedSettings) {
         setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(savedSettings) });
-      }
-
-      if (savedFilterSettings) {
-        setFilterSettings({ ...DEFAULT_FILTER_SETTINGS, ...JSON.parse(savedFilterSettings) });
       }
     } catch (error) {
       console.error('Error loading settings:', error);
@@ -118,76 +59,9 @@ export default function SettingsScreen() {
     }
   };
 
-  const saveFilterSettings = async (newFilterSettings: FilterSettings) => {
-    try {
-      await AsyncStorage.setItem('orderFilterSettings', JSON.stringify(newFilterSettings));
-      setFilterSettings(newFilterSettings);
-    } catch (error) {
-      console.error('Error saving filter settings:', error);
-      Alert.alert('Error', 'Failed to save filter settings. Please try again.');
-    }
-  };
-
   const updateSetting = <K extends keyof Settings>(key: K, value: Settings[K]) => {
     const newSettings = { ...settings, [key]: value };
     saveSettings(newSettings);
-  };
-
-  const toggleSource = (source: string) => {
-    const newSources = filterSettings.sources.includes(source)
-      ? filterSettings.sources.filter(s => s !== source)
-      : [...filterSettings.sources, source];
-
-    const newFilterSettings = { ...filterSettings, sources: newSources };
-    saveFilterSettings(newFilterSettings);
-  };
-
-  const toggleStatus = (status: string) => {
-    const newStatuses = filterSettings.statuses.includes(status)
-      ? filterSettings.statuses.filter(s => s !== status)
-      : [...filterSettings.statuses, status];
-
-    const newFilterSettings = { ...filterSettings, statuses: newStatuses };
-    saveFilterSettings(newFilterSettings);
-  };
-
-  const togglePaymentStatus = (paymentStatus: string) => {
-    const newPaymentStatuses = filterSettings.paymentStatuses.includes(paymentStatus)
-      ? filterSettings.paymentStatuses.filter(s => s !== paymentStatus)
-      : [...filterSettings.paymentStatuses, paymentStatus];
-
-    const newFilterSettings = { ...filterSettings, paymentStatuses: newPaymentStatuses };
-    saveFilterSettings(newFilterSettings);
-  };
-
-  const selectAllSources = () => {
-    const newFilterSettings = { ...filterSettings, sources: [...ALL_SOURCES] };
-    saveFilterSettings(newFilterSettings);
-  };
-
-  const deselectAllSources = () => {
-    const newFilterSettings = { ...filterSettings, sources: [] };
-    saveFilterSettings(newFilterSettings);
-  };
-
-  const selectAllStatuses = () => {
-    const newFilterSettings = { ...filterSettings, statuses: [...ALL_STATUSES] };
-    saveFilterSettings(newFilterSettings);
-  };
-
-  const deselectAllStatuses = () => {
-    const newFilterSettings = { ...filterSettings, statuses: [] };
-    saveFilterSettings(newFilterSettings);
-  };
-
-  const selectAllPaymentStatuses = () => {
-    const newFilterSettings = { ...filterSettings, paymentStatuses: [...ALL_PAYMENT_STATUSES] };
-    saveFilterSettings(newFilterSettings);
-  };
-
-  const deselectAllPaymentStatuses = () => {
-    const newFilterSettings = { ...filterSettings, paymentStatuses: [] };
-    saveFilterSettings(newFilterSettings);
   };
 
   const handleLogout = async () => {
@@ -225,58 +99,6 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      {/* Order Sources */}
-      <View style={styles.filterSection}>
-        <View style={styles.filterSectionHeader}>
-          <View style={styles.filterTitleRow}>
-            <MaterialIcons name="filter-list" size={24} color="#007AFF" />
-            <Text style={styles.filterSectionTitle}>Order Filters</Text>
-          </View>
-          <Text style={styles.filterSectionSubtitle}>
-            Configure which order sources and statuses to display
-          </Text>
-        </View>
-
-        <View style={styles.filterCategory}>
-          <View style={styles.filterCategoryHeader}>
-            <Text style={styles.filterCategoryTitle}>Order Sources</Text>
-            <Text style={styles.filterCategoryCount}>
-              {filterSettings.sources.length} of {ALL_SOURCES.length} selected
-            </Text>
-          </View>
-          <View style={styles.selectButtons}>
-            <TouchableOpacity onPress={selectAllSources} style={styles.selectButton}>
-              <Text style={styles.selectButtonText}>Select All</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={deselectAllSources} style={[styles.selectButton, styles.selectButtonSecondary]}>
-              <Text style={[styles.selectButtonText, styles.selectButtonSecondaryText]}>Clear All</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.filterGrid}>
-            {ALL_SOURCES.map((source) => (
-              <TouchableOpacity
-                key={source}
-                style={[
-                  styles.filterChip,
-                  filterSettings.sources.includes(source) && styles.filterChipSelected
-                ]}
-                onPress={() => toggleSource(source)}
-              >
-                <Text style={[
-                  styles.filterChipText,
-                  filterSettings.sources.includes(source) && styles.filterChipTextSelected
-                ]}>
-                  {capitalizeSourceName(source)}
-                </Text>
-                {filterSettings.sources.includes(source) && (
-                  <MaterialIcons name="check" size={16} color="#fff" style={styles.filterChipIcon} />
-                )}
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-      </View>
-
       {/* Account Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Account</Text>
@@ -313,111 +135,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  filterSection: {
-    backgroundColor: '#fff',
-    margin: 16,
-    borderRadius: 12,
-    padding: 20,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-  },
-  filterSectionHeader: {
-    marginBottom: 24,
-  },
-  filterTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  filterSectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#1a1a1a',
-    marginLeft: 12,
-  },
-  filterSectionSubtitle: {
-    fontSize: 14,
-    color: '#666',
-    lineHeight: 20,
-  },
-  filterCategory: {
-    marginBottom: 24,
-  },
-  filterCategoryHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  filterCategoryTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-  },
-  filterCategoryCount: {
-    fontSize: 12,
-    color: '#007AFF',
-    fontWeight: '500',
-  },
-  selectButtons: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 16,
-  },
-  selectButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: '#007AFF',
-    borderRadius: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  selectButtonSecondary: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: '#007AFF',
-  },
-  selectButtonText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  selectButtonSecondaryText: {
-    color: '#007AFF',
-  },
-  filterGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  filterChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    backgroundColor: '#f8f9fa',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#e9ecef',
-  },
-  filterChipSelected: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
-  },
-  filterChipText: {
-    fontSize: 12,
-    color: '#495057',
-    fontWeight: '500',
-  },
-  filterChipTextSelected: {
-    color: '#fff',
-  },
-  filterChipIcon: {
-    marginLeft: 4,
-  },
+  
   section: {
     backgroundColor: '#fff',
     marginHorizontal: 16,

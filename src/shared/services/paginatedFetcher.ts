@@ -111,7 +111,7 @@ export class PaginatedFetcher<T> {
 
   async loadMore(): Promise<void> {
     if (!this.state.hasMore || this.state.loading) return;
-    
+
     // Only load the next page if we haven't already loaded it
     const nextPage = this.state.currentPage + 1;
     if (nextPage <= this.state.totalPages) {
@@ -162,108 +162,142 @@ interface PaginatedFetcherActions {
 }
 
 export const usePaginatedFetcher = <T>(
-  baseUrl: string | null,
+  endpoint: string,
   options: PaginatedFetcherOptions = {}
-): PaginatedFetcherState<T> & PaginatedFetcherActions => {
-  const fetcherRef = useRef<PaginatedFetcher<T> | null>(null);
-  const [state, setState] = useState<PaginatedState<T>>({
-    data: [],
-    currentPage: 0,
-    totalPages: 1,
-    totalRecords: 0,
-    hasMore: true,
-    loading: false,
-    error: null,
-  });
+) => {
+  const {
+    pageSize = 10,
+    initialParams = {},
+    transform = (data: any) => data,
+  } = options;
 
-  const [params, setParams] = useState<Record<string, string | number>>(options.initialParams || {});
-  
-  // Create a stable string representation of params to prevent unnecessary re-renders
-  const paramsString = React.useMemo(() => JSON.stringify(params), [params]);
+  const [data, setData] = useState<T[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [nextPageURL, setNextPageURL] = useState<string | null>(null);
+  const [currentParams, setCurrentParams] = useState(initialParams);
 
+  // Watch for parameter changes and reset data when they change
   useEffect(() => {
-    if (baseUrl) {
-      // Only recreate fetcher if URL or params actually changed
-      if (!fetcherRef.current || fetcherRef.current['url'] !== baseUrl) {
-        fetcherRef.current = new PaginatedFetcher<T>(baseUrl, { ...options, initialParams: params });
-      } else {
-        // Just update params without recreating fetcher
-        fetcherRef.current.updateParams(params);
-      }
-      
-      fetcherRef.current.fetchPage(1, false).then(() => {
-        setState(fetcherRef.current!.getState());
-      });
-    } else {
-      fetcherRef.current = null;
-      setState({
-        data: [],
-        currentPage: 0,
-        totalPages: 1,
-        totalRecords: 0,
-        hasMore: true,
-        loading: false,
-        error: null,
-      });
+    const paramsChanged = JSON.stringify(currentParams) !== JSON.stringify(initialParams);
+    console.log('=== usePaginatedFetcher Parameter Change Detection ===');
+    console.log('Current params:', currentParams);
+    console.log('New params:', initialParams);
+    console.log('Params changed:', paramsChanged);
+
+    if (paramsChanged) {
+      console.log('Parameters changed, resetting and refetching...');
+      setCurrentParams(initialParams);
+      setData([]);
+      setCurrentPage(1);
+      setError(null);
+      fetchData(1, false, initialParams);
     }
-  }, [baseUrl, paramsString]);
+  }, [JSON.stringify(initialParams)]);
+
+  // Initial load
+  useEffect(() => {
+    fetchData(1);
+  }, [endpoint]);
+
+  const fetchData = async (pageNo: number = 1, append: boolean = false, customParams?: Record<string, any>) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const params = {
+        ...(customParams || currentParams),
+        pageNo,
+        pageSize,
+      };
+
+      console.log('=== usePaginatedFetcher fetchData ===');
+      console.log('Fetching with params:', params);
+      console.log('Endpoint:', endpoint);
+
+      const queryParams = new URLSearchParams();
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, String(value));
+        }
+      });
+
+      const response = await fetchWithToken(`${endpoint}?${queryParams.toString()}`);
+      const transformedData = transform(response.data);
+
+      setData((prevData) =>
+        append ? [...prevData, ...transformedData] : transformedData
+      );
+      setCurrentPage(response.pageNo);
+      setTotalPages(response.totalPages);
+      setTotalRecords(response.totalRecords);
+      setHasMore(response.pageNo < response.totalPages);
+      setNextPageURL(response.nextPageURL || null);
+      setLoading(false);
+    } catch (err) {
+      console.error('Error fetching data:', err);
+      setError(err instanceof Error ? err.message : 'An error occurred');
+      setLoading(false);
+    }
+  };
 
   const loadMore = useCallback(() => {
-    if (fetcherRef.current) {
-      return fetcherRef.current.loadMore().then(() => {
-        setState(fetcherRef.current!.getState());
-      });
-    }
-  }, []);
+    if (!hasMore || loading) return;
+    fetchData(currentPage + 1, true, currentParams);
+  }, [hasMore, loading, currentPage, currentParams]);
 
   const refresh = useCallback(() => {
-    if (fetcherRef.current) {
-      return fetcherRef.current.refresh().then(() => {
-        setState(fetcherRef.current!.getState());
-      });
-    }
-  }, []);
+    console.log('=== usePaginatedFetcher refresh ===');
+    console.log('Refreshing with current params:', currentParams);
+    setData([]);
+    setCurrentPage(1);
+    setError(null);
+    fetchData(1, false, currentParams);
+  }, [currentParams]);
 
-  const updateParamsAndFetch = useCallback((newParams: Record<string, string | number>) => {
-    setParams(prevParams => {
+  const updateParams = useCallback((newParams: Record<string, string | number>) => {
+    console.log('=== usePaginatedFetcher updateParams ===');
+    console.log('New params received:', newParams);
+    setCurrentParams(prevParams => {
       const updatedParams = { ...prevParams, ...newParams };
-      
-      // Only update fetcher if params actually changed
-      const hasChanged = Object.keys(updatedParams).some(key => 
-        updatedParams[key] !== prevParams[key]
-      );
-      
-      if (hasChanged && fetcherRef.current) {
-        fetcherRef.current.updateParams(updatedParams);
-        // Reset pagination and refresh for filter changes
-        fetcherRef.current.refresh().then(() => {
-          setState(fetcherRef.current!.getState());
-        });
-      }
+      console.log('Updated params:', updatedParams);
+      // Reset to first page and fetch with new parameters
+      setData([]);
+      setCurrentPage(1);
+      setError(null);
+      fetchData(1, false, updatedParams);
       return updatedParams;
     });
   }, []);
 
-  const resetFetcher = useCallback(() => {
-    if (fetcherRef.current) {
-      fetcherRef.current.reset();
-      setState({ // Also reset local state
-        data: [],
-        currentPage: 0,
-        totalPages: 1,
-        totalRecords: 0,
-        hasMore: true,
-        loading: false,
-        error: null,
-      });
-    }
-  }, []);
+  const reset = useCallback(() => {
+    console.log('=== usePaginatedFetcher reset ===');
+    setCurrentParams(initialParams);
+    setData([]);
+    setCurrentPage(1);
+    setTotalPages(1);
+    setTotalRecords(0);
+    setHasMore(true);
+    setLoading(false);
+    setError(null);
+    setNextPageURL(null);
+  }, [initialParams]);
 
   return {
-    ...state,
+    data,
+    loading,
+    error,
+    currentPage,
+    totalPages,
+    totalRecords,
+    hasMore,
     loadMore,
     refresh,
-    updateParams: updateParamsAndFetch,
-    reset: resetFetcher,
+    updateParams,
+    reset,
   };
 };

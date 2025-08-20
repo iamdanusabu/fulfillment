@@ -84,6 +84,7 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
     loading: paginatedState.loading || (!settings),
     error: paginatedState.error,
     hasMore: paginatedState.hasMore,
+    hasNoResults: paginatedState.hasNoResults,
     totalRecords: paginatedState.totalRecords,
     currentPage: paginatedState.currentPage,
     totalPages: paginatedState.totalPages,

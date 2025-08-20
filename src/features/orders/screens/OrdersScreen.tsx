@@ -30,6 +30,7 @@ export default function OrdersScreen() {
     totalRecords,
     currentPage,
     totalPages,
+    hasNoResults,
     loadMore, 
     refresh 
   } = usePaginatedOrders({ 
@@ -197,7 +198,8 @@ export default function OrdersScreen() {
     </TouchableOpacity>
   );
 
-  if (loading && orders.length === 0) {
+  // Show loading only for initial load or when no data exists
+  if (loading && orders.length === 0 && !hasNoResults) {
     return (
       <View style={styles.loadingContainer}>
         <Text>Loading orders...</Text>
@@ -263,7 +265,8 @@ export default function OrdersScreen() {
           return null;
         }}
         ListEmptyComponent={() => {
-          if (!loading && filteredOrders.length === 0) {
+          // Show empty state if no results from API or no filtered results
+          if ((!loading && filteredOrders.length === 0) || hasNoResults) {
             return (
               <View style={styles.emptyContainer}>
                 <MaterialIcons name="inbox" size={48} color="#ccc" style={styles.emptyIcon} />

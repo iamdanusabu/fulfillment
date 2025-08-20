@@ -216,12 +216,15 @@ export const usePaginatedFetcher = <T>(
     console.log('Params changed:', paramsChanged);
 
     if (paramsChanged) {
-      console.log('Parameters changed, resetting and refetching...');
-      setCurrentParams(initialParams);
+      console.log('Parameters changed, immediately resetting data and refetching...');
+      // Immediately clear data to prevent showing stale results
       setData([]);
-      setCurrentPage(1);
+      setHasNoResults(false);
       setError(null);
-      setHasNoResults(false); // Reset hasNoResults
+      setCurrentPage(1);
+      setTotalRecords(0);
+      setHasMore(true);
+      setCurrentParams(initialParams);
       fetchData(1, false, initialParams);
     }
   }, [JSON.stringify(initialParams)]);

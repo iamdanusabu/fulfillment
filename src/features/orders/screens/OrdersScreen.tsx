@@ -24,6 +24,9 @@ import { AppToolbar } from '../../../components/layout/AppToolbar';
 export default function OrdersScreen() {
   const params = useLocalSearchParams();
   const router = useRouter();
+  const { width, height } = useWindowDimensions();
+  
+  // All hooks must be called before any conditional logic
   const { 
     orders, 
     loading, 
@@ -39,14 +42,29 @@ export default function OrdersScreen() {
     hasFulfilmentJob: params.hasFulfilmentJob as string
   });
   const { settings: filterSettings } = useOrderFilters();
+  const { isScanning, isLoading: qrLoading, startScanning, stopScanning, handleScan } = useQRScanner();
+  
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
   const [isPicklistMode, setIsPicklistMode] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
-  // QR Scanner integration
-  const { isScanning, isLoading: qrLoading, startScanning, stopScanning, handleScan } = useQRScanner();
+  const filteredOrders = useMemo(() => {
+    if (!searchText.trim()) return orders;
+
+    return orders.filter(order => 
+      order.orderNumber.toLowerCase().includes(searchText.toLowerCase()) ||
+      order.customer.toLowerCase().includes(searchText.toLowerCase()) ||
+      order.source.toLowerCase().includes(searchText.toLowerCase())
+    );
+  }, [orders, searchText]);
+
+  const handleLoadMore = useCallback(() => {
+    if (hasMore && !loading) {
+      loadMore();
+    }
+  }, [hasMore, loading, loadMore]);
 
   useEffect(() => {
     setIsPicklistMode(params.mode === 'picklist');
@@ -79,16 +97,6 @@ export default function OrdersScreen() {
     router.push(`/picklist/location-selection?orderIds=${orderIdsParam}`);
   };
 
-  const filteredOrders = useMemo(() => {
-    if (!searchText.trim()) return orders;
-
-    return orders.filter(order => 
-      order.orderNumber.toLowerCase().includes(searchText.toLowerCase()) ||
-      order.customer.toLowerCase().includes(searchText.toLowerCase()) ||
-      order.source.toLowerCase().includes(searchText.toLowerCase())
-    );
-  }, [orders, searchText]);
-
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
@@ -97,12 +105,6 @@ export default function OrdersScreen() {
       setRefreshing(false);
     }
   };
-
-  const handleLoadMore = useCallback(() => {
-    if (hasMore && !loading) {
-      loadMore();
-    }
-  }, [hasMore, loading, loadMore]);
 
 
   const getPaymentStatusColor = (status: string) => {
@@ -266,7 +268,6 @@ export default function OrdersScreen() {
     );
   };
 
-  const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
   const isTablet = width >= 768;
 

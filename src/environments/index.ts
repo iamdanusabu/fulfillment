@@ -5,6 +5,7 @@ import { PROD_CONFIG } from './prod';
 export const COMMON_ENDPOINTS = {
   token: "/goauth/oauth/token",
   orders: "/console/transactions/orders",
+  orderSearch: "/console/transactions/orders/search",
   locations: "/api/locations",
   stores: "/console/business/stores",
   warehouses: "/console/business/warehouses",

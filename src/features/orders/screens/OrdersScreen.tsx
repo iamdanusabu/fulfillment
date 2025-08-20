@@ -145,10 +145,12 @@ export default function OrdersScreen() {
     // (handled within the modal component itself now)
   };
 
-  const handleOrderSelectFromSearch = (order: Order) => {
-    // Navigate to order details directly from search
-    router.push(`/orders/${order.orderID}`);
+  const handleOrderSelect = (order: Order) => {
+    setSearchModalVisible(false);
+    // Navigate to order details or handle order selection
+    router.push(`/orders/${order.id}`);
   };
+
 
   const toggleOrderSelection = (orderId: string) => {
     if (!isPicklistMode) return;
@@ -325,7 +327,7 @@ export default function OrdersScreen() {
       <OrderSearchModal
         visible={showSearchModal}
         onClose={handleSearchModalClose}
-        onOrderSelect={handleOrderSelectFromSearch}
+        onOrderSelect={handleOrderSelect}
       />
 
       <FlatList
@@ -657,7 +659,7 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   resultsList: {
-    marginTop: 10,
+    maxHeight: 300,
   },
   noResultsText: {
     textAlign: 'center',

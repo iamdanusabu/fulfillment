@@ -229,8 +229,13 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      {/* Order Filter Settings */}
+      {/* Dashboard Filter Settings */}
       <View style={styles.section}>
+        <Text style={styles.mainSectionTitle}>Dashboard Filters</Text>
+        <Text style={styles.sectionDescription}>
+          These filters control what data is displayed on the dashboard. They don't affect the Orders screen filters.
+        </Text>
+        
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Order Sources</Text>
           <View style={styles.selectButtons}>
@@ -260,7 +265,7 @@ export default function SettingsScreen() {
 
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Order Status</Text>
+          <Text style={styles.sectionTitle}>Order Status (Dashboard)</Text>
           <View style={styles.selectButtons}>
             <TouchableOpacity onPress={selectAllStatuses} style={styles.selectButton}>
               <Text style={styles.selectButtonText}>All</Text>
@@ -288,7 +293,7 @@ export default function SettingsScreen() {
 
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Payment Status</Text>
+          <Text style={styles.sectionTitle}>Payment Status (Dashboard)</Text>
           <View style={styles.selectButtons}>
             <TouchableOpacity onPress={selectAllPaymentStatuses} style={styles.selectButton}>
               <Text style={styles.selectButtonText}>All</Text>
@@ -389,6 +394,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     marginBottom: 12,
+  },
+  mainSectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#333',
+    marginBottom: 8,
+    paddingHorizontal: 16,
+  },
+  sectionDescription: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 16,
+    paddingHorizontal: 16,
+    lineHeight: 20,
   },
   sectionTitle: {
     fontSize: 16,

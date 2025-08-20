@@ -238,22 +238,6 @@ export default function OrdersScreen() {
         }
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.1}
-        ListEmptyComponent={() => {
-          if (loading) {
-            return null; // Don't show empty state while loading
-          }
-          return (
-            <View style={styles.emptyContainer}>
-              <MaterialIcons name="inbox" size={64} color="#ccc" />
-              <Text style={styles.emptyTitle}>No Orders Found</Text>
-              <Text style={styles.emptyText}>
-                {searchText.trim() 
-                  ? "No orders match your search criteria" 
-                  : "No orders available with current filters"}
-              </Text>
-            </View>
-          );
-        }}
         ListFooterComponent={() => {
           if (loading && orders.length > 0) {
             return (
@@ -269,10 +253,7 @@ export default function OrdersScreen() {
           return null;
         }}
         style={styles.ordersList}
-        contentContainerStyle={[
-          styles.ordersContent,
-          filteredOrders.length === 0 && !loading && styles.emptyContent
-        ]}
+        contentContainerStyle={styles.ordersContent}
       />
 
       {isPicklistMode && selectedOrders.length > 0 && (
@@ -480,27 +461,5 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '600',
     fontSize: 16,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 60,
-  },
-  emptyContent: {
-    flexGrow: 1,
-  },
-  emptyTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#333',
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  emptyText: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    paddingHorizontal: 40,
   },
 });

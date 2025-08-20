@@ -63,9 +63,9 @@ export class PaginatedFetcher<T> {
       return;
     }
 
-    this.updateState({
-      loading: true,
-      error: null
+    this.updateState({ 
+      loading: true, 
+      error: null 
     });
 
     try {
@@ -88,7 +88,7 @@ export class PaginatedFetcher<T> {
         `${this.url}?${params.toString()}`
       );
 
-      const newData = append
+      const newData = append 
         ? [...this.state.data, ...response.data]
         : response.data;
 
@@ -245,127 +245,19 @@ export const usePaginatedFetcher = <T>(
     }
   };
 
-  const loadMore = useCallback(async () => {
-    if (loading || !hasMore) return;
+  const loadMore = useCallback(() => {
+    if (!hasMore || loading) return;
+    fetchData(currentPage + 1, true, currentParams);
+  }, [hasMore, loading, currentPage, currentParams]);
 
-    setLoading(true);
-    try {
-      const nextPage = currentPage + 1;
-      console.log(`=== Loading page ${nextPage} ===`);
-      console.log('URL:', endpoint);
-      console.log('Params:', { ...currentParams, pageNo: nextPage, pageSize });
-
-      const response = await fetchWithToken(endpoint, {
-        method: 'GET',
-        params: { ...currentParams, pageNo: nextPage, pageSize },
-      });
-
-      console.log(`=== Page ${nextPage} Response ===`);
-      console.log('Response structure:', {
-        hasData: !!response.data,
-        dataLength: response.data?.length || 0,
-        totalRecords: response.totalRecords,
-        totalPages: response.totalPages,
-        currentPageFromResponse: response.pageNo
-      });
-
-      if (response.data && Array.isArray(response.data)) {
-        setData(prevData => [...prevData, ...response.data]);
-        setCurrentPage(nextPage);
-        setTotalRecords(response.totalRecords || 0);
-        setTotalPages(response.totalPages || 0);
-
-        // Update hasMore based on whether we've reached the end
-        const newHasMore = nextPage < (response.totalPages || 0) && response.data.length > 0;
-        setHasMore(newHasMore);
-
-        console.log(`Updated hasMore to: ${newHasMore} (page ${nextPage} of ${response.totalPages})`);
-      } else {
-        setHasMore(false);
-        console.log('No more data available - stopping pagination');
-      }
-    } catch (error) {
-      console.error('Error loading more data:', error);
-
-      // Handle 404 or other errors by stopping pagination
-      if (error instanceof Error) {
-        const errorMessage = error.message.toLowerCase();
-        if (errorMessage.includes('404') || errorMessage.includes('not found')) {
-          console.log('Got 404 - stopping pagination and treating as end of data');
-          setHasMore(false);
-        }
-      }
-
-      setError(error as Error);
-      setHasMore(false); // Stop pagination on any error
-    } finally {
-      setLoading(false);
-    }
-  }, [endpoint, currentParams, pageSize, currentPage, loading, hasMore]);
-
-  const refresh = useCallback(async () => {
-    console.log('=== Refreshing Data ===');
-    console.log('Resetting to page 1 with params:', currentParams);
-
-    setLoading(true);
+  const refresh = useCallback(() => {
+    console.log('=== usePaginatedFetcher refresh ===');
+    console.log('Refreshing with current params:', currentParams);
+    setData([]);
+    setCurrentPage(1);
     setError(null);
-
-    try {
-      const response = await fetchWithToken(endpoint, {
-        method: 'GET',
-        params: { ...currentParams, pageNo: 1, pageSize },
-      });
-
-      console.log('=== Refresh Response ===');
-      console.log('Response structure:', {
-        hasData: !!response.data,
-        dataLength: response.data?.length || 0,
-        totalRecords: response.totalRecords,
-        totalPages: response.totalPages
-      });
-
-      if (response.data && Array.isArray(response.data)) {
-        setData(response.data);
-        setCurrentPage(1);
-        setTotalRecords(response.totalRecords || 0);
-        setTotalPages(response.totalPages || 0);
-
-        // Determine if there are more pages available
-        const newHasMore = (response.totalPages || 0) > 1 && response.data.length > 0;
-        setHasMore(newHasMore);
-
-        console.log(`Refresh complete - hasMore: ${newHasMore}, totalPages: ${response.totalPages}`);
-      } else {
-        // No data returned
-        setData([]);
-        setCurrentPage(1);
-        setTotalRecords(0);
-        setTotalPages(0);
-        setHasMore(false);
-        console.log('Refresh complete - no data returned');
-      }
-    } catch (error) {
-      console.error('Error refreshing data:', error);
-
-      // Handle 404 or other errors gracefully
-      if (error instanceof Error) {
-        const errorMessage = error.message.toLowerCase();
-        if (errorMessage.includes('404') || errorMessage.includes('not found')) {
-          console.log('Got 404 on refresh - setting empty state');
-          setData([]);
-          setTotalRecords(0);
-          setTotalPages(0);
-          setHasMore(false);
-          setCurrentPage(1);
-          return; // Don't set error for 404, just show empty state
-        }
-      }
-
-      setError(error as Error);
-    } finally {
-      setLoading(false);
-    }
-  }, [endpoint, currentParams, pageSize]);
+    fetchData(1, false, currentParams);
+  }, [currentParams]);
 
   const updateParams = useCallback((newParams: Record<string, string | number>) => {
     console.log('=== usePaginatedFetcher updateParams ===');

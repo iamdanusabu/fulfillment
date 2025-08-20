@@ -16,11 +16,12 @@ import {
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authApi } from '../api/authApi';
+import { CompanyLogo } from '../../../shared/components/CompanyLogo';
 
 export default function LoginScreen() {
-  const [domain, setDomain] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [domain, setDomain] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { width, height } = useWindowDimensions();
@@ -34,7 +35,7 @@ export default function LoginScreen() {
     const trimmedUsername = username.trim();
     const trimmedPassword = password.trim();
     
-    if (!trimmedDomain || !trimmedUsername || !trimmedPassword) {
+    if (!trimmedUsername || !trimmedPassword || !trimmedDomain) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
@@ -82,63 +83,87 @@ export default function LoginScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-      <View style={[
-        styles.formContainer,
-        {
-          maxWidth: isTablet ? 500 : isLandscape ? 400 : '100%',
-          width: '100%',
-          paddingHorizontal: isSmallMobile ? 20 : 30,
-          paddingVertical: isLandscape && !isTablet ? 20 : 30,
-        }
-      ]}>
-        <Text style={styles.title}>Login</Text>
-        
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Domain</Text>
-          <TextInput
-            style={styles.input}
-            value={domain}
-            onChangeText={setDomain}
-            placeholder="Enter domain"
-            autoCapitalize="none"
-          />
-        </View>
+        <View style={[
+          styles.formContainer,
+          {
+            maxWidth: isTablet ? 500 : isLandscape ? 400 : '100%',
+            width: '100%',
+            paddingHorizontal: isSmallMobile ? 20 : 40,
+            paddingVertical: isLandscape && !isTablet ? 30 : 40,
+          }
+        ]}>
+          {/* Logo Section */}
+          <View style={styles.logoContainer}>
+            <CompanyLogo size={isSmallMobile ? 80 : 100} />
+          </View>
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Username</Text>
-          <TextInput
-            style={styles.input}
-            value={username}
-            onChangeText={setUsername}
-            placeholder="Enter username"
-            autoCapitalize="none"
-          />
-        </View>
+          {/* Welcome Text */}
+          <View style={styles.welcomeContainer}>
+            <Text style={styles.welcomeTitle}>Welcome Back</Text>
+            <Text style={styles.welcomeSubtitle}>Sign in to your account</Text>
+          </View>
+          
+          {/* Username Field */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Username</Text>
+            <TextInput
+              style={[styles.input, { backgroundColor: '#fafafa' }]}
+              value={username}
+              onChangeText={setUsername}
+              placeholder="Enter your username"
+              autoCapitalize="none"
+              autoCorrect={false}
+              autoComplete="username"
+            />
+          </View>
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Password</Text>
-          <TextInput
-            style={styles.input}
-            value={password}
-            onChangeText={setPassword}
-            placeholder="Enter password"
-            secureTextEntry
-          />
-        </View>
+          {/* Password Field */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Password</Text>
+            <TextInput
+              style={[styles.input, { backgroundColor: '#fafafa' }]}
+              value={password}
+              onChangeText={setPassword}
+              placeholder="Enter your password"
+              secureTextEntry
+              autoComplete="password"
+            />
+          </View>
 
-        <TouchableOpacity 
-          style={[styles.loginButton, loading && styles.disabledButton]}
-          onPress={handleLogin}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.loginButtonText}>Login</Text>
-          )}
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+          {/* Domain Field */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Domain</Text>
+            <TextInput
+              style={[styles.input, { backgroundColor: '#fafafa' }]}
+              value={domain}
+              onChangeText={setDomain}
+              placeholder="Enter company domain"
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+          </View>
+
+          {/* Login Button */}
+          <TouchableOpacity 
+            style={[styles.loginButton, loading && styles.disabledButton]}
+            onPress={handleLogin}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" size="small" />
+            ) : (
+              <Text style={styles.loginButtonText}>Sign In</Text>
+            )}
+          </TouchableOpacity>
+
+          {/* Footer */}
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>
+              Secure enterprise login powered by your organization
+            </Text>
+          </View>
+        </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
@@ -146,61 +171,95 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   keyboardContainer: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#f8fafc',
   },
   container: {
     flexGrow: 1,
     alignItems: 'center',
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#f8fafc',
     minHeight: '100%',
   },
   formContainer: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
     shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  welcomeContainer: {
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  welcomeTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#1e293b',
+    marginBottom: 8,
+  },
+  welcomeSubtitle: {
+    fontSize: 16,
+    color: '#64748b',
+    fontWeight: '400',
+  },
+  inputContainer: {
+    marginBottom: 24,
+  },
+  label: {
+    fontSize: 15,
+    fontWeight: '600',
+    marginBottom: 8,
+    color: '#374151',
+  },
+  input: {
+    borderWidth: 1.5,
+    borderColor: '#d1d5db',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 16,
+    color: '#1f2937',
+    backgroundColor: '#fafafa',
+    transition: 'border-color 0.2s',
+  },
+  loginButton: {
+    backgroundColor: '#0077ED',
+    paddingVertical: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 8,
+    shadowColor: '#0077ED',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 3,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 30,
-    color: '#333',
-  },
-  inputContainer: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginBottom: 8,
-    color: '#333',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    paddingVertical: 12,
-    fontSize: 16,
-    backgroundColor: '#fff',
-  },
-  loginButton: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 10,
-  },
   disabledButton: {
-    backgroundColor: '#ccc',
+    backgroundColor: '#9ca3af',
+    shadowOpacity: 0,
+    elevation: 0,
   },
   loginButtonText: {
-    color: '#fff',
-    fontSize: 18,
+    color: '#ffffff',
+    fontSize: 16,
     fontWeight: '600',
+    letterSpacing: 0.5,
+  },
+  footer: {
+    marginTop: 24,
+    alignItems: 'center',
+  },
+  footerText: {
+    fontSize: 13,
+    color: '#9ca3af',
+    textAlign: 'center',
+    lineHeight: 18,
   },
 });

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -23,6 +23,33 @@ import { AppToolbar } from '../../../components/layout/AppToolbar';
 export default function OrdersScreen() {
   const params = useLocalSearchParams();
   const router = useRouter();
+  const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
+  const [isPicklistMode, setIsPicklistMode] = useState(false);
+  const [searchText, setSearchText] = useState('');
+  const [debouncedSearchText, setDebouncedSearchText] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
+  const searchTimeoutRef = useRef<NodeJS.Timeout>();
+
+  // QR Scanner integration
+  const { isScanning, isLoading: qrLoading, startScanning, stopScanning, handleScan } = useQRScanner();
+
+  // Debounce search text
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    searchTimeoutRef.current = setTimeout(() => {
+      setDebouncedSearchText(searchText);
+    }, 500); // 500ms delay
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [searchText]);
+
   const { 
     orders, 
     loading, 
@@ -35,15 +62,9 @@ export default function OrdersScreen() {
   } = usePaginatedOrders({ 
     source: params.source as string,
     status: params.status as string,
-    hasFulfilmentJob: params.hasFulfilmentJob as string
+    hasFulfilmentJob: params.hasFulfilmentJob as string,
+    searchText: debouncedSearchText
   });
-  const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
-  const [isPicklistMode, setIsPicklistMode] = useState(false);
-  const [searchText, setSearchText] = useState('');
-  const [refreshing, setRefreshing] = useState(false);
-
-  // QR Scanner integration
-  const { isScanning, isLoading: qrLoading, startScanning, stopScanning, handleScan } = useQRScanner();
 
   useEffect(() => {
     setIsPicklistMode(params.mode === 'picklist');
@@ -76,15 +97,8 @@ export default function OrdersScreen() {
     router.push(`/picklist/location-selection?orderIds=${orderIdsParam}`);
   };
 
-  const filteredOrders = useMemo(() => {
-    if (!searchText.trim()) return orders;
-
-    return orders.filter(order => 
-      order.orderNumber.toLowerCase().includes(searchText.toLowerCase()) ||
-      order.customer.toLowerCase().includes(searchText.toLowerCase()) ||
-      order.source.toLowerCase().includes(searchText.toLowerCase())
-    );
-  }, [orders, searchText]);
+  // Remove client-side filtering since search is now handled by API
+  const filteredOrders = orders;
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -203,7 +217,7 @@ export default function OrdersScreen() {
         <MaterialIcons name="search" size={16} color="#666" style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
-          placeholder="Search orders..."
+          placeholder="Search by order ID or customer name..."
           value={searchText}
           onChangeText={setSearchText}
           clearButtonMode="while-editing"

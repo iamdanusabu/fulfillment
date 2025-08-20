@@ -10,6 +10,9 @@ interface UsePaginatedOrdersParams {
   source?: string;
   status?: string;
   hasFulfilmentJob?: string;
+  searchText?: string;
+  customerName?: string;
+  orderID?: string;
 }
 
 export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
@@ -45,8 +48,34 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
       result.status = params.status;
     }
 
+    // Add search parameters
+    if (params.searchText && params.searchText.trim()) {
+      result.searchMode = 'contains';
+      result.matchWith = 'any';
+      
+      // Determine if search text is numeric (likely an order ID) or text (likely customer name)
+      const searchValue = params.searchText.trim();
+      if (/^\d+$/.test(searchValue)) {
+        result.orderID = searchValue;
+      } else {
+        result.customerName = searchValue;
+      }
+    }
+
+    // Add specific search parameters if provided
+    if (params.customerName) {
+      result.customerName = params.customerName;
+      result.searchMode = 'contains';
+      result.matchWith = 'any';
+    }
+    if (params.orderID) {
+      result.orderID = params.orderID;
+      result.searchMode = 'contains';
+      result.matchWith = 'any';
+    }
+
     return result;
-  }, [settings, params.source, params.status, params.hasFulfilmentJob, getFilterParams]);
+  }, [settings, params.source, params.status, params.hasFulfilmentJob, params.searchText, params.customerName, params.orderID, getFilterParams]);
 
   const paginatedState = usePaginatedFetcher<any>(
     config.endpoints.orders,

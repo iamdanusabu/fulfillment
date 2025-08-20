@@ -1,7 +1,7 @@
 export interface Order {
   id: string;
-  orderID: number;
-  orderNumber: string;
+  orderID?: number;
+  orderNumber?: string;
   source: string;
   status: string;
   customer: string | object;
@@ -15,12 +15,12 @@ export interface Order {
   totalFees: number;
   customizationTotal: number;
   tax: number;
-  amount: number;
+  amount?: number;
   registerID: number;
   externalOrderKey: string;
   netDiscount: number;
   isTaxExempt: boolean;
-  totalItemQuantity: number;
+  totalItemQuantity?: number;
   employee: any;
   store: any;
   register: any;
@@ -57,8 +57,8 @@ export interface Address {
 export interface OrderItem {
   id: string;
   productId: string;
-  productName: string;
-  quantity: number;
+  productName?: string;
+  quantity?: number;
   pickedQuantity?: number;
   orderItemID: string;
   itemID: string;

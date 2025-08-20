@@ -87,11 +87,11 @@ export const ordersApi = {
     try {
       const { fetchWithToken } = await import('../../../shared/services/fetchWithToken');
       const config = getConfig();
-      
+
       // Use the same endpoint structure as curl command with pagination params
       const url = `${config.endpoints.orders}/${orderId}?pageNo=1&pageSize=1`;
       const data = await fetchWithToken(url);
-      
+
       // Handle paginated response structure
       if (data && data.data && Array.isArray(data.data) && data.data.length > 0) {
         return transformOrder(data.data[0]);
@@ -113,7 +113,7 @@ export const ordersApi = {
     try {
       const { fetchWithToken } = await import('../../../shared/services/fetchWithToken');
       const config = getConfig();
-      
+
       const requestBody = [{
         orderID: orderId,
         fulfillmentLocation: {
@@ -121,12 +121,12 @@ export const ordersApi = {
           id: fulfillmentLocationId
         }
       }];
-      
+
       const data = await fetchWithToken(config.endpoints.orderFulfill, {
         method: 'PATCH',
         body: JSON.stringify(requestBody),
       });
-      
+
       return data;
     } catch (error) {
       console.error('Error fulfilling order:', error);
@@ -139,17 +139,17 @@ export const ordersApi = {
     try {
       const { fetchWithToken } = await import('../../../shared/services/fetchWithToken');
       const config = getConfig();
-      
+
       const requestBody = {
         orderID: orderId,
         status: status
       };
-      
+
       const data = await fetchWithToken(`${config.endpoints.orders}/${orderId}`, {
         method: 'PATCH',
         body: JSON.stringify(requestBody),
       });
-      
+
       return data;
     } catch (error) {
       console.error('Error updating order status:', error);

@@ -14,6 +14,7 @@ interface PaginatedState<T> {
   hasMore: boolean;
   loading: boolean;
   error: string | null;
+  hasNoResults?: boolean; // Added to specifically track no results found
 }
 
 export class PaginatedFetcher<T> {
@@ -99,12 +100,35 @@ export class PaginatedFetcher<T> {
         totalRecords: response.totalRecords,
         hasMore: response.pageNo < response.totalPages,
         loading: false,
+        hasNoResults: false // Reset hasNoResults on successful fetch
       });
 
-    } catch (error) {
-      this.updateState({
-        loading: false,
-        error: error instanceof Error ? error.message : 'Failed to fetch data',
+    } catch (error: any) {
+      console.error('Failed to fetch data:', error);
+
+      // Handle network errors gracefully
+      if (error.message === 'Unauthorized') {
+        throw error; // Re-throw auth errors
+      }
+
+      // Handle 404 or no data scenarios
+      if (error.message.includes('404') || error.message.includes('Not Found')) {
+        this.updateState({ 
+          loading: false, 
+          error: null,
+          hasNoResults: true,
+          data: [],
+          totalRecords: 0,
+          hasMore: false
+        });
+        return;
+      }
+
+      // For other errors, set hasNoResults flag
+      this.updateState({ 
+        loading: false, 
+        error: error.message || 'Failed to load data',
+        hasNoResults: true 
       });
     }
   }
@@ -141,6 +165,7 @@ export class PaginatedFetcher<T> {
       hasMore: true,
       loading: false,
       error: null,
+      hasNoResults: false // Reset hasNoResults on reset
     });
   }
 
@@ -180,6 +205,7 @@ export const usePaginatedFetcher = <T>(
   const [hasMore, setHasMore] = useState(true);
   const [nextPageURL, setNextPageURL] = useState<string | null>(null);
   const [currentParams, setCurrentParams] = useState(initialParams);
+  const [hasNoResults, setHasNoResults] = useState(false); // State to track no results
 
   // Watch for parameter changes and reset data when they change
   useEffect(() => {
@@ -195,6 +221,7 @@ export const usePaginatedFetcher = <T>(
       setData([]);
       setCurrentPage(1);
       setError(null);
+      setHasNoResults(false); // Reset hasNoResults
       fetchData(1, false, initialParams);
     }
   }, [JSON.stringify(initialParams)]);
@@ -208,6 +235,7 @@ export const usePaginatedFetcher = <T>(
     try {
       setLoading(true);
       setError(null);
+      setHasNoResults(false); // Reset hasNoResults on new fetch
 
       const params = {
         ...(customParams || currentParams),
@@ -238,9 +266,23 @@ export const usePaginatedFetcher = <T>(
       setHasMore(response.pageNo < response.totalPages);
       setNextPageURL(response.nextPageURL || null);
       setLoading(false);
-    } catch (err) {
+      // If response.data is empty and it's not an append operation, set hasNoResults
+      if (transformedData.length === 0 && !append) {
+          setHasNoResults(true);
+      }
+    } catch (err: any) {
       console.error('Error fetching data:', err);
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      // Handle 404 or no data scenarios
+      if (err.message.includes('404') || err.message.includes('Not Found')) {
+        setData([]);
+        setTotalRecords(0);
+        setHasMore(false);
+        setError(null); // Clear error for 404
+        setHasNoResults(true); // Indicate no results
+      } else {
+        setError(err.message || 'An error occurred');
+        setHasNoResults(true); // Set for other errors too
+      }
       setLoading(false);
     }
   };
@@ -256,6 +298,7 @@ export const usePaginatedFetcher = <T>(
     setData([]);
     setCurrentPage(1);
     setError(null);
+    setHasNoResults(false); // Reset hasNoResults on refresh
     fetchData(1, false, currentParams);
   }, [currentParams]);
 
@@ -269,6 +312,7 @@ export const usePaginatedFetcher = <T>(
       setData([]);
       setCurrentPage(1);
       setError(null);
+      setHasNoResults(false); // Reset hasNoResults
       fetchData(1, false, updatedParams);
       return updatedParams;
     });
@@ -285,6 +329,7 @@ export const usePaginatedFetcher = <T>(
     setLoading(false);
     setError(null);
     setNextPageURL(null);
+    setHasNoResults(false); // Reset hasNoResults on reset
   }, [initialParams]);
 
   return {
@@ -299,5 +344,6 @@ export const usePaginatedFetcher = <T>(
     refresh,
     updateParams,
     reset,
+    hasNoResults, // Include hasNoResults in the return object
   };
 };

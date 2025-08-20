@@ -141,17 +141,21 @@ export default function OrdersScreen() {
     >
       <View style={styles.orderHeader}>
         <View style={styles.orderMainInfo}>
-          <Text style={styles.customerName}>
-            {item.customer || 'Guest Order'}
-          </Text>
+          {item.customer && (
+            <Text style={styles.customerName}>
+              {item.customer}
+            </Text>
+          )}
           <View style={styles.orderMetaRow}>
-            <Text style={styles.orderMainId}>#{item.orderID}</Text>
-            <Text style={styles.externalOrderId}>Ext: {item.orderNumber}</Text>
-            <View style={styles.paymentStatusTag}>
-              <Text style={[styles.paymentStatusText, getPaymentStatusColor(item.paymentStatus)]}>
-                {item.paymentStatus}
-              </Text>
-            </View>
+            {item.orderID && <Text style={styles.orderMainId}>#{item.orderID}</Text>}
+            {item.orderNumber && <Text style={styles.externalOrderId}>Ext: {item.orderNumber}</Text>}
+            {item.paymentStatus && (
+              <View style={styles.paymentStatusTag}>
+                <Text style={[styles.paymentStatusText, getPaymentStatusColor(item.paymentStatus)]}>
+                  {item.paymentStatus}
+                </Text>
+              </View>
+            )}
           </View>
         </View>
 
@@ -173,15 +177,21 @@ export default function OrdersScreen() {
 
       <View style={styles.orderFooter}>
         <View style={styles.orderTags}>
-          <View style={styles.tag}>
-            <Text style={styles.tagText}>{item.totalItemQuantity || item.items.length} Items</Text>
-          </View>
-          <View style={styles.tag}>
-            <Text style={styles.tagText}>{formatDate(item.date)}</Text>
-          </View>
-          <View style={styles.sourceTag}>
-            <Text style={styles.sourceText}>{item.source}</Text>
-          </View>
+          {(item.totalItemQuantity || item.items.length > 0) && (
+            <View style={styles.tag}>
+              <Text style={styles.tagText}>{item.totalItemQuantity || item.items.length} Items</Text>
+            </View>
+          )}
+          {item.date && (
+            <View style={styles.tag}>
+              <Text style={styles.tagText}>{formatDate(item.date)}</Text>
+            </View>
+          )}
+          {item.source && (
+            <View style={styles.sourceTag}>
+              <Text style={styles.sourceText}>{item.source}</Text>
+            </View>
+          )}
         </View>
       </View>
     </TouchableOpacity>
@@ -249,6 +259,16 @@ export default function OrdersScreen() {
           }
           if (!hasMore && orders.length > 0) {
             return <Text style={styles.endText}>No more orders</Text>;
+          }
+          return null;
+        }}
+        ListEmptyComponent={() => {
+          if (!loading && orders.length === 0) {
+            return (
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>No orders found</Text>
+              </View>
+            );
           }
           return null;
         }}
@@ -437,6 +457,17 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingVertical: 20,
     fontSize: 14,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 60,
+  },
+  emptyText: {
+    color: '#666',
+    fontSize: 16,
+    textAlign: 'center',
   },
   bottomBar: {
     flexDirection: 'row',

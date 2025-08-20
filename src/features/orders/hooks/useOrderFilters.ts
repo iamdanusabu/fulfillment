@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -61,14 +62,7 @@ export const useOrderFilters = () => {
     };
   };
 
-  return {
-    settings,
-    loading,
-    getFilterParams,
-    refreshSettings: loadSettings
-  };
-};
-// Helper function to verify current filter settings
+  // Helper function to verify current filter settings
   const verifyFilters = () => {
     const params = getFilterParams();
     console.log('=== Current Filter Settings ===');
@@ -91,3 +85,4 @@ export const useOrderFilters = () => {
     refreshSettings: loadSettings,
     verifyFilters
   };
+};

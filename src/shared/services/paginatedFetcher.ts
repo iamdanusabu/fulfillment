@@ -63,9 +63,9 @@ export class PaginatedFetcher<T> {
       return;
     }
 
-    this.updateState({ 
-      loading: true, 
-      error: null 
+    this.updateState({
+      loading: true,
+      error: null
     });
 
     try {
@@ -88,7 +88,7 @@ export class PaginatedFetcher<T> {
         `${this.url}?${params.toString()}`
       );
 
-      const newData = append 
+      const newData = append
         ? [...this.state.data, ...response.data]
         : response.data;
 
@@ -186,12 +186,12 @@ export const usePaginatedFetcher = <T>(
     if (baseUrl) {
       // Check if params actually changed
       const paramsChanged = paramsString !== prevParamsRef.current;
-      
+
       // Only recreate fetcher if URL changed
       if (!fetcherRef.current || fetcherRef.current['url'] !== baseUrl) {
         fetcherRef.current = new PaginatedFetcher<T>(baseUrl, { ...options, initialParams: params });
         prevParamsRef.current = paramsString;
-        
+
         fetcherRef.current.fetchPage(1, false).then(() => {
           setState(fetcherRef.current!.getState());
         });
@@ -199,7 +199,7 @@ export const usePaginatedFetcher = <T>(
         // Update params and refresh data
         fetcherRef.current.updateParams(params);
         prevParamsRef.current = paramsString;
-        
+
         // Reset and fetch with new params
         fetcherRef.current.reset();
         fetcherRef.current.fetchPage(1, false).then(() => {
@@ -242,7 +242,7 @@ export const usePaginatedFetcher = <T>(
       const updatedParams = { ...prevParams, ...newParams };
 
       // Only update fetcher if params actually changed
-      const hasChanged = Object.keys(updatedParams).some(key => 
+      const hasChanged = Object.keys(updatedParams).some(key =>
         updatedParams[key] !== prevParams[key]
       );
 

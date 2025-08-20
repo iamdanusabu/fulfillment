@@ -51,6 +51,13 @@ export default function OrdersScreen() {
     };
   }, [searchText]);
 
+  // Clear search when searchText becomes empty
+  useEffect(() => {
+    if (searchText === '') {
+      setDebouncedSearchText('');
+    }
+  }, [searchText]);
+
   const { 
     orders, 
     loading, 

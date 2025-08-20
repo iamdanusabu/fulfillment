@@ -48,30 +48,35 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
       result.status = params.status;
     }
 
-    // Add search parameters
+    // Add search parameters only if searchText is provided and not empty
     if (params.searchText && params.searchText.trim()) {
       const searchValue = params.searchText.trim();
       result.searchMode = 'contains';
       result.matchWith = 'any';
       
-      // Always add customerName for text searches, and orderID for numeric searches
+      // Clear any previous search parameters and add new ones
       if (/^\d+$/.test(searchValue)) {
         result.orderID = searchValue;
+        // Don't add customerName when searching by orderID
       } else {
         result.customerName = searchValue;
+        // Don't add orderID when searching by customerName
       }
     }
+    // If searchText is empty, don't add any search-specific parameters
 
-    // Add specific search parameters if provided
-    if (params.customerName) {
-      result.customerName = params.customerName;
-      result.searchMode = 'contains';
-      result.matchWith = 'any';
-    }
-    if (params.orderID) {
-      result.orderID = params.orderID;
-      result.searchMode = 'contains';
-      result.matchWith = 'any';
+    // Add specific search parameters if provided (but only if searchText is not being used)
+    if (!params.searchText) {
+      if (params.customerName) {
+        result.customerName = params.customerName;
+        result.searchMode = 'contains';
+        result.matchWith = 'any';
+      }
+      if (params.orderID) {
+        result.orderID = params.orderID;
+        result.searchMode = 'contains';
+        result.matchWith = 'any';
+      }
     }
 
     return result;
@@ -81,11 +86,7 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
     config.endpoints.orders,
     {
       pageSize: 20,
-      initialParams: {
-        hasFulfilmentJob: 'false',
-        expand: 'item,bin,location_hint,payment',
-        pagination: 'true',
-      },
+      initialParams: apiParams, // Use apiParams instead of hardcoded values
     }
   );
 

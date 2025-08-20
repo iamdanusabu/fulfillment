@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { PaginatedFetcher, usePaginatedFetcher } from '../../../shared/services/paginatedFetcher';
+import { usePaginatedFetcher } from '../../../shared/services/paginatedFetcher';
 import { Order } from '../../../shared/types';
 import { getConfig } from '../../../environments';
 import { useOrderFilters } from './useOrderFilters';
@@ -13,8 +14,9 @@ interface UsePaginatedOrdersParams {
 
 export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
   const { settings, getFilterParams } = useOrderFilters();
+  const config = getConfig();
 
-  // Build initial params once with stable dependencies
+  // Build initial params with stable dependencies
   const initialParams = React.useMemo(() => {
     const filterParams = getFilterParams();
     
@@ -40,12 +42,10 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
     params.source, 
     params.status, 
     params.hasFulfilmentJob, 
-    JSON.stringify(settings) // Stringify to prevent object reference changes
+    JSON.stringify(settings)
   ]);
 
-  const config = getConfig();
-  
-  const paginatedState = usePaginatedFetcher<any>(
+  const { data, loading, error, hasMore, loadMore } = usePaginatedFetcher<any>(
     config.endpoints.orders,
     {
       pageSize: 20,
@@ -54,17 +54,16 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
   );
 
   // Transform the raw data to Order objects
-  const transformedOrders = paginatedState.data.map(transformOrder);
+  const transformedOrders = React.useMemo(() => 
+    data.map(transformOrder), 
+    [data]
+  );
 
   return {
     orders: transformedOrders,
-    loading: paginatedState.loading,
-    error: paginatedState.error,
-    hasMore: paginatedState.hasMore,
-    totalRecords: paginatedState.totalRecords,
-    currentPage: paginatedState.currentPage,
-    totalPages: paginatedState.totalPages,
-    loadMore: paginatedState.loadMore,
-    refresh: paginatedState.refresh,
+    loading,
+    error,
+    hasMore,
+    loadMore,
   };
 };

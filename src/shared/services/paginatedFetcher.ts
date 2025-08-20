@@ -144,19 +144,19 @@ export class PaginatedFetcher<T> {
 // Hook for React components
 import { useState, useEffect, useRef, useCallback } from "react";
 
-// Define types for the hook's return value to match the original structure
-type PaginatedFetcherState<T> = PaginatedState<T>;
-interface PaginatedFetcherActions {
-  loadMore: () => Promise<void> | undefined;
-  refresh: () => Promise<void> | undefined;
-  updateParams: (params: Record<string, string | number>) => void;
-  reset: () => void;
+// Define types for the hook's return value
+interface UsePaginatedFetcherReturn<T> {
+  data: T[];
+  loading: boolean;
+  error: string | null;
+  hasMore: boolean;
+  loadMore: () => void;
 }
 
 export const usePaginatedFetcher = <T>(
   baseUrl: string | null,
   options: PaginatedFetcherOptions = {},
-): PaginatedFetcherState<T> & PaginatedFetcherActions => {
+): UsePaginatedFetcherReturn<T> => {
   const fetcherRef = useRef<PaginatedFetcher<T> | null>(null);
   const [state, setState] = useState<PaginatedState<T>>({
     data: [],
@@ -168,20 +168,13 @@ export const usePaginatedFetcher = <T>(
     error: null,
   });
 
-  const [params, setParams] = useState<Record<string, string | number>>(
-    options.initialParams || {},
-  );
+  // Create a stable reference for options to prevent unnecessary re-creation
+  const optionsRef = useRef(options);
+  optionsRef.current = options;
 
+  // Only re-create fetcher when baseUrl changes
   useEffect(() => {
-    if (baseUrl) {
-      fetcherRef.current = new PaginatedFetcher<T>(baseUrl, {
-        ...options,
-        initialParams: params,
-      });
-      fetcherRef.current.fetchPage(1, false).then(() => {
-        setState(fetcherRef.current!.getState());
-      });
-    } else {
+    if (!baseUrl) {
       fetcherRef.current = null;
       setState({
         data: [],
@@ -192,63 +185,42 @@ export const usePaginatedFetcher = <T>(
         loading: false,
         error: null,
       });
+      return;
     }
-  }, [baseUrl, JSON.stringify(params)]);
+
+    // Create new fetcher instance
+    fetcherRef.current = new PaginatedFetcher<T>(baseUrl, optionsRef.current);
+
+    // Subscribe to state changes
+    const unsubscribe = fetcherRef.current.subscribe((newState) => {
+      setState(newState);
+    });
+
+    // Initial fetch
+    fetcherRef.current.fetchPage(1, false);
+
+    return unsubscribe;
+  }, [baseUrl]);
+
+  // Update params without re-creating the fetcher
+  useEffect(() => {
+    if (fetcherRef.current && options.initialParams) {
+      fetcherRef.current.updateParams(options.initialParams);
+      fetcherRef.current.refresh();
+    }
+  }, [JSON.stringify(options.initialParams)]);
 
   const loadMore = useCallback(() => {
-    if (fetcherRef.current && !fetcherRef.current.getState().loading) {
-      return fetcherRef.current.loadMore().then(() => {
-        setState(fetcherRef.current!.getState());
-      });
+    if (fetcherRef.current && !state.loading && state.hasMore) {
+      fetcherRef.current.loadMore();
     }
-  }, []);
-
-  const refresh = useCallback(() => {
-    if (fetcherRef.current) {
-      return fetcherRef.current.refresh().then(() => {
-        setState(fetcherRef.current!.getState());
-      });
-    }
-  }, []);
-
-  const updateParamsAndFetch = useCallback(
-    (newParams: Record<string, string | number>) => {
-      setParams((prevParams) => {
-        const updatedParams = { ...prevParams, ...newParams };
-        if (fetcherRef.current) {
-          fetcherRef.current.updateParams(updatedParams);
-          // Reset pagination and refresh for filter changes
-          fetcherRef.current.refresh().then(() => {
-            setState(fetcherRef.current!.getState());
-          });
-        }
-        return updatedParams;
-      });
-    },
-    [],
-  );
-
-  const resetFetcher = useCallback(() => {
-    if (fetcherRef.current) {
-      fetcherRef.current.reset();
-      setState({
-        // Also reset local state
-        data: [],
-        currentPage: 0,
-        totalPages: 1,
-        totalRecords: 0,
-        hasMore: true,
-        loading: false,
-        error: null,
-      });
-    }
-  }, []);
+  }, [state.loading, state.hasMore]);
 
   return {
-    ...state,
+    data: state.data,
+    loading: state.loading,
+    error: state.error,
+    hasMore: state.hasMore,
     loadMore,
-    refresh,
-    updateParams: updateParamsAndFetch,
-    reset: resetFetcher,
   };
 };

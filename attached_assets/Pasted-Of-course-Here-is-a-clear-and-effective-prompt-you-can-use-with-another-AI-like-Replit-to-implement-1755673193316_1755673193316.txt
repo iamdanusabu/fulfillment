@@ -1,0 +1,173 @@
+Of course. Here is a clear and effective prompt you can use with another AI like Replit to implement the necessary changes.
+
+Replit Prompt:
+Hello! I need your help to fix a bug in my React Native application.
+
+The Goal:
+Update my code so that the main "Orders" screen correctly filters the list of orders based on the user's saved preferences in AsyncStorage. Currently, it ignores these saved settings and shows orders from all sources.
+
+The Problem:
+There is a race condition. My custom hook, usePaginatedOrders.js, tries to fetch data from the API before the filter settings (like preferred sources) have finished loading from AsyncStorage. This results in an API call without any filters applied.
+
+The Solution:
+We will fix this in two steps:
+
+Create a new, dedicated hook named useOrderFilters.js that is solely responsible for loading the filter settings from AsyncStorage and managing their loading state.
+
+Update the existing usePaginatedOrders.js hook to use this new hook. It must wait until the filters are fully loaded before it attempts to make the API call.
+
+Here are the specific instructions and the code you need to use:
+
+Step 1: Create a new file.
+Please create a new file at hooks/useOrderFilters.js and add the following code to it:
+
+JavaScript
+
+import { useState, useEffect, useCallback } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+interface FilterSettings {
+  sources: string[];
+  statuses: string[];
+  paymentStatuses: string[];
+}
+
+const DEFAULT_FILTER_SETTINGS: FilterSettings = {
+  sources: [
+    'Shopify', 'Tapin2', 'Breakaway', 'bigcommerce', 'Ecwid',
+    'PHONE ORDER', 'DELIVERY', 'BAR TAB', 'TIKT', 'TABLE',
+    'OTHER', 'MANUAL', 'FanVista', 'QSR'
+  ],
+  statuses: ['Initiated', 'Sent for Processing'],
+  paymentStatuses: ['PAID', 'UNPAID']
+};
+
+export const useOrderFilters = () => {
+  const [settings, setSettings] = useState<FilterSettings | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadFilterSettings = async () => {
+      setLoading(true);
+      try {
+        const savedSettingsJSON = await AsyncStorage.getItem('orderFilterSettings');
+        if (savedSettingsJSON) {
+          const savedSettings = JSON.parse(savedSettingsJSON);
+          setSettings({ ...DEFAULT_FILTER_SETTINGS, ...savedSettings });
+        } else {
+          setSettings(DEFAULT_FILTER_SETTINGS);
+        }
+      } catch (error) {
+        console.error('Failed to load order filter settings:', error);
+        setSettings(DEFAULT_FILTER_SETTINGS);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadFilterSettings();
+  }, []);
+
+  const getFilterParams = useCallback(() => {
+    if (!settings) {
+      return {};
+    }
+    
+    const params: { [key: string]: string } = {};
+    if (settings.sources.length > 0) {
+      params.source = settings.sources.join(',');
+    }
+    if (settings.statuses.length > 0) {
+      params.status = settings.statuses.join(',');
+    }
+    if (settings.paymentStatuses.length > 0) {
+      params.paymentStatus = settings.paymentStatuses.join(',');
+    }
+
+    return params;
+  }, [settings]);
+
+  return { settings, loading, getFilterParams };
+};
+Step 2: Update the existing usePaginatedOrders.js file.
+Please replace the entire contents of the existing file at hooks/usePaginatedOrders.js with the following updated code:
+
+JavaScript
+
+import React from 'react';
+import { usePaginatedFetcher } from '../../../shared/services/paginatedFetcher';
+import { Order } from '../../../shared/types';
+import { getConfig } from '../../../environments';
+import { useOrderFilters } from './useOrderFilters';
+import { transformOrder } from '../api/ordersApi';
+
+interface UsePaginatedOrdersParams {
+  source?: string;
+  status?: string;
+  hasFulfilmentJob?: string;
+}
+
+export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
+  const { settings, loading: filtersLoading, getFilterParams } = useOrderFilters();
+  const config = getConfig();
+
+  const apiParams = React.useMemo(() => {
+    if (filtersLoading || !settings) {
+      return null;
+    }
+
+    const filterParams = getFilterParams();
+    
+    const result: Record<string, string | boolean> = {
+      hasFulfilmentJob: params.hasFulfilmentJob || 'false',
+      expand: 'item,bin,location_hint,payment',
+      pagination: true,
+    };
+
+    Object.assign(result, filterParams);
+
+    if (params.source) {
+      result.source = params.source;
+    }
+    if (params.status) {
+      result.status = params.status;
+    }
+
+    return result;
+  }, [settings, filtersLoading, params, getFilterParams]);
+
+  const endpoint = apiParams ? config.endpoints.orders : null;
+
+  const paginatedState = usePaginatedFetcher<any>(
+    endpoint,
+    {
+      pageSize: 20,
+      initialParams: apiParams || {},
+    }
+  );
+
+  const transformedOrders = React.useMemo(() => 
+    paginatedState.data.map(transformOrder), 
+    [paginatedState.data]
+  );
+
+  return {
+    orders: transformedOrders,
+    loading: filtersLoading || paginatedState.loading,
+    error: paginatedState.error,
+    hasMore: paginatedState.hasMore,
+    totalRecords: paginatedState.totalRecords,
+    currentPage: paginatedState.currentPage,
+    totalPages: paginatedState.totalPages,
+    loadMore: paginatedState.loadMore,
+    refresh: paginatedState.refresh,
+  };
+};
+Thank you!
+
+
+
+
+
+
+

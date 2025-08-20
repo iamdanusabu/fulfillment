@@ -51,7 +51,8 @@ export default function OrderDetailScreen() {
       await ordersApi.updateOrderStatus(order.orderID.toString(), newStatus);
 
       // Update local state
-      setOrder(prev => prev ? { ...prev, status: newStatus } : null);
+      const updatedOrder = { ...order, status: newStatus };
+      setOrder(updatedOrder);
 
       Alert.alert('Success', 'Order status updated successfully');
     } catch (error) {

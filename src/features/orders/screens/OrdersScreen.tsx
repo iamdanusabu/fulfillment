@@ -49,19 +49,7 @@ export default function OrdersScreen() {
     setIsPicklistMode(params.mode === 'picklist');
   }, [params.mode]);
 
-  // Track if we navigated away and should refresh on return
-  const hasNavigatedAway = React.useRef(false);
-
-  // Refresh orders when returning from order detail screen
-  useFocusEffect(
-    useCallback(() => {
-      // Only refresh if we have navigated away and are returning
-      if (hasNavigatedAway.current && orders.length > 0) {
-        refresh();
-        hasNavigatedAway.current = false;
-      }
-    }, [refresh])
-  );
+  // No automatic refresh - users can pull-to-refresh when needed
 
   const toggleOrderSelection = (orderId: string) => {
     if (!isPicklistMode) return;
@@ -77,7 +65,6 @@ export default function OrdersScreen() {
     if (isPicklistMode) {
       toggleOrderSelection(order.id);
     } else {
-      hasNavigatedAway.current = true; // Set flag before navigating
       router.push(`/orders/${order.orderID}`);
     }
   };

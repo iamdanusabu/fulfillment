@@ -24,23 +24,22 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
       pagination: 'true',
     };
 
-    // Add filter params if they exist (user has made selections)
-    if (settings && settings.sources && settings.sources.length > 0) {
-      result.source = settings.sources.join(',');
-    }
-    if (settings && settings.statuses && settings.statuses.length > 0) {
-      result.status = settings.statuses.join(',');
-    }
-    if (settings && settings.paymentStatuses && settings.paymentStatuses.length > 0) {
-      result.paymentStatus = settings.paymentStatuses.join(',');
-    }
-
-    // Override with URL params if provided (URL params take precedence)
+    // URL params take precedence over filter settings
     if (params.source) {
       result.source = params.source;
+    } else if (settings && settings.sources && settings.sources.length > 0) {
+      result.source = settings.sources.join(',');
     }
+
     if (params.status) {
       result.status = params.status;
+    } else if (settings && settings.statuses && settings.statuses.length > 0) {
+      result.status = settings.statuses.join(',');
+    }
+
+    // Payment status only comes from filter settings (no URL param for this)
+    if (settings && settings.paymentStatuses && settings.paymentStatuses.length > 0) {
+      result.paymentStatus = settings.paymentStatuses.join(',');
     }
 
     return result;

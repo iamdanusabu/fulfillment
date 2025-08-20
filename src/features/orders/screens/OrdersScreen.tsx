@@ -49,15 +49,7 @@ export default function OrdersScreen() {
     setIsPicklistMode(params.mode === 'picklist');
   }, [params.mode]);
 
-  // Refresh orders when screen comes into focus (e.g., returning from order detail)
-  useFocusEffect(
-    useCallback(() => {
-      // Only refresh if we have existing orders (not on initial load)
-      if (orders.length > 0) {
-        refresh();
-      }
-    }, [orders.length, refresh])
-  );
+  // Removed aggressive refresh on focus - let users manually refresh via pull-to-refresh
 
   const toggleOrderSelection = (orderId: string) => {
     if (!isPicklistMode) return;

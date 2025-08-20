@@ -71,16 +71,24 @@ export function OrderSearchModal({ visible, onClose, onOrderSelect }: OrderSearc
   }, [debouncedQuery]);
 
   const performSearch = useCallback((query: string) => {
+    // Clean the search query to remove any URL parameters
+    const cleanOrderID = query.trim().split('?')[0];
+    
     const params = new URLSearchParams({
-      searchMode: 'MATCH_WITH',
+      pageNo: '1',
+      limit: '25',
+      createdFrom: '2009-08-15T00:00:00+05:30',
+      createdTo: '2025-08-20T23:59:59+05:30',
+      isPreventOrderIDParam: 'true',
+      staticFilters: 'createdTo,createdFrom',
+      source: 'tikt,breakaway,phone order,QSR,BARTAB,yinzcam,tapin2,suite,FanVista,Manual,woocommerce,jwo',
+      searchMode: 'contains',
       matchWith: 'any',
-      orderID: query.trim(),
-      expand: 'item,bin,location_hint,payment',
-      pagination: 'true',
+      orderID: cleanOrderID,
     });
 
-    setSearchUrl(`${config.endpoints.orderSearch}?${params.toString()}`);
-  }, [config.endpoints.orderSearch]);
+    setSearchUrl(`${config.endpoints.orders}?${params.toString()}`);
+  }, [config.endpoints.orders]);
 
   const handleSearch = useCallback(() => {
     if (!searchQuery.trim()) {

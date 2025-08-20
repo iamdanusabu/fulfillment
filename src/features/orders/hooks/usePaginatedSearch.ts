@@ -46,6 +46,9 @@ export function usePaginatedSearch({
       return;
     }
 
+    // Clean the search query to remove any URL parameters
+    const cleanOrderID = searchQuery.trim().split('?')[0];
+
     const params = new URLSearchParams({
       pageNo: '1',
       limit: '25',
@@ -56,7 +59,7 @@ export function usePaginatedSearch({
       source: 'tikt,breakaway,phone order,QSR,BARTAB,yinzcam,tapin2,suite,FanVista,Manual,woocommerce,jwo',
       searchMode: searchMode,
       matchWith: 'any',
-      orderID: searchQuery.trim(),
+      orderID: cleanOrderID,
     });
 
     setSearchUrl(`${config.endpoints.orders}?${params.toString()}`);

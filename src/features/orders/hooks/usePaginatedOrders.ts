@@ -50,11 +50,11 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
 
     // Add search parameters
     if (params.searchText && params.searchText.trim()) {
+      const searchValue = params.searchText.trim();
       result.searchMode = 'contains';
       result.matchWith = 'any';
       
-      // Determine if search text is numeric (likely an order ID) or text (likely customer name)
-      const searchValue = params.searchText.trim();
+      // Always add customerName for text searches, and orderID for numeric searches
       if (/^\d+$/.test(searchValue)) {
         result.orderID = searchValue;
       } else {

@@ -40,6 +40,7 @@ export default function OrdersScreen() {
     }
 
     searchTimeoutRef.current = setTimeout(() => {
+      console.log('Setting debounced search text:', searchText);
       setDebouncedSearchText(searchText);
     }, 500); // 500ms delay
 
@@ -65,6 +66,16 @@ export default function OrdersScreen() {
     hasFulfilmentJob: params.hasFulfilmentJob as string,
     searchText: debouncedSearchText
   });
+
+  // Debug logging
+  React.useEffect(() => {
+    console.log('Search params:', { 
+      searchText, 
+      debouncedSearchText, 
+      ordersCount: orders.length,
+      loading 
+    });
+  }, [searchText, debouncedSearchText, orders.length, loading]);
 
   useEffect(() => {
     setIsPicklistMode(params.mode === 'picklist');

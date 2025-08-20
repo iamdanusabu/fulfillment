@@ -111,7 +111,7 @@ export class PaginatedFetcher<T> {
 
   async loadMore(): Promise<void> {
     if (!this.state.hasMore || this.state.loading) return;
-    
+
     // Only load the next page if we haven't already loaded it
     const nextPage = this.state.currentPage + 1;
     if (nextPage <= this.state.totalPages) {
@@ -177,7 +177,7 @@ export const usePaginatedFetcher = <T>(
   });
 
   const [params, setParams] = useState<Record<string, string | number>>(options.initialParams || {});
-  
+
   // Create a stable string representation of params to prevent unnecessary re-renders
   const paramsString = React.useMemo(() => JSON.stringify(params), [params]);
 
@@ -190,7 +190,7 @@ export const usePaginatedFetcher = <T>(
         // Just update params without recreating fetcher
         fetcherRef.current.updateParams(params);
       }
-      
+
       fetcherRef.current.fetchPage(1, false).then(() => {
         setState(fetcherRef.current!.getState());
       });
@@ -227,12 +227,12 @@ export const usePaginatedFetcher = <T>(
   const updateParamsAndFetch = useCallback((newParams: Record<string, string | number>) => {
     setParams(prevParams => {
       const updatedParams = { ...prevParams, ...newParams };
-      
+
       // Only update fetcher if params actually changed
       const hasChanged = Object.keys(updatedParams).some(key => 
         updatedParams[key] !== prevParams[key]
       );
-      
+
       if (hasChanged && fetcherRef.current) {
         fetcherRef.current.updateParams(updatedParams);
         // Reset pagination and refresh for filter changes

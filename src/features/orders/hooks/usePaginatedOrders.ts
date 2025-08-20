@@ -30,31 +30,39 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
       pagination: 'true',
     };
 
-    // Add filter params if they exist (user has made selections)
-    if (filterParams.source) {
-      result.source = filterParams.source;
-      console.log('Added source to API params:', filterParams.source);
-    }
-    if (filterParams.status) {
-      result.status = filterParams.status;
-      console.log('Added status to API params:', filterParams.status);
-    }
-    if (filterParams.paymentStatus) {
-      result.paymentStatus = filterParams.paymentStatus;
-      console.log('Added paymentStatus to API params:', filterParams.paymentStatus);
-    }
+    // Only add filter params if user has actually made selections or URL params exist
+    const hasUserFilters = filterParams.source || filterParams.status || filterParams.paymentStatus;
+    const hasUrlParams = params.source || params.status;
+    
+    // Only proceed with API params if there are actual filters to apply
+    if (hasUserFilters || hasUrlParams) {
+      // Add filter params if they exist (user has made selections)
+      if (filterParams.source) {
+        result.source = filterParams.source;
+        console.log('Added source to API params:', filterParams.source);
+      }
+      if (filterParams.status) {
+        result.status = filterParams.status;
+        console.log('Added status to API params:', filterParams.status);
+      }
+      if (filterParams.paymentStatus) {
+        result.paymentStatus = filterParams.paymentStatus;
+        console.log('Added paymentStatus to API params:', filterParams.paymentStatus);
+      }
 
-    // Override with URL params if provided (URL params take precedence)
-    if (params.source) {
-      result.source = params.source;
-      console.log('Overridden source with URL param:', params.source);
-    }
-    if (params.status) {
-      result.status = params.status;
-      console.log('Overridden status with URL param:', params.status);
+      // Override with URL params if provided (URL params take precedence)
+      if (params.source) {
+        result.source = params.source;
+        console.log('Overridden source with URL param:', params.source);
+      }
+      if (params.status) {
+        result.status = params.status;
+        console.log('Overridden status with URL param:', params.status);
+      }
     }
 
     console.log('Final API params object:', result);
+    console.log('Has filters to apply:', hasUserFilters || hasUrlParams);
     return result;
   }, [
     settings.sources, 
@@ -65,11 +73,28 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
     params.hasFulfilmentJob
   ]);
 
+  // Determine if we should skip initial fetch (when no filters are applied)
+  const shouldSkipInitialFetch = React.useMemo(() => {
+    const filterParams = getFilterParams();
+    const hasUserFilters = filterParams.source || filterParams.status || filterParams.paymentStatus;
+    const hasUrlParams = params.source || params.status;
+    
+    // Skip initial fetch if no filters are applied
+    return !hasUserFilters && !hasUrlParams;
+  }, [
+    settings?.sources, 
+    settings?.statuses, 
+    settings?.paymentStatuses, 
+    params.source, 
+    params.status
+  ]);
+
   const paginatedState = usePaginatedFetcher<any>(
     config.endpoints.orders,
     {
       pageSize: 20,
       initialParams: apiParams,
+      skipInitialFetch: shouldSkipInitialFetch,
     }
   );
 

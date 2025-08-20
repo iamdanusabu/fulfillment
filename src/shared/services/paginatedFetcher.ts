@@ -4,6 +4,7 @@ import { PaginatedResponse } from '../types';
 interface PaginatedFetcherOptions {
   pageSize?: number;
   initialParams?: Record<string, string | number>;
+  skipInitialFetch?: boolean;
 }
 
 interface PaginatedState<T> {
@@ -194,6 +195,7 @@ export const usePaginatedFetcher = <T>(
     pageSize = 10,
     initialParams = {},
     transform = (data: any) => data,
+    skipInitialFetch = false,
   } = options;
 
   const [data, setData] = useState<T[]>([]);
@@ -229,10 +231,12 @@ export const usePaginatedFetcher = <T>(
     }
   }, [JSON.stringify(initialParams)]);
 
-  // Initial load
+  // Initial load - only if not skipped and there are params to use
   useEffect(() => {
-    fetchData(1);
-  }, [endpoint]);
+    if (!skipInitialFetch) {
+      fetchData(1);
+    }
+  }, [endpoint, skipInitialFetch]);
 
   const fetchData = async (pageNo: number = 1, append: boolean = false, customParams?: Record<string, any>) => {
     try {

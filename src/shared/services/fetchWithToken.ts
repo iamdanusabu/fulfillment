@@ -1,4 +1,3 @@
-
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getConfig } from '../../environments';
 
@@ -34,7 +33,7 @@ export const tokenService = new TokenService();
 export const fetchWithToken = async (url: string, options: RequestInit = {}) => {
   const config = getConfig();
   const token = await tokenService.getToken();
-  
+
   const headers = {
     'Content-Type': 'application/json',
     ...(token && { Authorization: `Bearer ${token}` }),
@@ -52,8 +51,33 @@ export const fetchWithToken = async (url: string, options: RequestInit = {}) => 
   }
 
   if (!response.ok) {
-    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-  }
+      // Handle different HTTP status codes
+      if (response.status === 401) {
+        console.log('401 Unauthorized - clearing tokens');
+        await AsyncStorage.multiRemove(['access_token', 'refresh_token']);
+        throw new Error('Authentication failed. Please log in again.');
+      }
+
+      if (response.status === 404) {
+        console.log('404 Not Found - resource does not exist');
+        throw new Error('404 Not Found - No data available');
+      }
+
+      // Try to parse error response
+      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+      try {
+        const errorData = await response.json();
+        if (errorData.error_description) {
+          errorMessage = errorData.error_description;
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        }
+      } catch (e) {
+        // If we can't parse the error response, use the default message
+      }
+
+      throw new Error(errorMessage);
+    }
 
   const text = await response.text();
   try {

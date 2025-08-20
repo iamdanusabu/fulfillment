@@ -72,25 +72,3 @@ export const useSettings = () => {
     refresh: loadSettings,
   };
 };
-// Helper function to verify all saved settings
-export const verifyAllSettings = async () => {
-  try {
-    const [appSettings, filterSettings] = await Promise.all([
-      AsyncStorage.getItem('app_settings'),
-      AsyncStorage.getItem('orderFilterSettings')
-    ]);
-    
-    console.log('=== All Stored Settings ===');
-    console.log('App Settings:', appSettings ? JSON.parse(appSettings) : 'Using defaults');
-    console.log('Filter Settings:', filterSettings ? JSON.parse(filterSettings) : 'Using defaults');
-    console.log('===========================');
-    
-    return {
-      appSettings: appSettings ? JSON.parse(appSettings) : null,
-      filterSettings: filterSettings ? JSON.parse(filterSettings) : null
-    };
-  } catch (error) {
-    console.error('Error verifying settings:', error);
-    return null;
-  }
-};

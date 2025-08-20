@@ -1,5 +1,7 @@
+
 import { fetchWithToken } from './fetchWithToken';
 import { PaginatedResponse } from '../types';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 interface PaginatedFetcherOptions {
   pageSize?: number;
@@ -15,7 +17,7 @@ interface PaginatedState<T> {
   hasMore: boolean;
   loading: boolean;
   error: string | null;
-  hasNoResults?: boolean; // Added to specifically track no results found
+  hasNoResults?: boolean;
 }
 
 export class PaginatedFetcher<T> {
@@ -29,7 +31,7 @@ export class PaginatedFetcher<T> {
     error: null,
   };
 
-  public url: string; // Made public for comparison in hook
+  public url: string;
   private options: PaginatedFetcherOptions;
   private subscribers: Array<(state: PaginatedState<T>) => void> = [];
 
@@ -60,7 +62,6 @@ export class PaginatedFetcher<T> {
   async fetchPage(pageNo: number = 1, append: boolean = false): Promise<void> {
     if (this.state.loading || !this.url) return;
 
-    // Prevent loading the same page multiple times when appending
     if (append && pageNo <= this.state.currentPage) {
       return;
     }
@@ -73,13 +74,11 @@ export class PaginatedFetcher<T> {
     try {
       const params = new URLSearchParams();
 
-      // Add pagination params
       params.append('pageNo', pageNo.toString());
       if (this.options.pageSize) {
         params.append('pageSize', this.options.pageSize.toString());
       }
 
-      // Add initial params
       if (this.options.initialParams) {
         Object.entries(this.options.initialParams).forEach(([key, value]) => {
           params.append(key, value.toString());
@@ -101,18 +100,16 @@ export class PaginatedFetcher<T> {
         totalRecords: response.totalRecords,
         hasMore: response.pageNo < response.totalPages,
         loading: false,
-        hasNoResults: false // Reset hasNoResults on successful fetch
+        hasNoResults: false
       });
 
     } catch (error: any) {
       console.error('Failed to fetch data:', error);
 
-      // Handle network errors gracefully
       if (error.message === 'Unauthorized') {
-        throw error; // Re-throw auth errors
+        throw error;
       }
 
-      // Handle 404 or no data scenarios
       if (error.message.includes('404') || error.message.includes('Not Found')) {
         this.updateState({ 
           loading: false, 
@@ -125,7 +122,6 @@ export class PaginatedFetcher<T> {
         return;
       }
 
-      // For other errors, set hasNoResults flag
       this.updateState({ 
         loading: false, 
         error: error.message || 'Failed to load data',
@@ -137,7 +133,6 @@ export class PaginatedFetcher<T> {
   async loadMore(): Promise<void> {
     if (!this.state.hasMore || this.state.loading) return;
 
-    // Only load the next page if we haven't already loaded it
     const nextPage = this.state.currentPage + 1;
     if (nextPage <= this.state.totalPages) {
       await this.fetchPage(nextPage, true);
@@ -166,7 +161,7 @@ export class PaginatedFetcher<T> {
       hasMore: true,
       loading: false,
       error: null,
-      hasNoResults: false // Reset hasNoResults on reset
+      hasNoResults: false
     });
   }
 
@@ -176,19 +171,8 @@ export class PaginatedFetcher<T> {
 }
 
 // Hook for React components
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-
-// Define types for the hook's return value to match the original structure
-type PaginatedFetcherState<T> = PaginatedState<T>;
-interface PaginatedFetcherActions {
-  loadMore: () => Promise<void> | undefined;
-  refresh: () => Promise<void> | undefined;
-  updateParams: (params: Record<string, string | number>) => void;
-  reset: () => void;
-}
-
 export const usePaginatedFetcher = <T>(
-  endpoint: string | null, // Allow endpoint to be null
+  endpoint: string | null,
   options: PaginatedFetcherOptions = {}
 ) => {
   const {
@@ -197,29 +181,36 @@ export const usePaginatedFetcher = <T>(
     skipInitialFetch = false,
   } = options;
 
-  const [state, setState] = useState<PaginatedState<T>>({
-    data: [],
-    loading: false,
-    error: null,
-    currentPage: 0,
-    totalPages: 0,
-    totalRecords: 0,
-    hasMore: true,
-    hasNoResults: false,
-  });
+  const [data, setData] = useState<T[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [hasNoResults, setHasNoResults] = useState(false);
+  const [nextPageURL, setNextPageURL] = useState<string | null>(null);
+  const [currentParams, setCurrentParams] = useState<Record<string, any>>(initialParams);
 
-  // Early return if endpoint is null (completely skip all functionality)
+  // Early return if endpoint is null
   if (endpoint === null) {
     return {
-      ...state,
-      hasNoResults: true,
+      data: [],
       loading: false,
+      error: null,
+      currentPage: 0,
+      totalPages: 0,
+      totalRecords: 0,
+      hasMore: false,
+      hasNoResults: true,
       loadMore: () => {},
       refresh: () => Promise.resolve(),
       updateParams: () => {},
       reset: () => {},
     };
   }
+
+  const transform = (rawData: any[]) => rawData || [];
 
   // Watch for parameter changes and reset data when they change
   useEffect(() => {
@@ -231,7 +222,6 @@ export const usePaginatedFetcher = <T>(
 
     if (paramsChanged) {
       console.log('Parameters changed, immediately resetting data and refetching...');
-      // Immediately clear data to prevent showing stale results
       setData([]);
       setHasNoResults(false);
       setError(null);
@@ -248,7 +238,6 @@ export const usePaginatedFetcher = <T>(
     if (!skipInitialFetch && endpoint && endpoint.trim() !== '') {
       fetchData(1);
     } else if (endpoint && endpoint.trim() === '') {
-      // If endpoint is empty string but not null, and not skipping, set no results
       setData([]);
       setHasNoResults(true);
       setLoading(false);
@@ -256,7 +245,6 @@ export const usePaginatedFetcher = <T>(
   }, [endpoint, skipInitialFetch]);
 
   const fetchData = async (pageNo: number = 1, append: boolean = false, customParams?: Record<string, any>) => {
-    // Skip fetch if endpoint is empty or null
     if (!endpoint || endpoint.trim() === '') {
       console.log('=== usePaginatedFetcher fetchData SKIPPED ===');
       console.log('No endpoint provided or empty, skipping fetch');
@@ -269,7 +257,7 @@ export const usePaginatedFetcher = <T>(
     try {
       setLoading(true);
       setError(null);
-      setHasNoResults(false); // Reset hasNoResults on new fetch
+      setHasNoResults(false);
 
       const params = {
         ...(customParams || currentParams),
@@ -300,22 +288,22 @@ export const usePaginatedFetcher = <T>(
       setHasMore(response.pageNo < response.totalPages);
       setNextPageURL(response.nextPageURL || null);
       setLoading(false);
-      // If response.data is empty and it's not an append operation, set hasNoResults
+      
       if (transformedData.length === 0 && !append) {
-          setHasNoResults(true);
+        setHasNoResults(true);
       }
     } catch (err: any) {
       console.error('Error fetching data:', err);
-      // Handle 404 or no data scenarios
+      
       if (err.message.includes('404') || err.message.includes('Not Found')) {
         setData([]);
         setTotalRecords(0);
         setHasMore(false);
-        setError(null); // Clear error for 404
-        setHasNoResults(true); // Indicate no results
+        setError(null);
+        setHasNoResults(true);
       } else {
         setError(err.message || 'An error occurred');
-        setHasNoResults(true); // Set for other errors too
+        setHasNoResults(true);
       }
       setLoading(false);
     }
@@ -332,7 +320,7 @@ export const usePaginatedFetcher = <T>(
     setData([]);
     setCurrentPage(1);
     setError(null);
-    setHasNoResults(false); // Reset hasNoResults on refresh
+    setHasNoResults(false);
     fetchData(1, false, currentParams);
   }, [currentParams]);
 
@@ -342,11 +330,10 @@ export const usePaginatedFetcher = <T>(
     setCurrentParams(prevParams => {
       const updatedParams = { ...prevParams, ...newParams };
       console.log('Updated params:', updatedParams);
-      // Reset to first page and fetch with new parameters
       setData([]);
       setCurrentPage(1);
       setError(null);
-      setHasNoResults(false); // Reset hasNoResults
+      setHasNoResults(false);
       fetchData(1, false, updatedParams);
       return updatedParams;
     });
@@ -363,7 +350,7 @@ export const usePaginatedFetcher = <T>(
     setLoading(false);
     setError(null);
     setNextPageURL(null);
-    setHasNoResults(false); // Reset hasNoResults on reset
+    setHasNoResults(false);
   }, [initialParams]);
 
   return {
@@ -378,6 +365,6 @@ export const usePaginatedFetcher = <T>(
     refresh,
     updateParams,
     reset,
-    hasNoResults, // Include hasNoResults in the return object
+    hasNoResults,
   };
 };

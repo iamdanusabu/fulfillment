@@ -146,9 +146,9 @@ export default function OrdersScreen() {
   };
 
   const handleOrderSelect = (order: Order) => {
-    setSearchModalVisible(false);
-    // Navigate to order details or handle order selection
-    router.push(`/orders/${order.id}`);
+    setShowSearchModal(false);
+    // Navigate to order details using the correct orderID
+    router.push(`/orders/${order.orderID}`);
   };
 
 

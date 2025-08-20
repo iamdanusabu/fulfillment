@@ -104,6 +104,7 @@ export function OrderSearchModal({ visible, onClose, onOrderSelect }: OrderSearc
     const transformedOrder = transformOrder(order);
     onOrderSelect(transformedOrder);
     onClose();
+    handleClearSearch(); // Clear search when order is selected
   }, [onOrderSelect, onClose]);
 
   const renderOrderItem = ({ item }: { item: any }) => {
@@ -198,29 +199,20 @@ export function OrderSearchModal({ visible, onClose, onOrderSelect }: OrderSearc
             <MaterialIcons name="search" size={20} color="#666" style={styles.searchIcon} />
             <TextInput
               style={styles.searchInput}
-              placeholder="Enter order number..."
+              placeholder="Enter order number... (searches automatically)"
               value={searchQuery}
               onChangeText={setSearchQuery}
-              onSubmitEditing={handleSearch}
-              returnKeyType="search"
+              returnKeyType="done"
             />
             {searchQuery.length > 0 && (
               <TouchableOpacity onPress={handleClearSearch} style={styles.clearButton}>
                 <MaterialIcons name="clear" size={20} color="#666" />
               </TouchableOpacity>
             )}
-          </View>
-          <TouchableOpacity 
-            style={[styles.searchButton, loading && styles.disabledButton]} 
-            onPress={handleSearch}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Text style={styles.searchButtonText}>Search</Text>
+            {loading && (
+              <ActivityIndicator size="small" color="#007AFF" style={styles.loadingIcon} />
             )}
-          </TouchableOpacity>
+          </View>
         </View>
 
         {searchUrl && (
@@ -285,12 +277,10 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   searchContainer: {
-    flexDirection: 'row',
     padding: 16,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#e9ecef',
-    gap: 12,
   },
   searchInputContainer: {
     flex: 1,
@@ -313,22 +303,8 @@ const styles = StyleSheet.create({
   clearButton: {
     padding: 4,
   },
-  searchButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    minWidth: 80,
-  },
-  disabledButton: {
-    backgroundColor: '#ccc',
-  },
-  searchButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 16,
+  loadingIcon: {
+    marginLeft: 8,
   },
   resultsContainer: {
     flex: 1,

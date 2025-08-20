@@ -1,0 +1,107 @@
+Of course. The primary reason for the erratic pagination behavior is the **instability of the `handleLoadMore` function** passed to the `FlatList`'s `onEndReached` prop. A secondary issue causing unwanted refreshes is the aggressive use of `useFocusEffect`.
+
+Here’s a breakdown of the problems and how to fix them.
+
+-----
+
+## 1\. Main Issue: Unstable `onEndReached` Callback
+
+The `FlatList` component in React Native can call the `onEndReached` function multiple times in quick succession if the content length changes or the component re-renders while the user is at the bottom of the list.
+
+Your current `handleLoadMore` function is recreated every time the `loading` or `hasMore` state changes:
+
+```typescript
+// OrdersScreen.tsx - The Problematic Code
+const handleLoadMore = useCallback(() => {
+  if (hasMore && !loading) {
+    loadMore();
+  }
+}, [hasMore, loading, loadMore]); // <-- Dependencies cause re-creation
+```
+
+**Here's the problematic flow:**
+
+1.  You scroll to the bottom. `onEndReached` fires.
+2.  `handleLoadMore` is called, which calls `loadMore()`.
+3.  The `loading` state becomes `true`, causing your `OrdersScreen` to re-render.
+4.  Because `loading` is in the dependency array, a **brand new** `handleLoadMore` function is created.
+5.  `FlatList` receives this new function. If it's still near the bottom, it might fire `onEndReached` again.
+6.  The API call finishes, `loading` becomes `false`, and the component re-renders *again*, creating yet another `handleLoadMore` function.
+
+This cycle leads to the unpredictable and repeated API calls you're seeing.
+
+### The Fix
+
+Make the `handleLoadMore` function stable by removing the dependencies. The necessary checks for `hasMore` and `loading` are already handled correctly inside your `PaginatedFetcher` class, so the check in the component is redundant.
+
+```typescript
+// OrdersScreen.tsx - The Fix
+const handleLoadMore = useCallback(() => {
+  // The guards are already inside the loadMore function from the hook.
+  // No need to check for `hasMore` or `loading` here.
+  loadMore();
+}, [loadMore]); // <-- `loadMore` is stable and won't change.
+```
+
+By only depending on `loadMore` (which is a stable function returned from `useCallback` in your hook), `handleLoadMore` is created only once. `FlatList` now has a consistent function reference, preventing it from firing erratically on re-renders.
+
+-----
+
+## 2\. Secondary Issue: Aggressive Refreshing on Focus
+
+You mentioned that the API for page 1 is being called repeatedly. This is likely caused by your `useFocusEffect`.
+
+```typescript
+// OrdersScreen.tsx - The Problematic Effect
+useFocusEffect(
+  useCallback(() => {
+    // This runs EVERY time the screen comes into focus.
+    if (orders.length > 0) {
+      refresh(); // <-- Fetches page 1 and clears existing data
+    }
+  }, [orders.length, refresh])
+);
+```
+
+This code refreshes the entire order list every time the user navigates back to this screen. If a user scrolls to page 3, navigates to an order detail screen, and then returns, they will be sent back to a freshly loaded page 1. This can be jarring and is likely contributing to the unwanted "page 1" calls you described.
+
+### The Fix
+
+Since you already have a `RefreshControl` for manual pull-to-refresh, this automatic refresh is likely unnecessary. It's better to let the user decide when to refresh.
+
+```typescript
+// OrdersScreen.tsx - The Fix
+// Simply remove the entire useFocusEffect block.
+/*
+useFocusEffect(
+  useCallback(() => {
+    if (orders.length > 0) {
+      refresh();
+    }
+  }, [orders.length, refresh])
+);
+*/
+```
+
+By removing this effect, the data will only be refreshed when the component first mounts or when the user manually pulls down to refresh, creating a much smoother and more predictable user experience.
+
+-----
+
+## ⚠️ A Related Bug to Consider: Client-Side Filtering
+
+I noticed that your search functionality filters the orders that have *already been loaded* into the app, not all the orders on the server.
+
+```typescript
+// OrdersScreen.tsx
+const filteredOrders = useMemo(() => {
+  if (!searchText.trim()) return orders;
+  // This only filters the `orders` array currently in memory
+  return orders.filter(order => /* ... */);
+}, [orders, searchText]);
+
+<FlatList data={filteredOrders} /* ... */ />
+```
+
+If you have 1000 orders on the server but have only loaded 20 (page 1), your search will only look within those 20.
+
+**The correct approach** is to perform the search on the backend. You should use the `updateParams` function from your `usePaginatedFetcher` hook to send the `searchText` to the API, which will then return a new, filtered, paginated list. This will require modifying `usePaginatedOrders` and `OrdersScreen` to handle search parameter changes.

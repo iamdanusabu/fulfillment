@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { usePaginatedOrders } from '../hooks/usePaginatedOrders';
+import { useOrderFilters } from '../hooks/useOrderFilters';
 import { Order } from '../../../shared/types';
 import { picklistApi } from '../../picklist/api/picklistApi';
 import { QRCodeScanner } from '../components/QRCodeScanner';
@@ -37,10 +38,12 @@ export default function OrdersScreen() {
     status: params.status as string,
     hasFulfilmentJob: params.hasFulfilmentJob as string
   });
+  const { settings: filterSettings } = useOrderFilters();
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
   const [isPicklistMode, setIsPicklistMode] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
 
   // QR Scanner integration
   const { isScanning, isLoading: qrLoading, startScanning, stopScanning, handleScan } = useQRScanner();
@@ -195,9 +198,119 @@ export default function OrdersScreen() {
     );
   }
 
+  const renderFilterSummary = () => {
+    const activeSourcesCount = filterSettings.sources.length;
+    const activeStatusesCount = filterSettings.statuses.length;
+    const activePaymentStatusesCount = filterSettings.paymentStatuses.length;
+
+    return (
+      <View style={styles.filterSummary}>
+        <TouchableOpacity 
+          style={styles.filterToggle}
+          onPress={() => setShowFilters(!showFilters)}
+        >
+          <MaterialIcons name="filter-list" size={20} color="#007AFF" />
+          <Text style={styles.filterToggleText}>
+            Active Filters ({activeSourcesCount + activeStatusesCount + activePaymentStatusesCount})
+          </Text>
+          <MaterialIcons 
+            name={showFilters ? "expand-less" : "expand-more"} 
+            size={20} 
+            color="#007AFF" 
+          />
+        </TouchableOpacity>
+
+        {showFilters && (
+          <View style={styles.filterDetails}>
+            <View style={styles.filterSection}>
+              <Text style={styles.filterSectionTitle}>Sources ({activeSourcesCount}):</Text>
+              <Text style={styles.filterItems}>
+                {filterSettings.sources.length > 0 
+                  ? filterSettings.sources.slice(0, 3).join(', ') + 
+                    (filterSettings.sources.length > 3 ? ` +${filterSettings.sources.length - 3} more` : '')
+                  : 'None selected'
+                }
+              </Text>
+            </View>
+
+            <View style={styles.filterSection}>
+              <Text style={styles.filterSectionTitle}>Status ({activeStatusesCount}):</Text>
+              <Text style={styles.filterItems}>
+                {filterSettings.statuses.length > 0 
+                  ? filterSettings.statuses.join(', ')
+                  : 'None selected'
+                }
+              </Text>
+            </View>
+
+            <View style={styles.filterSection}>
+              <Text style={styles.filterSectionTitle}>Payment ({activePaymentStatusesCount}):</Text>
+              <Text style={styles.filterItems}>
+                {filterSettings.paymentStatuses.length > 0 
+                  ? filterSettings.paymentStatuses.join(', ')
+                  : 'None selected'
+                }
+              </Text>
+            </View>
+
+            <TouchableOpacity 
+              style={styles.editFiltersButton}
+              onPress={() => router.push('/settings')}
+            >
+              <Text style={styles.editFiltersText}>Edit Filters</Text>
+              <MaterialIcons name="settings" size={16} color="#007AFF" />
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+    );
+  };
+
+  const isLandscape = width > height;
+  const isTablet = width >= 768;
+
   return (
     <View style={{ flex: 1 }}>
-      <View style={styles.container}>
+      <View style={[styles.container, { paddingHorizontal: isTablet ? 24 : 16 }]}>
+        <AppToolbar 
+          title="Orders" 
+          showBackButton={false}
+          rightComponent={
+            <View style={styles.headerActions}>
+              <TouchableOpacity
+                style={styles.scanButton}
+                onPress={() => startScanning()}
+              >
+                <MaterialIcons name="qr-code-scanner" size={24} color="#007AFF" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.picklistToggle,
+                  isPicklistMode && styles.picklistToggleActive
+                ]}
+                onPress={() => {
+                  setIsPicklistMode(!isPicklistMode);
+                  setSelectedOrders([]);
+                }}
+              >
+                <MaterialIcons 
+                  name={isPicklistMode ? "check-box" : "check-box-outline-blank"} 
+                  size={24} 
+                  color={isPicklistMode ? "#fff" : "#007AFF"} 
+                />
+                <Text style={[
+                  styles.picklistToggleText,
+                  isPicklistMode && styles.picklistToggleTextActive
+                ]}>
+                  Select
+                </Text>
+              </TouchableOpacity>
+            </View>
+          }
+        />
+
+        {renderFilterSummary()}
+      
       {/* Search Bar */}
       <View style={styles.searchContainer}>
         <MaterialIcons name="search" size={16} color="#666" style={styles.searchIcon} />
@@ -277,14 +390,42 @@ export default function OrdersScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#ffffff',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  scanButton: {
+    marginRight: 12,
+    padding: 4,
+  },
+  picklistToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#007AFF',
+  },
+  picklistToggleActive: {
+    backgroundColor: '#007AFF',
+  },
+  picklistToggleText: {
+    color: '#007AFF',
+    fontWeight: '500',
+    marginLeft: 4,
+  },
+  picklistToggleTextActive: {
+    color: '#fff',
+  },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -461,5 +602,65 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '600',
     fontSize: 16,
+  },
+  filterSummary: {
+    backgroundColor: '#f8f9fa',
+    marginBottom: 16,
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  filterToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+  },
+  filterToggleText: {
+    fontSize: 14,
+    color: '#007AFF',
+    fontWeight: '500',
+    marginLeft: 8,
+    flex: 1,
+  },
+  filterDetails: {
+    padding: 16,
+    backgroundColor: '#f8f9fa',
+    borderTopWidth: 1,
+    borderTopColor: '#e9ecef',
+  },
+  filterSection: {
+    marginBottom: 12,
+  },
+  filterSectionTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 4,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  filterItems: {
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 18,
+  },
+  editFiltersButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: '#fff',
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#007AFF',
+  },
+  editFiltersText: {
+    fontSize: 14,
+    color: '#007AFF',
+    fontWeight: '500',
+    marginRight: 4,
   },
 });

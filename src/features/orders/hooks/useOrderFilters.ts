@@ -68,3 +68,26 @@ export const useOrderFilters = () => {
     refreshSettings: loadSettings
   };
 };
+// Helper function to verify current filter settings
+  const verifyFilters = () => {
+    const params = getFilterParams();
+    console.log('=== Current Filter Settings ===');
+    console.log('Sources:', settings.sources.length > 0 ? settings.sources : 'All sources (no filter)');
+    console.log('Statuses:', settings.statuses.length > 0 ? settings.statuses : 'All statuses (no filter)');
+    console.log('Payment Statuses:', settings.paymentStatuses.length > 0 ? settings.paymentStatuses : 'All payment statuses (no filter)');
+    console.log('API Parameters:', params);
+    console.log('================================');
+    return {
+      settings,
+      apiParams: params,
+      totalActiveFilters: settings.sources.length + settings.statuses.length + settings.paymentStatuses.length
+    };
+  };
+
+  return {
+    settings,
+    loading,
+    getFilterParams,
+    refreshSettings: loadSettings,
+    verifyFilters
+  };

@@ -140,7 +140,7 @@ export function usePaginatedFetcher<T>(
 
   // Track previous params to avoid unnecessary updates
   const prevParamsRef = useRef<string>('');
-  const currentParamsString = JSON.stringify(options.initialParams);
+  const currentParamsString = JSON.stringify(options.initialParams || {});
   
   // Update params only when they actually change
   useEffect(() => {
@@ -153,6 +153,7 @@ export function usePaginatedFetcher<T>(
   }, [fetcher, currentParamsString]);
 
   // Subscribe to fetcher state changes and initial load
+  const initializedRef = useRef(false);
   useEffect(() => {
     const updateState = () => {
       setState(fetcher.getState());
@@ -160,8 +161,11 @@ export function usePaginatedFetcher<T>(
 
     const unsubscribe = fetcher.subscribe(updateState);
     
-    // Initial load only when fetcher is created
-    fetcher.refresh();
+    // Initial load only once when fetcher is first created
+    if (!initializedRef.current) {
+      initializedRef.current = true;
+      fetcher.refresh();
+    }
 
     return unsubscribe;
   }, [fetcher]);

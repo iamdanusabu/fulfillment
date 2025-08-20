@@ -16,7 +16,7 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
   const { settings, getFilterParams } = useOrderFilters();
   const config = getConfig();
 
-  // Build stable params
+  // Build stable params - use individual settings properties instead of JSON.stringify
   const baseUrl = React.useMemo(() => config.endpoints.orders, []);
   
   const initialParams = React.useMemo(() => {
@@ -44,7 +44,9 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
     params.source, 
     params.status, 
     params.hasFulfilmentJob, 
-    JSON.stringify(settings)
+    settings.sources.join(','),
+    settings.statuses.join(','),
+    settings.paymentStatuses.join(',')
   ]);
 
   const { data, loading, error, hasMore, loadMore, refresh } = usePaginatedFetcher<any>(

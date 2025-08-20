@@ -20,6 +20,7 @@ const DEFAULT_SETTINGS: FilterSettings = {
 export const useOrderFilters = () => {
   const [settings, setSettings] = useState<FilterSettings>(DEFAULT_SETTINGS);
   const [loading, setLoading] = useState(true);
+  const [hasUserSettings, setHasUserSettings] = useState(false);
 
   useEffect(() => {
     loadSettings();
@@ -47,6 +48,7 @@ export const useOrderFilters = () => {
         console.log('Statuses:', parsedSettings.statuses);
         console.log('Payment Statuses:', parsedSettings.paymentStatuses);
         
+        setHasUserSettings(true);
         setSettings(prevSettings => {
           // Only update if settings actually changed
           if (JSON.stringify(prevSettings) !== JSON.stringify(parsedSettings)) {
@@ -59,9 +61,11 @@ export const useOrderFilters = () => {
         console.log('Default Sources:', DEFAULT_SETTINGS.sources);
         console.log('Default Statuses:', DEFAULT_SETTINGS.statuses);
         console.log('Default Payment Statuses:', DEFAULT_SETTINGS.paymentStatuses);
+        setHasUserSettings(false);
       }
     } catch (error) {
       console.error('Error loading filter settings:', error);
+      setHasUserSettings(false);
     } finally {
       setLoading(false);
     }
@@ -88,6 +92,7 @@ export const useOrderFilters = () => {
   return {
     settings,
     loading,
+    hasUserSettings,
     getFilterParams,
     refreshSettings: loadSettings
   };

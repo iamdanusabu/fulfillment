@@ -13,7 +13,7 @@ interface UsePaginatedOrdersParams {
 }
 
 export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
-  const { settings, getFilterParams } = useOrderFilters();
+  const { settings, hasUserSettings, getFilterParams } = useOrderFilters();
   const config = getConfig();
 
   // Build parameters that react to filter settings changes
@@ -80,23 +80,22 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
     params.hasFulfilmentJob
   ]);
 
-  // Determine if we should skip initial fetch (when no filters are applied)
+  // Determine if we should skip initial fetch (when no user filters are set in AsyncStorage)
   const shouldSkipInitialFetch = React.useMemo(() => {
-    const filterParams = getFilterParams();
-    const hasUserFilters = filterParams.source || filterParams.status || filterParams.paymentStatus;
     const hasUrlParams = params.source || params.status;
     
-    // Skip initial fetch if no filters are applied
-    const shouldSkip = !hasUserFilters && !hasUrlParams;
-    console.log('Should skip initial fetch:', shouldSkip);
+    // If there are URL params, don't skip
+    if (hasUrlParams) {
+      console.log('URL params present, not skipping fetch');
+      return false;
+    }
+    
+    // Skip initial fetch if user hasn't set any custom filters in AsyncStorage
+    const shouldSkip = !hasUserSettings;
+    console.log('Should skip initial fetch (no user filters in AsyncStorage):', shouldSkip);
+    console.log('Has user settings in AsyncStorage:', hasUserSettings);
     return shouldSkip;
-  }, [
-    settings?.sources, 
-    settings?.statuses, 
-    settings?.paymentStatuses, 
-    params.source, 
-    params.status
-  ]);
+  }, [hasUserSettings, params.source, params.status]);
 
   const paginatedState = usePaginatedFetcher<any>(
     shouldSkipInitialFetch ? '' : config.endpoints.orders, // Pass empty endpoint when should skip

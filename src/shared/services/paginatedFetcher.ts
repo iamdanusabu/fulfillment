@@ -210,7 +210,7 @@ export const usePaginatedFetcher = <T>(
     };
   }
 
-  const transform = (rawData: any[]) => rawData || [];
+  const transform = (rawData: any[]) => Array.isArray(rawData) ? rawData : [];
 
   // Watch for parameter changes and reset data when they change
   useEffect(() => {
@@ -277,7 +277,7 @@ export const usePaginatedFetcher = <T>(
       });
 
       const response = await fetchWithToken(`${endpoint}?${queryParams.toString()}`);
-      const transformedData = transform(response.data);
+      const transformedData = transform(response.data || []);
 
       setData((prevData) =>
         append ? [...prevData, ...transformedData] : transformedData

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { usePaginatedFetcher } from '../../../shared/services/paginatedFetcher';
 import { Order } from '../../../shared/types';
@@ -19,15 +18,15 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
   // Build parameters that react to filter settings changes
   const apiParams = React.useMemo(() => {
     const filterParams = getFilterParams();
-    
+
     console.log('=== Building API Params in usePaginatedOrders ===');
     console.log('Current settings in usePaginatedOrders:', settings);
     console.log('Filter params from getFilterParams:', filterParams);
-    
+
     // Only add filter params if user has actually made selections or URL params exist
     const hasUserFilters = filterParams.source || filterParams.status || filterParams.paymentStatus;
     const hasUrlParams = params.source || params.status;
-    
+
     // Only build params if there are actual filters to apply
     if (!hasUserFilters && !hasUrlParams) {
       console.log('No filters applied by user, returning empty params');
@@ -83,18 +82,18 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
   // Determine if we should skip initial fetch (when no user filters are set in AsyncStorage)
   const shouldSkipInitialFetch = React.useMemo(() => {
     const hasUrlParams = params.source || params.status;
-    
+
     // If there are URL params, don't skip
     if (hasUrlParams) {
       console.log('URL params present, not skipping fetch');
       return false;
     }
-    
+
     // Skip initial fetch if user hasn't set any custom filters in AsyncStorage
     const shouldSkip = !hasUserSettings;
     console.log('Should skip initial fetch (no user filters in AsyncStorage):', shouldSkip);
     console.log('Has user settings in AsyncStorage:', hasUserSettings);
-    
+
     // Additional check: if user has settings but no actual filter params, also skip
     if (hasUserSettings) {
       const filterParams = getFilterParams();
@@ -104,7 +103,7 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
         return true;
       }
     }
-    
+
     return shouldSkip;
   }, [hasUserSettings, params.source, params.status, getFilterParams]);
 

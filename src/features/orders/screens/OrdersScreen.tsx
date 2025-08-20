@@ -23,17 +23,17 @@ import { AppToolbar } from '../../../components/layout/AppToolbar';
 export default function OrdersScreen() {
   const params = useLocalSearchParams();
   const router = useRouter();
-  const { 
-    orders, 
-    loading, 
-    hasMore, 
+  const {
+    orders = [], // Provide default empty array
+    loading,
+    hasMore,
     totalRecords,
     currentPage,
     totalPages,
     hasNoResults,
-    loadMore, 
-    refresh 
-  } = usePaginatedOrders({ 
+    loadMore,
+    refresh
+  } = usePaginatedOrders({
     source: params.source as string,
     status: params.status as string,
     hasFulfilmentJob: params.hasFulfilmentJob as string
@@ -55,8 +55,8 @@ export default function OrdersScreen() {
   const toggleOrderSelection = (orderId: string) => {
     if (!isPicklistMode) return;
 
-    setSelectedOrders(prev => 
-      prev.includes(orderId) 
+    setSelectedOrders(prev =>
+      prev.includes(orderId)
         ? prev.filter(id => id !== orderId)
         : [...prev, orderId]
     );
@@ -80,7 +80,7 @@ export default function OrdersScreen() {
   const filteredOrders = useMemo(() => {
     if (!searchText.trim()) return orders;
 
-    return orders.filter(order => 
+    return orders.filter(order =>
       order.orderNumber.toLowerCase().includes(searchText.toLowerCase()) ||
       order.customer.toLowerCase().includes(searchText.toLowerCase()) ||
       order.source.toLowerCase().includes(searchText.toLowerCase())
@@ -220,8 +220,8 @@ export default function OrdersScreen() {
           onChangeText={setSearchText}
           clearButtonMode="while-editing"
         />
-        <TouchableOpacity 
-          style={styles.qrButton} 
+        <TouchableOpacity
+          style={styles.qrButton}
           onPress={startScanning}
           disabled={qrLoading}
         >

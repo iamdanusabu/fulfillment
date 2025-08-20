@@ -67,50 +67,48 @@ export default function LoginScreen() {
 
   return (
     <KeyboardAvoidingView 
-      style={styles.keyboardContainer}
+      style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
       <ScrollView 
         contentContainerStyle={[
-          styles.container,
+          styles.scrollContainer,
           {
-            paddingHorizontal: isSmallMobile ? 16 : isLandscape && !isTablet ? 40 : 20,
+            paddingHorizontal: isSmallMobile ? 24 : isLandscape && !isTablet ? 48 : 32,
             justifyContent: isLandscape && !isTablet ? 'flex-start' : 'center',
-            paddingTop: isLandscape && !isTablet ? 40 : 0,
+            paddingTop: isLandscape && !isTablet ? 60 : 80,
           }
         ]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
+        {/* Logo Section */}
+        <View style={styles.logoContainer}>
+          <CompanyLogo size={isSmallMobile ? 72 : 88} />
+        </View>
+
+        {/* Welcome Text */}
+        <View style={styles.welcomeContainer}>
+          <Text style={styles.appName}>OrderUp</Text>
+          <Text style={styles.welcomeSubtitle}>Sign in to continue</Text>
+        </View>
+        
+        {/* Form Container */}
         <View style={[
           styles.formContainer,
           {
-            maxWidth: isTablet ? 500 : isLandscape ? 400 : '100%',
+            maxWidth: isTablet ? 400 : '100%',
             width: '100%',
-            paddingHorizontal: isSmallMobile ? 20 : 40,
-            paddingVertical: isLandscape && !isTablet ? 30 : 40,
           }
         ]}>
-          {/* Logo Section */}
-          <View style={styles.logoContainer}>
-            <CompanyLogo size={isSmallMobile ? 80 : 100} />
-          </View>
-
-          {/* Welcome Text */}
-          <View style={styles.welcomeContainer}>
-            <Text style={styles.welcomeTitle}>Welcome Back</Text>
-            <Text style={styles.welcomeSubtitle}>Sign in to your account</Text>
-          </View>
-          
           {/* Username Field */}
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Username</Text>
             <TextInput
-              style={[styles.input, { backgroundColor: '#fafafa' }]}
+              style={styles.input}
               value={username}
               onChangeText={setUsername}
-              placeholder="Enter your username"
+              placeholder="Username"
+              placeholderTextColor="#8e8e93"
               autoCapitalize="none"
               autoCorrect={false}
               autoComplete="username"
@@ -119,12 +117,12 @@ export default function LoginScreen() {
 
           {/* Password Field */}
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Password</Text>
             <TextInput
-              style={[styles.input, { backgroundColor: '#fafafa' }]}
+              style={styles.input}
               value={password}
               onChangeText={setPassword}
-              placeholder="Enter your password"
+              placeholder="Password"
+              placeholderTextColor="#8e8e93"
               secureTextEntry
               autoComplete="password"
             />
@@ -132,12 +130,12 @@ export default function LoginScreen() {
 
           {/* Domain Field */}
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Domain</Text>
             <TextInput
-              style={[styles.input, { backgroundColor: '#fafafa' }]}
+              style={styles.input}
               value={domain}
               onChangeText={setDomain}
-              placeholder="Enter company domain"
+              placeholder="Company Domain"
+              placeholderTextColor="#8e8e93"
               autoCapitalize="none"
               autoCorrect={false}
             />
@@ -148,6 +146,7 @@ export default function LoginScreen() {
             style={[styles.loginButton, loading && styles.disabledButton]}
             onPress={handleLogin}
             disabled={loading}
+            activeOpacity={0.8}
           >
             {loading ? (
               <ActivityIndicator color="#fff" size="small" />
@@ -156,110 +155,92 @@ export default function LoginScreen() {
             )}
           </TouchableOpacity>
 
-          {/* Footer */}
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>
-              Secure enterprise login powered by your organization
-            </Text>
-          </View>
+          {/* Forgot Password Link */}
+          <TouchableOpacity style={styles.forgotPasswordContainer}>
+            <Text style={styles.forgotPasswordText}>Forgot password?</Text>
+          </TouchableOpacity>
         </View>
+
+        {/* Bottom Spacer */}
+        <View style={styles.bottomSpacer} />
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  keyboardContainer: {
-    flex: 1,
-    backgroundColor: '#f8fafc',
-  },
   container: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+  },
+  scrollContainer: {
     flexGrow: 1,
     alignItems: 'center',
-    backgroundColor: '#f8fafc',
     minHeight: '100%',
-  },
-  formContainer: {
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 8,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
   },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 40,
   },
   welcomeContainer: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 48,
   },
-  welcomeTitle: {
-    fontSize: 28,
+  appName: {
+    fontSize: 32,
     fontWeight: '700',
-    color: '#1e293b',
+    color: '#000000',
     marginBottom: 8,
+    letterSpacing: -0.5,
   },
   welcomeSubtitle: {
-    fontSize: 16,
-    color: '#64748b',
+    fontSize: 17,
+    color: '#8e8e93',
     fontWeight: '400',
   },
-  inputContainer: {
-    marginBottom: 24,
+  formContainer: {
+    width: '100%',
   },
-  label: {
-    fontSize: 15,
-    fontWeight: '600',
-    marginBottom: 8,
-    color: '#374151',
+  inputContainer: {
+    marginBottom: 16,
   },
   input: {
-    borderWidth: 1.5,
-    borderColor: '#d1d5db',
-    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e5e5ea',
+    borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: '#1f2937',
-    backgroundColor: '#fafafa',
-    transition: 'border-color 0.2s',
+    paddingVertical: 16,
+    fontSize: 17,
+    color: '#000000',
+    backgroundColor: '#f2f2f7',
+    fontWeight: '400',
   },
   loginButton: {
     backgroundColor: '#0077ED',
     paddingVertical: 16,
-    borderRadius: 8,
+    borderRadius: 12,
     alignItems: 'center',
-    marginTop: 8,
-    shadowColor: '#0077ED',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
+    marginTop: 24,
+    marginBottom: 24,
   },
   disabledButton: {
-    backgroundColor: '#9ca3af',
-    shadowOpacity: 0,
-    elevation: 0,
+    backgroundColor: '#c7c7cc',
   },
   loginButtonText: {
     color: '#ffffff',
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
-    letterSpacing: 0.5,
   },
-  footer: {
-    marginTop: 24,
+  forgotPasswordContainer: {
     alignItems: 'center',
+    paddingVertical: 12,
   },
-  footerText: {
-    fontSize: 13,
-    color: '#9ca3af',
-    textAlign: 'center',
-    lineHeight: 18,
+  forgotPasswordText: {
+    fontSize: 15,
+    color: '#0077ED',
+    fontWeight: '400',
+  },
+  bottomSpacer: {
+    height: 40,
   },
 });

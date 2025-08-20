@@ -17,7 +17,6 @@ import { usePaginatedOrders } from '../hooks/usePaginatedOrders';
 import { Order } from '../../../shared/types';
 import { picklistApi } from '../../picklist/api/picklistApi';
 import { QRCodeScanner } from '../components/QRCodeScanner';
-import { OrderFilterModal } from '../components/OrderFilterModal';
 import { useQRScanner } from '../hooks/useQRScanner';
 import { AppToolbar } from '../../../components/layout/AppToolbar';
 
@@ -42,7 +41,6 @@ export default function OrdersScreen() {
   const [isPicklistMode, setIsPicklistMode] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [refreshing, setRefreshing] = useState(false);
-  const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
 
   // QR Scanner integration
   const { isScanning, isLoading: qrLoading, startScanning, stopScanning, handleScan } = useQRScanner();
@@ -51,7 +49,7 @@ export default function OrdersScreen() {
     setIsPicklistMode(params.mode === 'picklist');
   }, [params.mode]);
 
-  // No automatic refresh - users can pull-to-refresh when needed
+  // Removed aggressive refresh on focus - let users manually refresh via pull-to-refresh
 
   const toggleOrderSelection = (orderId: string) => {
     if (!isPicklistMode) return;
@@ -102,20 +100,6 @@ export default function OrdersScreen() {
       loadMore();
     }
   }, [hasMore, loading, loadMore]);
-
-  const handleFilterApply = async (filters: any) => {
-    // The filter settings are already saved to AsyncStorage by the modal
-    // The usePaginatedOrders hook will automatically pick up the changes
-    await refresh();
-  };
-
-  const openFilterModal = () => {
-    setIsFilterModalVisible(true);
-  };
-
-  const closeFilterModal = () => {
-    setIsFilterModalVisible(false);
-  };
 
 
   const getPaymentStatusColor = (status: string) => {
@@ -225,13 +209,7 @@ export default function OrdersScreen() {
           clearButtonMode="while-editing"
         />
         <TouchableOpacity 
-          style={styles.actionButton} 
-          onPress={openFilterModal}
-        >
-          <MaterialIcons name="filter-list" size={16} color="#007AFF" />
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.actionButton} 
+          style={styles.qrButton} 
           onPress={startScanning}
           disabled={qrLoading}
         >
@@ -244,13 +222,6 @@ export default function OrdersScreen() {
         visible={isScanning}
         onClose={stopScanning}
         onScan={handleScan}
-      />
-
-      {/* Filter Modal */}
-      <OrderFilterModal
-        visible={isFilterModalVisible}
-        onClose={closeFilterModal}
-        onApply={handleFilterApply}
       />
 
 
@@ -338,7 +309,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     paddingVertical: 0,
   },
-  actionButton: {
+  qrButton: {
     padding: 4,
     marginLeft: 6,
   },

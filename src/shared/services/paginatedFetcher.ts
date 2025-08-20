@@ -176,12 +176,19 @@ export const usePaginatedFetcher = <T>(
     error: null,
   });
 
+  // Create stable parameters string for comparison
+  const optionsString = React.useMemo(() => JSON.stringify(options), [options]);
+  const prevOptionsRef = useRef<string>('');
+
   // Subscribe to fetcher state changes
   useEffect(() => {
     if (baseUrl) {
+      const optionsChanged = optionsString !== prevOptionsRef.current;
+      
       if (!fetcherRef.current || fetcherRef.current.url !== baseUrl) {
         // Create new fetcher only when URL changes
         fetcherRef.current = new PaginatedFetcher<T>(baseUrl, options);
+        prevOptionsRef.current = optionsString;
         
         // Subscribe to state changes
         const unsubscribe = fetcherRef.current.subscribe((newState) => {
@@ -192,9 +199,20 @@ export const usePaginatedFetcher = <T>(
         fetcherRef.current.fetchPage(1, false);
 
         return unsubscribe;
+      } else if (optionsChanged && fetcherRef.current) {
+        // Only update params if they actually changed
+        fetcherRef.current.updateParams(options.initialParams || {});
+        prevOptionsRef.current = optionsString;
+        
+        // Only reset if we're not already on page 1 or if data exists
+        if (fetcherRef.current.getState().currentPage > 1 || fetcherRef.current.getState().data.length > 0) {
+          fetcherRef.current.reset();
+          fetcherRef.current.fetchPage(1, false);
+        }
       }
     } else {
       fetcherRef.current = null;
+      prevOptionsRef.current = '';
       setState({
         data: [],
         currentPage: 0,
@@ -215,14 +233,6 @@ export const usePaginatedFetcher = <T>(
     return fetcherRef.current?.refresh();
   }, []);
 
-  const updateParamsAndFetch = useCallback((newParams: Record<string, string | number>) => {
-    if (fetcherRef.current) {
-      fetcherRef.current.updateParams(newParams);
-      fetcherRef.current.reset();
-      fetcherRef.current.fetchPage(1, false);
-    }
-  }, []);
-
   const resetFetcher = useCallback(() => {
     if (fetcherRef.current) {
       fetcherRef.current.reset();
@@ -238,11 +248,11 @@ export const usePaginatedFetcher = <T>(
     }
   }, []);
 
+  // Don't expose updateParams since it's handled automatically via options changes
   return {
     ...state,
     loadMore,
     refresh,
-    updateParams: updateParamsAndFetch,
     reset: resetFetcher,
   };
 };

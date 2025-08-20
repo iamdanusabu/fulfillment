@@ -81,20 +81,9 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
     config.endpoints.orders,
     {
       pageSize: 20,
-      initialParams: {
-        hasFulfilmentJob: 'false',
-        expand: 'item,bin,location_hint,payment',
-        pagination: 'true',
-      },
+      initialParams: apiParams,
     }
   );
-
-  // Update parameters when apiParams change
-  React.useEffect(() => {
-    if (paginatedState.updateParams) {
-      paginatedState.updateParams(apiParams);
-    }
-  }, [JSON.stringify(apiParams), paginatedState.updateParams]);
 
   // Transform the raw data to Order objects
   const transformedOrders = React.useMemo(() => 

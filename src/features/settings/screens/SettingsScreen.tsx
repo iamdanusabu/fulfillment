@@ -280,43 +280,7 @@ export default function SettingsScreen() {
         
       </View>
 
-      {/* App Settings Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>App Settings</Text>
-        
-        <View style={styles.settingItem}>
-          <View style={styles.settingLabelContainer}>
-            <MaterialIcons name="notifications" size={20} color="#666" />
-            <Text style={styles.settingLabel}>Notifications</Text>
-          </View>
-          <Switch
-            value={settings.notifications}
-            onValueChange={(value) => updateSetting('notifications', value)}
-          />
-        </View>
-
-        <View style={styles.settingItem}>
-          <View style={styles.settingLabelContainer}>
-            <MaterialIcons name="sync" size={20} color="#666" />
-            <Text style={styles.settingLabel}>Auto Refresh</Text>
-          </View>
-          <Switch
-            value={settings.autoRefresh}
-            onValueChange={(value) => updateSetting('autoRefresh', value)}
-          />
-        </View>
-
-        <TouchableOpacity style={styles.settingItem}>
-          <View style={styles.settingLabelContainer}>
-            <MaterialIcons name="palette" size={20} color="#666" />
-            <Text style={styles.settingLabel}>Theme</Text>
-          </View>
-          <View style={styles.settingValue}>
-            <Text style={styles.settingValueText}>{settings.theme === 'light' ? 'Light' : 'Dark'}</Text>
-            <MaterialIcons name="chevron-right" size={20} color="#666" />
-          </View>
-        </TouchableOpacity>
-      </View>
+      
 
       {/* Account Section */}
       <View style={styles.section}>

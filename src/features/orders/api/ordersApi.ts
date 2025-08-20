@@ -171,41 +171,6 @@ export const ordersApi = {
       throw error;
     }
   },
-
-  // Search orders
-  async searchOrders(searchParams: {
-    searchMode: string;
-    matchWith: string;
-    searchFields: string;
-    pageNo?: number;
-    limit?: number;
-  }) {
-    try {
-      const { fetchWithToken } = await import('../../../shared/services/fetchWithToken');
-      const config = getConfig();
-      
-      const queryParams = new URLSearchParams({
-        searchMode: searchParams.searchMode,
-        matchWith: searchParams.matchWith,
-        searchFields: searchParams.searchFields,
-        pageNo: (searchParams.pageNo || 1).toString(),
-        limit: (searchParams.limit || 25).toString(),
-      });
-
-      const data = await fetchWithToken(`${config.endpoints.orderSearch}?${queryParams.toString()}`);
-      
-      // Transform the data to match our Order type
-      const transformedData = {
-        ...data,
-        data: data.data ? data.data.map(transformOrder) : []
-      };
-      
-      return transformedData;
-    } catch (error) {
-      console.error('Error searching orders:', error);
-      throw error;
-    }
-  },
 };
 
 // Export the transform function for use in hooks

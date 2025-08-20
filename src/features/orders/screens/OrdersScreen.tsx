@@ -105,7 +105,7 @@ const OrderSearchModal = ({ visible, onClose, onOrderSelect }) => {
 };
 
 export default function OrdersScreen() {
-  const params = useLocalSearchParams() || {};
+  const params = useLocalSearchParams();
   const router = useRouter();
   const { 
     orders, 
@@ -131,8 +131,8 @@ export default function OrdersScreen() {
   const { isScanning, isLoading: qrLoading, startScanning, stopScanning, handleScan } = useQRScanner();
 
   useEffect(() => {
-    setIsPicklistMode(params?.mode === 'picklist');
-  }, [params?.mode]);
+    setIsPicklistMode(params.mode === 'picklist');
+  }, [params.mode]);
 
   const handleSearchModalOpen = () => {
     setShowSearchModal(true);
@@ -177,11 +177,10 @@ export default function OrdersScreen() {
   const filteredOrders = useMemo(() => {
     if (!searchText.trim()) return orders;
 
-    const searchLower = searchText.toLowerCase();
     return orders.filter(order => 
-      (order.orderNumber || '').toLowerCase().includes(searchLower) ||
-      (order.customer || '').toLowerCase().includes(searchLower) ||
-      (order.source || '').toLowerCase().includes(searchLower)
+      order.orderNumber.toLowerCase().includes(searchText.toLowerCase()) ||
+      order.customer.toLowerCase().includes(searchText.toLowerCase()) ||
+      order.source.toLowerCase().includes(searchText.toLowerCase())
     );
   }, [orders, searchText]);
 

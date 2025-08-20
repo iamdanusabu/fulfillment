@@ -80,9 +80,9 @@ export default function OrdersScreen() {
     if (!searchText.trim()) return orders;
 
     return orders.filter(order => 
-      order.orderNumber.toLowerCase().includes(searchText.toLowerCase()) ||
-      order.customer.toLowerCase().includes(searchText.toLowerCase()) ||
-      order.source.toLowerCase().includes(searchText.toLowerCase())
+      (order.orderNumber || '').toLowerCase().includes(searchText.toLowerCase()) ||
+      (order.customer || '').toLowerCase().includes(searchText.toLowerCase()) ||
+      (order.source || '').toLowerCase().includes(searchText.toLowerCase())
     );
   }, [orders, searchText]);
 

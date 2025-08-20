@@ -58,6 +58,11 @@ export class PaginatedFetcher<T> {
   async fetchPage(pageNo: number = 1, append: boolean = false): Promise<void> {
     if (this.state.loading || !this.url) return;
 
+    // Prevent loading the same page multiple times when appending
+    if (append && pageNo <= this.state.currentPage) {
+      return;
+    }
+
     this.updateState({ 
       loading: true, 
       error: null 
@@ -106,7 +111,12 @@ export class PaginatedFetcher<T> {
 
   async loadMore(): Promise<void> {
     if (!this.state.hasMore || this.state.loading) return;
-    await this.fetchPage(this.state.currentPage + 1, true);
+    
+    // Only load the next page if we haven't already loaded it
+    const nextPage = this.state.currentPage + 1;
+    if (nextPage <= this.state.totalPages) {
+      await this.fetchPage(nextPage, true);
+    }
   }
 
   async refresh(): Promise<void> {
@@ -186,7 +196,7 @@ export const usePaginatedFetcher = <T>(
         error: null,
       });
     }
-  }, [baseUrl, JSON.stringify({...params, pageNo: undefined})]);
+  }, [baseUrl, JSON.stringify(params)]);
 
   const loadMore = useCallback(() => {
     if (fetcherRef.current) {

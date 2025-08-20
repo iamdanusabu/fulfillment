@@ -16,7 +16,18 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
   const { settings, getFilterParams } = useOrderFilters();
   const config = getConfig();
 
-  // Build initial params once
+  // Create a stable key for the parameters to prevent unnecessary re-renders
+  const paramsKey = React.useMemo(() => {
+    const filterParams = getFilterParams();
+    return JSON.stringify({
+      hasFulfilmentJob: params.hasFulfilmentJob || 'false',
+      source: params.source || filterParams.source || '',
+      status: params.status || filterParams.status || '',
+      paymentStatus: filterParams.paymentStatus || '',
+    });
+  }, [settings, params.source, params.status, params.hasFulfilmentJob]);
+
+  // Build initial params only when the key actually changes
   const initialParams = React.useMemo(() => {
     const filterParams = getFilterParams();
     
@@ -46,7 +57,7 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
     }
 
     return apiParams;
-  }, [settings, params.source, params.status, params.hasFulfilmentJob]);
+  }, [paramsKey]);
 
   const paginatedState = usePaginatedFetcher<any>(
     config.endpoints.orders,

@@ -188,26 +188,38 @@ interface PaginatedFetcherActions {
 }
 
 export const usePaginatedFetcher = <T>(
-  endpoint: string,
+  endpoint: string | null, // Allow endpoint to be null
   options: PaginatedFetcherOptions = {}
 ) => {
   const {
-    pageSize = 10,
+    pageSize = 20,
     initialParams = {},
-    transform = (data: any) => data,
     skipInitialFetch = false,
   } = options;
 
-  const [data, setData] = useState<T[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalRecords, setTotalRecords] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
-  const [nextPageURL, setNextPageURL] = useState<string | null>(null);
-  const [currentParams, setCurrentParams] = useState(initialParams);
-  const [hasNoResults, setHasNoResults] = useState(false); // State to track no results
+  const [state, setState] = useState<PaginatedState<T>>({
+    data: [],
+    loading: false,
+    error: null,
+    currentPage: 0,
+    totalPages: 0,
+    totalRecords: 0,
+    hasMore: true,
+    hasNoResults: false,
+  });
+
+  // Early return if endpoint is null (completely skip all functionality)
+  if (endpoint === null) {
+    return {
+      ...state,
+      hasNoResults: true,
+      loading: false,
+      loadMore: () => {},
+      refresh: () => Promise.resolve(),
+      updateParams: () => {},
+      reset: () => {},
+    };
+  }
 
   // Watch for parameter changes and reset data when they change
   useEffect(() => {
@@ -235,14 +247,19 @@ export const usePaginatedFetcher = <T>(
   useEffect(() => {
     if (!skipInitialFetch && endpoint && endpoint.trim() !== '') {
       fetchData(1);
+    } else if (endpoint && endpoint.trim() === '') {
+      // If endpoint is empty string but not null, and not skipping, set no results
+      setData([]);
+      setHasNoResults(true);
+      setLoading(false);
     }
   }, [endpoint, skipInitialFetch]);
 
   const fetchData = async (pageNo: number = 1, append: boolean = false, customParams?: Record<string, any>) => {
-    // Skip fetch if endpoint is empty (indicates no filters set)
+    // Skip fetch if endpoint is empty or null
     if (!endpoint || endpoint.trim() === '') {
       console.log('=== usePaginatedFetcher fetchData SKIPPED ===');
-      console.log('No endpoint provided, skipping fetch');
+      console.log('No endpoint provided or empty, skipping fetch');
       setData([]);
       setHasNoResults(true);
       setLoading(false);

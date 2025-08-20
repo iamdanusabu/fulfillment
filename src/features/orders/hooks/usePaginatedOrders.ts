@@ -94,17 +94,41 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
     const shouldSkip = !hasUserSettings;
     console.log('Should skip initial fetch (no user filters in AsyncStorage):', shouldSkip);
     console.log('Has user settings in AsyncStorage:', hasUserSettings);
+    
+    // Additional check: if user has settings but no actual filter params, also skip
+    if (hasUserSettings) {
+      const filterParams = getFilterParams();
+      const hasActualFilters = filterParams.source || filterParams.status || filterParams.paymentStatus;
+      if (!hasActualFilters) {
+        console.log('User has settings but no actual filter params, skipping fetch');
+        return true;
+      }
+    }
+    
     return shouldSkip;
-  }, [hasUserSettings, params.source, params.status]);
+  }, [hasUserSettings, params.source, params.status, getFilterParams]);
 
+  // Use conditional hook to completely avoid API calls when we should skip
   const paginatedState = usePaginatedFetcher<any>(
-    shouldSkipInitialFetch ? '' : config.endpoints.orders, // Pass empty endpoint when should skip
+    shouldSkipInitialFetch ? null : config.endpoints.orders, // Pass null instead of empty string
     {
       pageSize: 20,
-      initialParams: apiParams,
+      initialParams: shouldSkipInitialFetch ? {} : apiParams, // Don't pass params if skipping
       skipInitialFetch: shouldSkipInitialFetch,
     }
   );
+
+  // Debug logging
+  React.useEffect(() => {
+    console.log('=== usePaginatedOrders Debug Info ===');
+    console.log('hasUserSettings:', hasUserSettings);
+    console.log('shouldSkipInitialFetch:', shouldSkipInitialFetch);
+    console.log('endpoint passed to fetcher:', shouldSkipInitialFetch ? 'NULL' : config.endpoints.orders);
+    console.log('apiParams:', apiParams);
+    console.log('paginatedState.data.length:', paginatedState.data.length);
+    console.log('paginatedState.hasNoResults:', paginatedState.hasNoResults);
+    console.log('paginatedState.loading:', paginatedState.loading);
+  }, [hasUserSettings, shouldSkipInitialFetch, apiParams, paginatedState.data.length, paginatedState.hasNoResults, paginatedState.loading]);
 
   // Transform the raw data to Order objects
   const transformedOrders = React.useMemo(() => 
@@ -117,7 +141,7 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
     loading: paginatedState.loading || (!settings),
     error: paginatedState.error,
     hasMore: paginatedState.hasMore,
-    hasNoResults: paginatedState.hasNoResults,
+    hasNoResults: shouldSkipInitialFetch ? true : paginatedState.hasNoResults,
     totalRecords: paginatedState.totalRecords,
     currentPage: paginatedState.currentPage,
     totalPages: paginatedState.totalPages,

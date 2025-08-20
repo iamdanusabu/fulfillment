@@ -13,7 +13,7 @@ interface UsePaginatedOrdersParams {
 }
 
 export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
-  const { settings, getFilterParams } = useOrderFilters();
+  const { settings, loading: filtersLoading, getFilterParams } = useOrderFilters();
   const config = getConfig();
 
   // Build parameters that react to filter settings changes
@@ -44,8 +44,10 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
       result.paymentStatus = filterParams.paymentStatus;
     }
 
+    console.log('API params for orders:', result);
+
     return result;
-  }, [settings, params.source, params.status, params.hasFulfilmentJob, getFilterParams]);
+  }, [settings, params.source, params.status, params.hasFulfilmentJob, getFilterParams, filtersLoading]);
 
   const paginatedState = usePaginatedFetcher<any>(
     config.endpoints.orders,
@@ -63,7 +65,7 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
 
   return {
     orders: transformedOrders,
-    loading: paginatedState.loading || (!settings),
+    loading: paginatedState.loading || filtersLoading,
     error: paginatedState.error,
     hasMore: paginatedState.hasMore,
     totalRecords: paginatedState.totalRecords,

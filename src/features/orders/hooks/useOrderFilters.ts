@@ -54,7 +54,15 @@ export const useOrderFilters = () => {
 
   // Convert settings to API parameters
   const getFilterParams = () => {
-    // Only include parameters if user has made specific selections (not all defaults)
+    // If still loading, don't apply any filters
+    if (loading) {
+      return {
+        source: undefined,
+        status: undefined,
+        paymentStatus: undefined
+      };
+    }
+
     const allSources = [
       'Shopify', 'Tapin2', 'Breakaway', 'bigcommerce', 'Ecwid', 
       'PHONE ORDER', 'DELIVERY', 'BAR TAB', 'TIKT', 'TABLE', 
@@ -75,11 +83,28 @@ export const useOrderFilters = () => {
     const hasAllPaymentStatuses = settings.paymentStatuses.length === allPaymentStatuses.length && 
       allPaymentStatuses.every(status => settings.paymentStatuses.includes(status));
 
-    return {
-      source: !hasAllSources && settings.sources.length > 0 ? settings.sources.join(',') : undefined,
-      status: !hasAllStatuses && settings.statuses.length > 0 ? settings.statuses.join(',') : undefined,
-      paymentStatus: !hasAllPaymentStatuses && settings.paymentStatuses.length > 0 ? settings.paymentStatuses.join(',') : undefined
-    };
+    // Always include filter parameters if user has made specific selections
+    const result: { source?: string; status?: string; paymentStatus?: string } = {};
+
+    // Include source parameter if not all sources are selected OR if specific sources are chosen
+    if (!hasAllSources && settings.sources.length > 0) {
+      result.source = settings.sources.join(',');
+    }
+
+    // Include status parameter if not all statuses are selected OR if specific statuses are chosen
+    if (!hasAllStatuses && settings.statuses.length > 0) {
+      result.status = settings.statuses.join(',');
+    }
+
+    // Include payment status parameter if not all payment statuses are selected OR if specific ones are chosen
+    if (!hasAllPaymentStatuses && settings.paymentStatuses.length > 0) {
+      result.paymentStatus = settings.paymentStatuses.join(',');
+    }
+
+    console.log('Filter params generated:', result);
+    console.log('Current settings:', settings);
+
+    return result;
   };
 
   return {

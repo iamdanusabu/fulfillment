@@ -3,21 +3,24 @@ import React from 'react';
 import { usePaginatedFetcher } from '../../../shared/services/paginatedFetcher';
 import { Order } from '../../../shared/types';
 import { getConfig } from '../../../environments';
-import { useOrderFilters } from './useOrderFilters';
+import { useOrderFilters, OrderFilters } from './useOrderFilters';
 import { transformOrder } from '../api/ordersApi';
 
 interface UsePaginatedOrdersParams {
   source?: string;
   status?: string;
   hasFulfilmentJob?: string;
+  externalFilters?: OrderFilters;
 }
 
 export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
-  const { settings, getFilterParams } = useOrderFilters();
+  const { filters, getFilterParams } = useOrderFilters();
   const config = getConfig();
 
   // Build parameters that react to filter settings changes
   const apiParams = React.useMemo(() => {
+    // Use external filters if provided, otherwise use stored filters
+    const activeFilters = params.externalFilters || filters;
     const filterParams = getFilterParams();
     
     const result: Record<string, string | number> = {
@@ -27,14 +30,26 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
     };
 
     // Add filter params if they exist (user has made selections)
-    if (filterParams.source) {
-      result.source = filterParams.source;
-    }
-    if (filterParams.status) {
-      result.status = filterParams.status;
-    }
-    if (filterParams.paymentStatus) {
-      result.paymentStatus = filterParams.paymentStatus;
+    if (params.externalFilters) {
+      if (params.externalFilters.sources.length > 0) {
+        result.source = params.externalFilters.sources.join(',');
+      }
+      if (params.externalFilters.statuses.length > 0) {
+        result.status = params.externalFilters.statuses.join(',');
+      }
+      if (params.externalFilters.paymentStatuses.length > 0) {
+        result.paymentStatus = params.externalFilters.paymentStatuses.join(',');
+      }
+    } else {
+      if (filterParams.source) {
+        result.source = filterParams.source;
+      }
+      if (filterParams.status) {
+        result.status = filterParams.status;
+      }
+      if (filterParams.paymentStatus) {
+        result.paymentStatus = filterParams.paymentStatus;
+      }
     }
 
     // Override with URL params if provided (URL params take precedence)
@@ -46,7 +61,7 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
     }
 
     return result;
-  }, [settings, params.source, params.status, params.hasFulfilmentJob, getFilterParams]);
+  }, [filters, params.source, params.status, params.hasFulfilmentJob, params.externalFilters, getFilterParams]);
 
   const paginatedState = usePaginatedFetcher<any>(
     config.endpoints.orders,
@@ -64,7 +79,7 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
 
   return {
     orders: transformedOrders,
-    loading: paginatedState.loading || (!settings),
+    loading: paginatedState.loading,
     error: paginatedState.error,
     hasMore: paginatedState.hasMore,
     totalRecords: paginatedState.totalRecords,

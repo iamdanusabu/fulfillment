@@ -14,15 +14,25 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import { usePaginatedOrders } from '../hooks/usePaginatedOrders';
+import { useOrderFilters, OrderFilters } from '../hooks/useOrderFilters';
 import { Order } from '../../../shared/types';
 import { picklistApi } from '../../picklist/api/picklistApi';
 import { QRCodeScanner } from '../components/QRCodeScanner';
+import { FilterModal } from '../components/FilterModal';
 import { useQRScanner } from '../hooks/useQRScanner';
 import { AppToolbar } from '../../../components/layout/AppToolbar';
 
 export default function OrdersScreen() {
   const params = useLocalSearchParams();
   const router = useRouter();
+  const { hasActiveFilters } = useOrderFilters();
+  const [currentFilters, setCurrentFilters] = useState<OrderFilters>({
+    sources: [],
+    statuses: [],
+    paymentStatuses: [],
+  });
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  
   const { 
     orders, 
     loading, 
@@ -35,7 +45,8 @@ export default function OrdersScreen() {
   } = usePaginatedOrders({ 
     source: params.source as string,
     status: params.status as string,
-    hasFulfilmentJob: params.hasFulfilmentJob as string
+    hasFulfilmentJob: params.hasFulfilmentJob as string,
+    externalFilters: currentFilters
   });
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
   const [isPicklistMode, setIsPicklistMode] = useState(false);
@@ -100,6 +111,24 @@ export default function OrdersScreen() {
       loadMore();
     }
   }, [hasMore, loading, loadMore]);
+
+  const handleApplyFilters = (filters: OrderFilters) => {
+    setCurrentFilters(filters);
+  };
+
+  const handleClearFilters = () => {
+    setCurrentFilters({
+      sources: [],
+      statuses: [],
+      paymentStatuses: [],
+    });
+  };
+
+  const getActiveFilterCount = () => {
+    return currentFilters.sources.length + 
+           currentFilters.statuses.length + 
+           currentFilters.paymentStatuses.length;
+  };
 
 
   const getPaymentStatusColor = (status: string) => {
@@ -209,6 +238,17 @@ export default function OrdersScreen() {
           clearButtonMode="while-editing"
         />
         <TouchableOpacity 
+          style={styles.filterButton} 
+          onPress={() => setShowFilterModal(true)}
+        >
+          <MaterialIcons name="filter-list" size={16} color="#007AFF" />
+          {getActiveFilterCount() > 0 && (
+            <View style={styles.filterBadge}>
+              <Text style={styles.filterBadgeText}>{getActiveFilterCount()}</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+        <TouchableOpacity 
           style={styles.qrButton} 
           onPress={startScanning}
           disabled={qrLoading}
@@ -216,6 +256,25 @@ export default function OrdersScreen() {
           <MaterialIcons name="qr-code-scanner" size={16} color="#007AFF" />
         </TouchableOpacity>
       </View>
+
+      {/* Filter Modal */}
+      <FilterModal
+        visible={showFilterModal}
+        onClose={() => setShowFilterModal(false)}
+        onApplyFilters={handleApplyFilters}
+      />
+
+      {/* Active Filters Display */}
+      {getActiveFilterCount() > 0 && (
+        <View style={styles.activeFiltersContainer}>
+          <Text style={styles.activeFiltersText}>
+            {getActiveFilterCount()} filter{getActiveFilterCount() !== 1 ? 's' : ''} active
+          </Text>
+          <TouchableOpacity onPress={handleClearFilters} style={styles.clearFiltersButton}>
+            <Text style={styles.clearFiltersText}>Clear All</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* QR Code Scanner Modal */}
       <QRCodeScanner
@@ -309,9 +368,54 @@ const styles = StyleSheet.create({
     fontSize: 14,
     paddingVertical: 0,
   },
+  filterButton: {
+    padding: 4,
+    marginLeft: 6,
+    position: 'relative',
+  },
+  filterBadge: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    backgroundColor: '#ff3b30',
+    borderRadius: 8,
+    minWidth: 16,
+    height: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  filterBadgeText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '600',
+  },
   qrButton: {
     padding: 4,
     marginLeft: 6,
+  },
+  activeFiltersContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: '#e7f3ff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#007AFF',
+  },
+  activeFiltersText: {
+    color: '#007AFF',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  clearFiltersButton: {
+    paddingVertical: 2,
+    paddingHorizontal: 8,
+  },
+  clearFiltersText: {
+    color: '#007AFF',
+    fontSize: 12,
+    fontWeight: '600',
   },
   resultsText: {
     paddingHorizontal: 16,

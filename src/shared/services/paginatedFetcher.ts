@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { fetchWithToken } from './fetchWithToken';
 
 interface PaginatedFetcherOptions {
@@ -138,14 +138,21 @@ export function usePaginatedFetcher<T>(
     return new PaginatedFetcher<T>(baseUrl, options);
   }, [baseUrl]);
 
-  // Update params when options change without recreating fetcher
+  // Track previous params to avoid unnecessary updates
+  const prevParamsRef = useRef<string>('');
+  const currentParamsString = JSON.stringify(options.initialParams);
+  
+  // Update params only when they actually change
   useEffect(() => {
-    if (options.initialParams) {
-      fetcher.updateParams(options.initialParams);
+    if (currentParamsString !== prevParamsRef.current) {
+      prevParamsRef.current = currentParamsString;
+      if (options.initialParams) {
+        fetcher.updateParams(options.initialParams);
+      }
     }
-  }, [fetcher, JSON.stringify(options.initialParams)]);
+  }, [fetcher, currentParamsString]);
 
-  // Subscribe to fetcher state changes
+  // Subscribe to fetcher state changes and initial load
   useEffect(() => {
     const updateState = () => {
       setState(fetcher.getState());
@@ -153,7 +160,7 @@ export function usePaginatedFetcher<T>(
 
     const unsubscribe = fetcher.subscribe(updateState);
     
-    // Initial load
+    // Initial load only when fetcher is created
     fetcher.refresh();
 
     return unsubscribe;

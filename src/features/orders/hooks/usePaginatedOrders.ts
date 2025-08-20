@@ -16,7 +16,9 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
   const { settings, getFilterParams } = useOrderFilters();
   const config = getConfig();
 
-  // Build initial params with stable dependencies
+  // Build stable params
+  const baseUrl = React.useMemo(() => config.endpoints.orders, []);
+  
   const initialParams = React.useMemo(() => {
     const filterParams = getFilterParams();
     
@@ -46,7 +48,7 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
   ]);
 
   const { data, loading, error, hasMore, loadMore, refresh } = usePaginatedFetcher<any>(
-    config.endpoints.orders,
+    baseUrl,
     {
       pageSize: 20,
       initialParams,

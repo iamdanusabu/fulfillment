@@ -56,6 +56,17 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
     }
   );
 
+  // Transform the data using the transformOrder function
+  const transformedData = React.useMemo(() => {
+    return paginatedState.data.map(transformOrder);
+  }, [paginatedState.data]);
+
+  return {
+    ...paginatedState,
+    orders: transformedData,
+  };
+};
+
   // Transform the raw data to Order objects
   const transformedOrders = React.useMemo(() => 
     paginatedState.data.map(transformOrder), 

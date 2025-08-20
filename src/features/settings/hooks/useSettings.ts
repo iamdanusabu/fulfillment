@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -9,27 +8,27 @@ export interface AppSettings {
   refreshInterval: number;
 }
 
-const DEFAULT_SETTINGS: AppSettings = {
+const DEFAULT_APP_SETTINGS: AppSettings = {
   notifications: true,
   autoRefresh: false,
   theme: 'light',
   refreshInterval: 30,
 };
 
-export const useSettings = () => {
-  const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
+export const useAppSettings = () => {
+  const [settings, setSettings] = useState<AppSettings>(DEFAULT_APP_SETTINGS);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadSettings();
+    loadAppSettings();
   }, []);
 
-  const loadSettings = async () => {
+  const loadAppSettings = async () => {
     try {
       const savedSettings = await AsyncStorage.getItem('app_settings');
       if (savedSettings) {
         const parsed = JSON.parse(savedSettings);
-        setSettings({ ...DEFAULT_SETTINGS, ...parsed });
+        setSettings({ ...DEFAULT_APP_SETTINGS, ...parsed });
       }
     } catch (error) {
       console.error('Error loading settings:', error);
@@ -38,8 +37,8 @@ export const useSettings = () => {
     }
   };
 
-  const updateSetting = async <K extends keyof AppSettings>(
-    key: K, 
+  const updateAppSetting = async <K extends keyof AppSettings>(
+    key: K,
     value: AppSettings[K]
   ) => {
     try {
@@ -53,10 +52,10 @@ export const useSettings = () => {
     }
   };
 
-  const resetSettings = async () => {
+  const resetAppSettings = async () => {
     try {
       await AsyncStorage.removeItem('app_settings');
-      setSettings(DEFAULT_SETTINGS);
+      setSettings(DEFAULT_APP_SETTINGS);
       return true;
     } catch (error) {
       console.error('Error resetting settings:', error);
@@ -67,8 +66,74 @@ export const useSettings = () => {
   return {
     settings,
     loading,
-    updateSetting,
-    resetSettings,
-    refresh: loadSettings,
+    updateAppSetting,
+    resetAppSettings,
+    refresh: loadAppSettings,
+  };
+};
+
+
+export interface FilterSettings {
+  sources: string[];
+}
+
+const DEFAULT_FILTER_SETTINGS: FilterSettings = {
+  sources: []
+};
+
+export const useOrderFilterSettings = () => {
+  const [filterSettings, setFilterSettings] = useState<FilterSettings>(DEFAULT_FILTER_SETTINGS);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadFilterSettings();
+  }, []);
+
+  const loadFilterSettings = async () => {
+    try {
+      const savedSettings = await AsyncStorage.getItem('orderFilterSettings');
+      if (savedSettings) {
+        const parsed = JSON.parse(savedSettings);
+        setFilterSettings({ ...DEFAULT_FILTER_SETTINGS, ...parsed });
+      }
+    } catch (error) {
+      console.error('Error loading filter settings:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateFilterSetting = async <K extends keyof FilterSettings>(
+    key: K,
+    value: FilterSettings[K]
+  ) => {
+    try {
+      const newSettings = { ...filterSettings, [key]: value };
+      await AsyncStorage.setItem('orderFilterSettings', JSON.stringify(newSettings));
+      setFilterSettings(newSettings);
+      return true;
+    } catch (error) {
+      console.error('Error saving filter setting:', error);
+      return false;
+    }
+  };
+
+  const resetFilterSettings = async () => {
+    try {
+      await AsyncStorage.removeItem('orderFilterSettings');
+      setFilterSettings(DEFAULT_FILTER_SETTINGS);
+      return true;
+    } catch (error) {
+      console.error('Error resetting filter settings:', error);
+      return false;
+    }
+  };
+
+  return {
+    filterSettings,
+    loading,
+    updateFilterSetting,
+    resetFilterSettings,
+    refresh: loadFilterSettings,
   };
 };

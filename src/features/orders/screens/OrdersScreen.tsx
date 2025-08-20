@@ -257,16 +257,22 @@ export default function OrdersScreen() {
               </View>
             );
           }
-          if (!hasMore && orders.length > 0) {
-            return <Text style={styles.endText}>No more orders</Text>;
+          if (!hasMore && orders.length > 0 && totalRecords > 20) {
+            return <Text style={styles.endText}>End of results • {totalRecords} total orders</Text>;
           }
           return null;
         }}
         ListEmptyComponent={() => {
-          if (!loading && orders.length === 0) {
+          if (!loading && filteredOrders.length === 0) {
             return (
               <View style={styles.emptyContainer}>
-                <Text style={styles.emptyText}>No orders found</Text>
+                <MaterialIcons name="inbox" size={48} color="#ccc" style={styles.emptyIcon} />
+                <Text style={styles.emptyText}>
+                  {searchText.trim() ? 'No orders match your search' : 'No orders found'}
+                </Text>
+                {searchText.trim() && (
+                  <Text style={styles.emptySubtext}>Try adjusting your search terms</Text>
+                )}
               </View>
             );
           }
@@ -464,9 +470,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 60,
   },
+  emptyIcon: {
+    marginBottom: 16,
+  },
   emptyText: {
     color: '#666',
     fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  emptySubtext: {
+    color: '#999',
+    fontSize: 14,
     textAlign: 'center',
   },
   bottomBar: {

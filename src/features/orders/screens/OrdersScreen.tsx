@@ -21,10 +21,10 @@ import { useQRScanner } from '../hooks/useQRScanner';
 import { AppToolbar } from '../../../components/layout/AppToolbar';
 
 export default function OrdersScreen() {
-  const params = useLocalSearchParams();
   const router = useRouter();
+  const params = useLocalSearchParams();
   const {
-    orders = [], // Provide default empty array
+    orders: hookOrders = [], // Provide default empty array
     loading,
     hasMore,
     totalRecords,
@@ -78,14 +78,14 @@ export default function OrdersScreen() {
   };
 
   const filteredOrders = useMemo(() => {
-    if (!searchText.trim()) return orders;
+    if (!searchText.trim()) return hookOrders;
 
-    return orders.filter(order =>
+    return hookOrders.filter(order =>
       order.orderNumber.toLowerCase().includes(searchText.toLowerCase()) ||
       order.customer.toLowerCase().includes(searchText.toLowerCase()) ||
       order.source.toLowerCase().includes(searchText.toLowerCase())
     );
-  }, [orders, searchText]);
+  }, [hookOrders, searchText]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -199,7 +199,7 @@ export default function OrdersScreen() {
   );
 
   // Show loading only for initial load or when no data exists
-  if (loading && orders.length === 0 && !hasNoResults) {
+  if (loading && hookOrders.length === 0 && !hasNoResults) {
     return (
       <View style={styles.loadingContainer}>
         <Text>Loading orders...</Text>
@@ -251,7 +251,7 @@ export default function OrdersScreen() {
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.1}
         ListFooterComponent={() => {
-          if (loading && orders.length > 0) {
+          if (loading && hookOrders.length > 0) {
             return (
               <View style={styles.loadingFooter}>
                 <ActivityIndicator color="#007AFF" />
@@ -259,7 +259,7 @@ export default function OrdersScreen() {
               </View>
             );
           }
-          if (!hasMore && orders.length > 0 && totalRecords > 20) {
+          if (!hasMore && hookOrders.length > 0 && totalRecords > 20) {
             return <Text style={styles.endText}>End of results • {totalRecords} total orders</Text>;
           }
           return null;

@@ -8,9 +8,13 @@ export interface FilterSettings {
 }
 
 const DEFAULT_SETTINGS: FilterSettings = {
-  sources: [],
-  statuses: [],
-  paymentStatuses: []
+  sources: [
+    'Shopify', 'Tapin2', 'Breakaway', 'bigcommerce', 'Ecwid', 
+    'PHONE ORDER', 'DELIVERY', 'BAR TAB', 'TIKT', 'TABLE', 
+    'OTHER', 'MANUAL', 'FanVista', 'QSR'
+  ],
+  statuses: ['Initiated', 'Sent for Processing'],
+  paymentStatuses: ['PAID', 'UNPAID']
 };
 
 export const useOrderFilters = () => {
@@ -33,14 +37,16 @@ export const useOrderFilters = () => {
       const savedSettings = await AsyncStorage.getItem('orderFilterSettings');
       if (savedSettings) {
         const parsedSettings = JSON.parse(savedSettings);
-        setSettings(parsedSettings);
-      } else {
-        // If no saved settings, use default empty arrays
-        setSettings(DEFAULT_SETTINGS);
+        setSettings(prevSettings => {
+          // Only update if settings actually changed
+          if (JSON.stringify(prevSettings) !== JSON.stringify(parsedSettings)) {
+            return parsedSettings;
+          }
+          return prevSettings;
+        });
       }
     } catch (error) {
       console.error('Error loading filter settings:', error);
-      setSettings(DEFAULT_SETTINGS);
     } finally {
       setLoading(false);
     }

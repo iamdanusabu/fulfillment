@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   Modal,
   View,
@@ -26,6 +26,8 @@ interface OrderSearchModalProps {
 export function OrderSearchModal({ visible, onClose, onOrderSelect }: OrderSearchModalProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchUrl, setSearchUrl] = useState<string | null>(null);
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const config = getConfig();
 
   const {
@@ -42,26 +44,60 @@ export function OrderSearchModal({ visible, onClose, onOrderSelect }: OrderSearc
     }
   );
 
+  // Debounce search query
+  useEffect(() => {
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+
+    debounceTimeoutRef.current = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+    }, 300);
+
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+    };
+  }, [searchQuery]);
+
+  // Perform search when debounced query changes
+  useEffect(() => {
+    if (debouncedQuery.trim()) {
+      performSearch(debouncedQuery);
+    } else {
+      setSearchUrl(null);
+    }
+  }, [debouncedQuery]);
+
+  const performSearch = useCallback((query: string) => {
+    const params = new URLSearchParams({
+      searchMode: 'MATCH_WITH',
+      matchWith: 'any',
+      orderID: query.trim(),
+      expand: 'item,bin,location_hint,payment',
+      pagination: 'true',
+    });
+
+    setSearchUrl(`${config.endpoints.orderSearch}?${params.toString()}`);
+  }, [config.endpoints.orderSearch]);
+
   const handleSearch = useCallback(() => {
     if (!searchQuery.trim()) {
       Alert.alert('Error', 'Please enter an order number to search');
       return;
     }
 
-    const params = new URLSearchParams({
-      searchMode: 'MATCH_WITH',
-      matchWith: 'any',
-      orderID: searchQuery.trim(),
-      expand: 'item,bin,location_hint,payment',
-      pagination: 'true',
-    });
-
-    setSearchUrl(`${config.endpoints.orderSearch}?${params.toString()}`);
-  }, [searchQuery, config.endpoints.orderSearch]);
+    performSearch(searchQuery);
+  }, [searchQuery, performSearch]);
 
   const handleClearSearch = useCallback(() => {
     setSearchQuery('');
+    setDebouncedQuery('');
     setSearchUrl(null);
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
   }, []);
 
   const handleOrderPress = useCallback((order: any) => {

@@ -21,19 +21,19 @@ import { useQRScanner } from '../hooks/useQRScanner';
 import { AppToolbar } from '../../../components/layout/AppToolbar';
 
 export default function OrdersScreen() {
-  const router = useRouter();
   const params = useLocalSearchParams();
-  const {
-    orders: hookOrders = [], // Provide default empty array
-    loading,
-    hasMore,
+  const router = useRouter();
+  const { 
+    orders, 
+    loading, 
+    hasMore, 
     totalRecords,
     currentPage,
     totalPages,
     hasNoResults,
-    loadMore,
-    refresh
-  } = usePaginatedOrders({
+    loadMore, 
+    refresh 
+  } = usePaginatedOrders({ 
     source: params.source as string,
     status: params.status as string,
     hasFulfilmentJob: params.hasFulfilmentJob as string
@@ -55,8 +55,8 @@ export default function OrdersScreen() {
   const toggleOrderSelection = (orderId: string) => {
     if (!isPicklistMode) return;
 
-    setSelectedOrders(prev =>
-      prev.includes(orderId)
+    setSelectedOrders(prev => 
+      prev.includes(orderId) 
         ? prev.filter(id => id !== orderId)
         : [...prev, orderId]
     );
@@ -78,14 +78,14 @@ export default function OrdersScreen() {
   };
 
   const filteredOrders = useMemo(() => {
-    if (!searchText.trim()) return hookOrders;
+    if (!searchText.trim()) return orders;
 
-    return hookOrders.filter(order =>
+    return orders.filter(order => 
       order.orderNumber.toLowerCase().includes(searchText.toLowerCase()) ||
       order.customer.toLowerCase().includes(searchText.toLowerCase()) ||
       order.source.toLowerCase().includes(searchText.toLowerCase())
     );
-  }, [hookOrders, searchText]);
+  }, [orders, searchText]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -199,7 +199,7 @@ export default function OrdersScreen() {
   );
 
   // Show loading only for initial load or when no data exists
-  if (loading && hookOrders.length === 0 && !hasNoResults) {
+  if (loading && orders.length === 0 && !hasNoResults) {
     return (
       <View style={styles.loadingContainer}>
         <Text>Loading orders...</Text>
@@ -220,8 +220,8 @@ export default function OrdersScreen() {
           onChangeText={setSearchText}
           clearButtonMode="while-editing"
         />
-        <TouchableOpacity
-          style={styles.qrButton}
+        <TouchableOpacity 
+          style={styles.qrButton} 
           onPress={startScanning}
           disabled={qrLoading}
         >
@@ -251,7 +251,7 @@ export default function OrdersScreen() {
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.1}
         ListFooterComponent={() => {
-          if (loading && hookOrders.length > 0) {
+          if (loading && orders.length > 0) {
             return (
               <View style={styles.loadingFooter}>
                 <ActivityIndicator color="#007AFF" />
@@ -259,7 +259,7 @@ export default function OrdersScreen() {
               </View>
             );
           }
-          if (!hasMore && hookOrders.length > 0 && totalRecords > 20) {
+          if (!hasMore && orders.length > 0 && totalRecords > 20) {
             return <Text style={styles.endText}>End of results • {totalRecords} total orders</Text>;
           }
           return null;

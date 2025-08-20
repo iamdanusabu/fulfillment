@@ -13,13 +13,11 @@ interface UsePaginatedOrdersParams {
 }
 
 export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
-  const { settings, getFilterParams } = useOrderFilters();
+  const { settings } = useOrderFilters();
   const config = getConfig();
 
   // Build parameters that react to filter settings changes
   const apiParams = React.useMemo(() => {
-    const filterParams = getFilterParams();
-    
     const result: Record<string, string | number> = {
       hasFulfilmentJob: params.hasFulfilmentJob || 'false',
       expand: 'item,bin,location_hint,payment',
@@ -27,14 +25,14 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
     };
 
     // Add filter params if they exist (user has made selections)
-    if (filterParams.source) {
-      result.source = filterParams.source;
+    if (settings && settings.sources && settings.sources.length > 0) {
+      result.source = settings.sources.join(',');
     }
-    if (filterParams.status) {
-      result.status = filterParams.status;
+    if (settings && settings.statuses && settings.statuses.length > 0) {
+      result.status = settings.statuses.join(',');
     }
-    if (filterParams.paymentStatus) {
-      result.paymentStatus = filterParams.paymentStatus;
+    if (settings && settings.paymentStatuses && settings.paymentStatuses.length > 0) {
+      result.paymentStatus = settings.paymentStatuses.join(',');
     }
 
     // Override with URL params if provided (URL params take precedence)
@@ -46,7 +44,7 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
     }
 
     return result;
-  }, [settings, params.source, params.status, params.hasFulfilmentJob, getFilterParams]);
+  }, [settings, params.source, params.status, params.hasFulfilmentJob]);
 
   const paginatedState = usePaginatedFetcher<any>(
     config.endpoints.orders,

@@ -13,31 +13,24 @@ interface UsePaginatedOrdersParams {
 }
 
 export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
-  const { settings, getFilterParams } = useOrderFilters();
+  const { settings, loading: filtersLoading, getFilterParams } = useOrderFilters();
   const config = getConfig();
 
-  // Build parameters that react to filter settings changes
   const apiParams = React.useMemo(() => {
+    if (filtersLoading || !settings) {
+      return null;
+    }
+
     const filterParams = getFilterParams();
     
-    const result: Record<string, string | number> = {
+    const result: Record<string, string | boolean> = {
       hasFulfilmentJob: params.hasFulfilmentJob || 'false',
       expand: 'item,bin,location_hint,payment',
-      pagination: 'true',
+      pagination: true,
     };
 
-    // Add filter params if they exist (user has made selections)
-    if (filterParams.source) {
-      result.source = filterParams.source;
-    }
-    if (filterParams.status) {
-      result.status = filterParams.status;
-    }
-    if (filterParams.paymentStatus) {
-      result.paymentStatus = filterParams.paymentStatus;
-    }
+    Object.assign(result, filterParams);
 
-    // Override with URL params if provided (URL params take precedence)
     if (params.source) {
       result.source = params.source;
     }
@@ -46,17 +39,18 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
     }
 
     return result;
-  }, [settings, params.source, params.status, params.hasFulfilmentJob, getFilterParams]);
+  }, [settings, filtersLoading, params, getFilterParams]);
+
+  const endpoint = apiParams ? config.endpoints.orders : null;
 
   const paginatedState = usePaginatedFetcher<any>(
-    config.endpoints.orders,
+    endpoint,
     {
       pageSize: 20,
-      initialParams: apiParams,
+      initialParams: apiParams || {},
     }
   );
 
-  // Transform the raw data to Order objects
   const transformedOrders = React.useMemo(() => 
     paginatedState.data.map(transformOrder), 
     [paginatedState.data]
@@ -64,7 +58,7 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
 
   return {
     orders: transformedOrders,
-    loading: paginatedState.loading || (!settings),
+    loading: filtersLoading || paginatedState.loading,
     error: paginatedState.error,
     hasMore: paginatedState.hasMore,
     totalRecords: paginatedState.totalRecords,

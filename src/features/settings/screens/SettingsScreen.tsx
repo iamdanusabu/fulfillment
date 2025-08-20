@@ -9,7 +9,9 @@ import {
   ScrollView,
   Switch,
   Modal,
-  FlatList
+  FlatList,
+  SafeAreaView,
+  Dimensions
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -49,6 +51,8 @@ const ALL_SOURCES = [
 const ALL_STATUSES = ['Initiated', 'Sent for Processing', 'Processing', 'Ready', 'Delivered', 'Cancelled'];
 
 const ALL_PAYMENT_STATUSES = ['PAID', 'UNPAID', 'PENDING', 'REFUNDED'];
+
+const { height } = Dimensions.get('window');
 
 export default function SettingsScreen() {
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
@@ -102,7 +106,6 @@ export default function SettingsScreen() {
     try {
       await AsyncStorage.setItem('orderFilterSettings', JSON.stringify(newFilterSettings));
       setFilterSettings(newFilterSettings);
-      Alert.alert('Success', 'Filter settings saved successfully!');
     } catch (error) {
       console.error('Error saving filter settings:', error);
       Alert.alert('Error', 'Failed to save filter settings. Please try again.');
@@ -185,48 +188,93 @@ export default function SettingsScreen() {
     );
   }
 
+  const renderFilterOption = ({ item }: { item: string }) => {
+    const isSelected = filterSettings[activeFilterType].includes(item);
+    
+    return (
+      <TouchableOpacity 
+        style={styles.filterOption}
+        onPress={() => toggleFilterItem(item)}
+        activeOpacity={0.7}
+      >
+        <Text style={[styles.filterOptionText, isSelected && styles.filterOptionTextSelected]}>
+          {item}
+        </Text>
+        <View style={[styles.checkbox, isSelected && styles.checkboxSelected]}>
+          {isSelected && (
+            <MaterialIcons name="check" size={14} color="#fff" />
+          )}
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <ScrollView style={styles.container}>
       {/* Filter Settings Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Order Filters</Text>
         
-        <TouchableOpacity style={styles.settingItem} onPress={() => openFilterModal('sources')}>
+        <TouchableOpacity 
+          style={styles.settingItem} 
+          onPress={() => openFilterModal('sources')}
+          activeOpacity={0.7}
+        >
           <View style={styles.settingLabelContainer}>
-            <MaterialIcons name="store" size={20} color="#666" />
+            <View style={[styles.iconContainer, { backgroundColor: '#e3f2fd' }]}>
+              <MaterialIcons name="store" size={18} color="#1976d2" />
+            </View>
             <Text style={styles.settingLabel}>Order Sources</Text>
           </View>
           <View style={styles.filterSummary}>
-            <Text style={styles.filterSummaryText}>
-              {filterSettings.sources.length} / {ALL_SOURCES.length} selected
-            </Text>
-            <MaterialIcons name="arrow-forward-ios" size={16} color="#666" />
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>
+                {filterSettings.sources.length}/{ALL_SOURCES.length}
+              </Text>
+            </View>
+            <MaterialIcons name="chevron-right" size={20} color="#9e9e9e" />
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.settingItem} onPress={() => openFilterModal('statuses')}>
+        <TouchableOpacity 
+          style={styles.settingItem} 
+          onPress={() => openFilterModal('statuses')}
+          activeOpacity={0.7}
+        >
           <View style={styles.settingLabelContainer}>
-            <MaterialIcons name="flag" size={20} color="#666" />
+            <View style={[styles.iconContainer, { backgroundColor: '#f3e5f5' }]}>
+              <MaterialIcons name="flag" size={18} color="#7b1fa2" />
+            </View>
             <Text style={styles.settingLabel}>Order Statuses</Text>
           </View>
           <View style={styles.filterSummary}>
-            <Text style={styles.filterSummaryText}>
-              {filterSettings.statuses.length} / {ALL_STATUSES.length} selected
-            </Text>
-            <MaterialIcons name="arrow-forward-ios" size={16} color="#666" />
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>
+                {filterSettings.statuses.length}/{ALL_STATUSES.length}
+              </Text>
+            </View>
+            <MaterialIcons name="chevron-right" size={20} color="#9e9e9e" />
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.settingItem} onPress={() => openFilterModal('paymentStatuses')}>
+        <TouchableOpacity 
+          style={[styles.settingItem, styles.lastSettingItem]} 
+          onPress={() => openFilterModal('paymentStatuses')}
+          activeOpacity={0.7}
+        >
           <View style={styles.settingLabelContainer}>
-            <MaterialIcons name="payment" size={20} color="#666" />
+            <View style={[styles.iconContainer, { backgroundColor: '#e8f5e8' }]}>
+              <MaterialIcons name="payment" size={18} color="#388e3c" />
+            </View>
             <Text style={styles.settingLabel}>Payment Statuses</Text>
           </View>
           <View style={styles.filterSummary}>
-            <Text style={styles.filterSummaryText}>
-              {filterSettings.paymentStatuses.length} / {ALL_PAYMENT_STATUSES.length} selected
-            </Text>
-            <MaterialIcons name="arrow-forward-ios" size={16} color="#666" />
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>
+                {filterSettings.paymentStatuses.length}/{ALL_PAYMENT_STATUSES.length}
+              </Text>
+            </View>
+            <MaterialIcons name="chevron-right" size={20} color="#9e9e9e" />
           </View>
         </TouchableOpacity>
       </View>
@@ -234,20 +282,29 @@ export default function SettingsScreen() {
       {/* Account Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Account</Text>
-        <TouchableOpacity style={styles.settingItem} onPress={handleLogout}>
+        <TouchableOpacity 
+          style={[styles.settingItem, styles.lastSettingItem]} 
+          onPress={handleLogout}
+          activeOpacity={0.7}
+        >
           <View style={styles.settingLabelContainer}>
-            <MaterialIcons name="logout" size={20} color="#dc3545" />
+            <View style={[styles.iconContainer, { backgroundColor: '#ffebee' }]}>
+              <MaterialIcons name="logout" size={18} color="#d32f2f" />
+            </View>
             <Text style={[styles.settingLabel, styles.logoutText]}>Logout</Text>
           </View>
+          <MaterialIcons name="chevron-right" size={20} color="#9e9e9e" />
         </TouchableOpacity>
       </View>
 
       {/* About Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>About</Text>
-        <View style={styles.settingItem}>
+        <View style={[styles.settingItem, styles.lastSettingItem]}>
           <View style={styles.settingLabelContainer}>
-            <MaterialIcons name="info" size={20} color="#666" />
+            <View style={[styles.iconContainer, { backgroundColor: '#f5f5f5' }]}>
+              <MaterialIcons name="info" size={18} color="#616161" />
+            </View>
             <Text style={styles.settingLabel}>Version</Text>
           </View>
           <Text style={styles.settingValueText}>1.0.0</Text>
@@ -258,48 +315,60 @@ export default function SettingsScreen() {
       <Modal
         visible={showFilterModal}
         animationType="slide"
-        presentationStyle="pageSheet"
+        presentationStyle="formSheet"
+        onRequestClose={() => setShowFilterModal(false)}
       >
-        <View style={styles.modalContainer}>
+        <SafeAreaView style={styles.modalContainer}>
+          {/* Modal Header */}
           <View style={styles.modalHeader}>
-            <TouchableOpacity onPress={() => setShowFilterModal(false)}>
-              <Text style={styles.modalCancelText}>Cancel</Text>
+            <TouchableOpacity 
+              style={styles.headerButton}
+              onPress={() => setShowFilterModal(false)}
+              activeOpacity={0.7}
+            >
+              <MaterialIcons name="close" size={24} color="#666" />
             </TouchableOpacity>
             <Text style={styles.modalTitle}>{getFilterTitle()}</Text>
-            <TouchableOpacity onPress={() => setShowFilterModal(false)}>
-              <Text style={styles.modalDoneText}>Done</Text>
+            <View style={styles.headerButton} />
+          </View>
+
+          {/* Quick Actions */}
+          <View style={styles.quickActions}>
+            <TouchableOpacity 
+              style={[styles.quickActionButton, styles.primaryButton]}
+              onPress={selectAllFilters}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.primaryButtonText}>Select All</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.quickActionButton, styles.secondaryButton]}
+              onPress={clearAllFilters}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.secondaryButtonText}>Clear All</Text>
             </TouchableOpacity>
           </View>
 
-          <View style={styles.modalActions}>
-            <TouchableOpacity style={styles.actionButton} onPress={selectAllFilters}>
-              <Text style={styles.actionButtonText}>Select All</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.actionButton} onPress={clearAllFilters}>
-              <Text style={styles.actionButtonText}>Clear All</Text>
-            </TouchableOpacity>
+          {/* Filter Options */}
+          <View style={styles.listContainer}>
+            <FlatList
+              data={getFilterOptions()}
+              keyExtractor={(item) => item}
+              renderItem={renderFilterOption}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.listContent}
+              ItemSeparatorComponent={() => <View style={styles.separator} />}
+            />
           </View>
 
-          <FlatList
-            data={getFilterOptions()}
-            keyExtractor={(item) => item}
-            renderItem={({ item }) => (
-              <TouchableOpacity 
-                style={styles.filterOption}
-                onPress={() => toggleFilterItem(item)}
-              >
-                <Text style={styles.filterOptionText}>{item}</Text>
-                <Switch
-                  value={filterSettings[activeFilterType].includes(item)}
-                  onValueChange={() => toggleFilterItem(item)}
-                  trackColor={{ false: '#767577', true: '#007AFF' }}
-                  thumbColor={filterSettings[activeFilterType].includes(item) ? '#ffffff' : '#f4f3f4'}
-                />
-              </TouchableOpacity>
-            )}
-            style={styles.filterList}
-          />
-        </View>
+          {/* Selection Summary */}
+          <View style={styles.selectionSummary}>
+            <Text style={styles.summaryText}>
+              {filterSettings[activeFilterType].length} of {getFilterOptions().length} selected
+            </Text>
+          </View>
+        </SafeAreaView>
       </Modal>
     </ScrollView>
   );
@@ -308,7 +377,7 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f7fa',
+    backgroundColor: '#f8f9fa',
   },
   loadingContainer: {
     flex: 1,
@@ -319,24 +388,24 @@ const styles = StyleSheet.create({
   section: {
     backgroundColor: '#fff',
     marginHorizontal: 16,
-    marginBottom: 16,
-    borderRadius: 12,
+    marginTop: 24,
+    borderRadius: 16,
     overflow: 'hidden',
-    elevation: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: '600',
-    color: '#333',
+    color: '#8e8e93',
     paddingHorizontal: 20,
     paddingTop: 20,
-    paddingBottom: 12,
+    paddingBottom: 8,
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 0.8,
   },
   settingItem: {
     flexDirection: 'row',
@@ -347,101 +416,159 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#f0f0f0',
   },
+  lastSettingItem: {
+    borderBottomWidth: 0,
+  },
   settingLabelContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
   },
+  iconContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
   settingLabel: {
     fontSize: 16,
-    color: '#333',
-    marginLeft: 12,
-  },
-  settingValue: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    color: '#1a1a1a',
+    fontWeight: '500',
   },
   settingValueText: {
     fontSize: 16,
-    color: '#666',
-    marginRight: 8,
+    color: '#8e8e93',
+    fontWeight: '400',
   },
   logoutText: {
-    color: '#dc3545',
+    color: '#d32f2f',
   },
   filterSummary: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
   },
-  filterSummaryText: {
-    fontSize: 14,
-    color: '#666',
+  badge: {
+    backgroundColor: '#f0f0f0',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
   },
+  badgeText: {
+    fontSize: 12,
+    color: '#666',
+    fontWeight: '500',
+  },
+
+  // Modal Styles
   modalContainer: {
     flex: 1,
-    backgroundColor: '#f5f7fa',
+    backgroundColor: '#fff',
   },
   modalHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#fff',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#e9ecef',
+    borderBottomColor: '#e5e5ea',
+  },
+  headerButton: {
+    width: 32,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '600',
-    color: '#333',
+    color: '#1a1a1a',
   },
-  modalCancelText: {
-    fontSize: 16,
-    color: '#666',
-  },
-  modalDoneText: {
-    fontSize: 16,
-    color: '#007AFF',
-    fontWeight: '600',
-  },
-  modalActions: {
+  quickActions: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    padding: 16,
-    backgroundColor: '#fff',
-    marginBottom: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    gap: 12,
   },
-  actionButton: {
-    paddingVertical: 8,
+  quickActionButton: {
+    flex: 1,
+    paddingVertical: 12,
     paddingHorizontal: 16,
-    backgroundColor: '#f8f9fa',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#dee2e6',
-  },
-  actionButtonText: {
-    fontSize: 14,
-    color: '#495057',
-    fontWeight: '500',
-  },
-  filterList: {
-    backgroundColor: '#fff',
-    marginHorizontal: 16,
     borderRadius: 12,
+    alignItems: 'center',
+  },
+  primaryButton: {
+    backgroundColor: '#007aff',
+  },
+  secondaryButton: {
+    backgroundColor: '#f0f0f0',
+  },
+  primaryButtonText: {
+    fontSize: 15,
+    color: '#fff',
+    fontWeight: '600',
+  },
+  secondaryButtonText: {
+    fontSize: 15,
+    color: '#333',
+    fontWeight: '600',
+  },
+  listContainer: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  listContent: {
+    paddingVertical: 8,
   },
   filterOption: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#f0f0f0',
+    paddingVertical: 14,
+    paddingHorizontal: 4,
   },
   filterOptionText: {
     fontSize: 16,
-    color: '#333',
+    color: '#1a1a1a',
+    fontWeight: '400',
     flex: 1,
+  },
+  filterOptionTextSelected: {
+    color: '#007aff',
+    fontWeight: '500',
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#d1d1d6',
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkboxSelected: {
+    backgroundColor: '#007aff',
+    borderColor: '#007aff',
+  },
+  separator: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: '#f0f0f0',
+    marginLeft: 4,
+  },
+  selectionSummary: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#e5e5ea',
+    alignItems: 'center',
+  },
+  summaryText: {
+    fontSize: 14,
+    color: '#8e8e93',
+    fontWeight: '500',
   },
 });

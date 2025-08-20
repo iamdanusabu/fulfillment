@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -54,63 +55,34 @@ export const useOrderFilters = () => {
 
   // Convert settings to API parameters
   const getFilterParams = () => {
-    // If still loading, don't apply any filters
-    if (loading) {
-      return {
-        source: undefined,
-        status: undefined,
-        paymentStatus: undefined
-      };
-    }
+    return {
+      source: settings.sources.length > 0 ? settings.sources.join(',') : undefined,
+      status: settings.statuses.length > 0 ? settings.statuses.join(',') : undefined,
+      paymentStatus: settings.paymentStatuses.length > 0 ? settings.paymentStatuses.join(',') : undefined
+    };
+  };
 
-    const allSources = [
-      'Shopify', 'Tapin2', 'Breakaway', 'bigcommerce', 'Ecwid', 
-      'PHONE ORDER', 'DELIVERY', 'BAR TAB', 'TIKT', 'TABLE', 
-      'OTHER', 'MANUAL', 'FanVista', 'QSR'
-    ];
-    const allStatuses = ['Initiated', 'Sent for Processing'];
-    const allPaymentStatuses = ['PAID', 'UNPAID'];
-
-    // Check if user has selected all sources (default state)
-    const hasAllSources = settings.sources.length === allSources.length && 
-      allSources.every(source => settings.sources.includes(source));
-    
-    // Check if user has selected all statuses (default state)
-    const hasAllStatuses = settings.statuses.length === allStatuses.length && 
-      allStatuses.every(status => settings.statuses.includes(status));
-    
-    // Check if user has selected all payment statuses (default state)
-    const hasAllPaymentStatuses = settings.paymentStatuses.length === allPaymentStatuses.length && 
-      allPaymentStatuses.every(status => settings.paymentStatuses.includes(status));
-
-    // Always include filter parameters if user has made specific selections
-    const result: { source?: string; status?: string; paymentStatus?: string } = {};
-
-    // Include source parameter if not all sources are selected OR if specific sources are chosen
-    if (!hasAllSources && settings.sources.length > 0) {
-      result.source = settings.sources.join(',');
-    }
-
-    // Include status parameter if not all statuses are selected OR if specific statuses are chosen
-    if (!hasAllStatuses && settings.statuses.length > 0) {
-      result.status = settings.statuses.join(',');
-    }
-
-    // Include payment status parameter if not all payment statuses are selected OR if specific ones are chosen
-    if (!hasAllPaymentStatuses && settings.paymentStatuses.length > 0) {
-      result.paymentStatus = settings.paymentStatuses.join(',');
-    }
-
-    console.log('Filter params generated:', result);
-    console.log('Current settings:', settings);
-
-    return result;
+  // Helper function to verify current filter settings
+  const verifyFilters = () => {
+    const params = getFilterParams();
+    console.log('=== Current Filter Settings ===');
+    console.log('Sources:', settings.sources.length > 0 ? settings.sources : 'All sources (no filter)');
+    console.log('Statuses:', settings.statuses.length > 0 ? settings.statuses : 'All statuses (no filter)');
+    console.log('Payment Statuses:', settings.paymentStatuses.length > 0 ? settings.paymentStatuses : 'All payment statuses (no filter)');
+    console.log('API Parameters:', params);
+    console.log('================================');
+    return {
+      settings,
+      apiParams: params,
+      totalActiveFilters: settings.sources.length + settings.statuses.length + settings.paymentStatuses.length
+    };
   };
 
   return {
     settings,
     loading,
     getFilterParams,
-    refreshSettings: loadSettings
+    refreshSettings: loadSettings,
+    verifyFilters
   };
 };

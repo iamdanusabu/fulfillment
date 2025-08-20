@@ -13,7 +13,7 @@ interface UsePaginatedOrdersParams {
 }
 
 export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
-  const { settings, loading: filtersLoading, getFilterParams } = useOrderFilters();
+  const { settings, getFilterParams } = useOrderFilters();
   const config = getConfig();
 
   // Build parameters that react to filter settings changes
@@ -26,28 +26,27 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
       pagination: 'true',
     };
 
-    // Only add filter params if they're not the default "all" selections
-    // URL params take precedence over settings
-    if (params.source) {
-      result.source = params.source;
-    } else if (filterParams.source) {
+    // Add filter params if they exist (user has made selections)
+    if (filterParams.source) {
       result.source = filterParams.source;
     }
-    
-    if (params.status) {
-      result.status = params.status;
-    } else if (filterParams.status) {
+    if (filterParams.status) {
       result.status = filterParams.status;
     }
-    
     if (filterParams.paymentStatus) {
       result.paymentStatus = filterParams.paymentStatus;
     }
 
-    console.log('API params for orders:', result);
+    // Override with URL params if provided (URL params take precedence)
+    if (params.source) {
+      result.source = params.source;
+    }
+    if (params.status) {
+      result.status = params.status;
+    }
 
     return result;
-  }, [settings, params.source, params.status, params.hasFulfilmentJob, getFilterParams, filtersLoading]);
+  }, [settings, params.source, params.status, params.hasFulfilmentJob, getFilterParams]);
 
   const paginatedState = usePaginatedFetcher<any>(
     config.endpoints.orders,
@@ -65,7 +64,7 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
 
   return {
     orders: transformedOrders,
-    loading: paginatedState.loading || filtersLoading,
+    loading: paginatedState.loading || (!settings),
     error: paginatedState.error,
     hasMore: paginatedState.hasMore,
     totalRecords: paginatedState.totalRecords,

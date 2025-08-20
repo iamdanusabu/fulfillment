@@ -154,11 +154,6 @@ export default function LoginScreen() {
               <Text style={styles.loginButtonText}>Sign In</Text>
             )}
           </TouchableOpacity>
-
-          {/* Forgot Password Link */}
-          <TouchableOpacity style={styles.forgotPasswordContainer}>
-            <Text style={styles.forgotPasswordText}>Forgot password?</Text>
-          </TouchableOpacity>
         </View>
 
         {/* Bottom Spacer */}
@@ -230,15 +225,6 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 17,
     fontWeight: '600',
-  },
-  forgotPasswordContainer: {
-    alignItems: 'center',
-    paddingVertical: 12,
-  },
-  forgotPasswordText: {
-    fontSize: 15,
-    color: '#0077ED',
-    fontWeight: '400',
   },
   bottomSpacer: {
     height: 40,

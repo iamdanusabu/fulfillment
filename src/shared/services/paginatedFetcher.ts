@@ -233,12 +233,22 @@ export const usePaginatedFetcher = <T>(
 
   // Initial load - only if not skipped and there are params to use
   useEffect(() => {
-    if (!skipInitialFetch) {
+    if (!skipInitialFetch && endpoint && endpoint.trim() !== '') {
       fetchData(1);
     }
   }, [endpoint, skipInitialFetch]);
 
   const fetchData = async (pageNo: number = 1, append: boolean = false, customParams?: Record<string, any>) => {
+    // Skip fetch if endpoint is empty (indicates no filters set)
+    if (!endpoint || endpoint.trim() === '') {
+      console.log('=== usePaginatedFetcher fetchData SKIPPED ===');
+      console.log('No endpoint provided, skipping fetch');
+      setData([]);
+      setHasNoResults(true);
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);

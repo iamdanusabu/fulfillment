@@ -99,7 +99,7 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
   ]);
 
   const paginatedState = usePaginatedFetcher<any>(
-    config.endpoints.orders,
+    shouldSkipInitialFetch ? '' : config.endpoints.orders, // Pass empty endpoint when should skip
     {
       pageSize: 20,
       initialParams: apiParams,

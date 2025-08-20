@@ -32,8 +32,8 @@ const OrderSearchModal = ({ visible, onClose, onOrderSelect }) => {
     error: searchError, 
     fetchData: searchOrders 
   } = usePaginatedSearch({ 
-    searchMode: 'MATCH_WITH', 
-    searchFields: 'ORDERID',
+    searchMode: 'contains', 
+    searchFields: 'orderID',
     query: orderIdInput,
     searchOnMount: false,
   });
@@ -89,7 +89,8 @@ const OrderSearchModal = ({ visible, onClose, onOrderSelect }) => {
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
                 <TouchableOpacity onPress={() => handleOrderPress(item)} style={styles.resultItem}>
-                  <Text style={styles.resultText}>#{item.orderID} - {item.customer} ({item.orderNumber})</Text>
+                  <Text style={styles.resultText}>#{item.orderNumber} - {item.customer}</Text>
+                  <Text style={styles.resultSubText}>ID: {item.orderID} • {item.source}</Text>
                 </TouchableOpacity>
               )}
               style={styles.resultsList}
@@ -299,25 +300,18 @@ export default function OrdersScreen() {
       {/* Search Bar */}
       <View style={styles.searchContainer}>
         <MaterialIcons name="search" size={16} color="#666" style={styles.searchIcon} />
-        <TextInput
+        <TouchableOpacity 
           style={styles.searchInput}
-          placeholder="Search orders..."
-          value={searchText}
-          onChangeText={setSearchText}
-          clearButtonMode="while-editing"
-        />
+          onPress={handleSearchModalOpen}
+        >
+          <Text style={styles.searchPlaceholder}>Search orders...</Text>
+        </TouchableOpacity>
         <TouchableOpacity 
           style={styles.qrButton} 
           onPress={startScanning}
           disabled={qrLoading}
         >
           <MaterialIcons name="qr-code-scanner" size={16} color="#007AFF" />
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.searchButton} 
-          onPress={handleSearchModalOpen}
-        >
-          <MaterialIcons name="search" size={16} color="#007AFF" />
         </TouchableOpacity>
       </View>
 
@@ -415,7 +409,12 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 14,
-    paddingVertical: 0,
+    paddingVertical: 8,
+    justifyContent: 'center',
+  },
+  searchPlaceholder: {
+    fontSize: 14,
+    color: '#666',
   },
   qrButton: {
     padding: 4,
@@ -643,13 +642,19 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   resultItem: {
-    paddingVertical: 10,
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
   resultText: {
     fontSize: 14,
     color: '#333',
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  resultSubText: {
+    fontSize: 12,
+    color: '#666',
   },
   resultsList: {
     marginTop: 10,

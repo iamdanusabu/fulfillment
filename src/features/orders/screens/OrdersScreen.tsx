@@ -19,6 +19,7 @@ import { picklistApi } from '../../picklist/api/picklistApi';
 import { QRCodeScanner } from '../components/QRCodeScanner';
 import { useQRScanner } from '../hooks/useQRScanner';
 import { AppToolbar } from '../../../components/layout/AppToolbar';
+import { usePaginatedSearch } from '../hooks/usePaginatedSearch';
 
 export default function OrdersScreen() {
   const params = useLocalSearchParams();
@@ -37,9 +38,25 @@ export default function OrdersScreen() {
     status: params.status as string,
     hasFulfilmentJob: params.hasFulfilmentJob as string
   });
+
+  const { 
+    searchOrders, 
+    searchLoading, 
+    searchHasMore, 
+    searchCurrentPage,
+    searchTotalPages,
+    loadMoreSearch, 
+    refreshSearch,
+    searchTerm,
+    setSearchTerm
+  } = usePaginatedSearch({ 
+    source: params.source as string,
+    status: params.status as string,
+    hasFulfilmentJob: params.hasFulfilmentJob as string,
+  });
+
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
   const [isPicklistMode, setIsPicklistMode] = useState(false);
-  const [searchText, setSearchText] = useState('');
   const [refreshing, setRefreshing] = useState(false);
 
   // QR Scanner integration
@@ -48,8 +65,6 @@ export default function OrdersScreen() {
   useEffect(() => {
     setIsPicklistMode(params.mode === 'picklist');
   }, [params.mode]);
-
-  // Removed aggressive refresh on focus - let users manually refresh via pull-to-refresh
 
   const toggleOrderSelection = (orderId: string) => {
     if (!isPicklistMode) return;
@@ -76,31 +91,30 @@ export default function OrdersScreen() {
     router.push(`/picklist/location-selection?orderIds=${orderIdsParam}`);
   };
 
-  const filteredOrders = useMemo(() => {
-    if (!searchText.trim()) return orders;
-
-    return orders.filter(order => 
-      order.orderNumber.toLowerCase().includes(searchText.toLowerCase()) ||
-      order.customer.toLowerCase().includes(searchText.toLowerCase()) ||
-      order.source.toLowerCase().includes(searchText.toLowerCase())
-    );
-  }, [orders, searchText]);
-
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
-      await refresh();
+      if (searchTerm) {
+        await refreshSearch();
+      } else {
+        await refresh();
+      }
     } finally {
       setRefreshing(false);
     }
   };
 
   const handleLoadMore = useCallback(() => {
-    if (hasMore && !loading) {
-      loadMore();
+    if (searchTerm) {
+      if (searchHasMore && !searchLoading) {
+        loadMoreSearch();
+      }
+    } else {
+      if (hasMore && !loading) {
+        loadMore();
+      }
     }
-  }, [hasMore, loading, loadMore]);
-
+  }, [hasMore, loading, loadMore, searchHasMore, searchLoading, loadMoreSearch, searchTerm]);
 
   const getPaymentStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
@@ -187,7 +201,11 @@ export default function OrdersScreen() {
     </TouchableOpacity>
   );
 
-  if (loading && orders.length === 0) {
+  const currentOrders = searchTerm ? searchOrders : orders;
+  const currentLoading = searchTerm ? searchLoading : loading;
+  const currentHasMore = searchTerm ? searchHasMore : hasMore;
+
+  if (currentLoading && currentOrders.length === 0) {
     return (
       <View style={styles.loadingContainer}>
         <Text>Loading orders...</Text>
@@ -204,8 +222,8 @@ export default function OrdersScreen() {
         <TextInput
           style={styles.searchInput}
           placeholder="Search orders..."
-          value={searchText}
-          onChangeText={setSearchText}
+          value={searchTerm}
+          onChangeText={setSearchTerm}
           clearButtonMode="while-editing"
         />
         <TouchableOpacity 
@@ -227,7 +245,7 @@ export default function OrdersScreen() {
 
 
       <FlatList
-        data={filteredOrders}
+        data={currentOrders}
         renderItem={renderOrderItem}
         keyExtractor={(item) => item.id}
         refreshControl={
@@ -239,7 +257,7 @@ export default function OrdersScreen() {
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.1}
         ListFooterComponent={() => {
-          if (loading && orders.length > 0) {
+          if (currentLoading && currentOrders.length > 0) {
             return (
               <View style={styles.loadingFooter}>
                 <ActivityIndicator color="#007AFF" />
@@ -247,7 +265,7 @@ export default function OrdersScreen() {
               </View>
             );
           }
-          if (!hasMore && orders.length > 0) {
+          if (!currentHasMore && currentOrders.length > 0) {
             return <Text style={styles.endText}>No more orders</Text>;
           }
           return null;

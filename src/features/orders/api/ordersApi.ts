@@ -96,8 +96,8 @@ export const ordersApi = {
       if (data && data.data && Array.isArray(data.data) && data.data.length > 0) {
         return transformOrder(data.data[0]);
       }
-      // Handle direct object response
-      else if (data && !Array.isArray(data)) {
+      // Handle direct object response (non-paginated)
+      else if (data && !Array.isArray(data) && data.orderID) {
         return transformOrder(data);
       }
 

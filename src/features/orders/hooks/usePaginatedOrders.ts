@@ -91,8 +91,10 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
 
   // Update parameters when apiParams change
   React.useEffect(() => {
-    paginatedState.updateParams(apiParams);
-  }, [apiParams]);
+    if (paginatedState.updateParams) {
+      paginatedState.updateParams(apiParams);
+    }
+  }, [JSON.stringify(apiParams), paginatedState.updateParams]);
 
   // Transform the raw data to Order objects
   const transformedOrders = React.useMemo(() => 

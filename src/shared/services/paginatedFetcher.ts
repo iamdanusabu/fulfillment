@@ -1,226 +1,181 @@
-import { fetchWithToken } from "./fetchWithToken";
-import { PaginatedResponse } from "../types";
+
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { fetchWithToken } from './fetchWithToken';
 
 interface PaginatedFetcherOptions {
   pageSize?: number;
-  initialParams?: Record<string, string | number>;
+  initialParams?: Record<string, any>;
 }
 
-interface PaginatedState<T> {
+interface PaginatedResponse<T> {
   data: T[];
-  currentPage: number;
-  totalPages: number;
   totalRecords: number;
-  hasMore: boolean;
-  loading: boolean;
-  error: string | null;
+  totalPages: number;
+  pageNo: number;
+  nextPageURL?: string;
 }
 
 export class PaginatedFetcher<T> {
-  private state: PaginatedState<T> = {
-    data: [],
-    currentPage: 0,
-    totalPages: 1,
-    totalRecords: 0,
-    hasMore: true,
-    loading: false,
-    error: null,
-  };
+  private baseUrl: string;
+  private params: Record<string, any>;
+  private pageSize: number;
+  private data: T[] = [];
+  private currentPage = 1;
+  private totalPages = 1;
+  private totalRecords = 0;
+  private hasMore = true;
+  private isLoading = false;
+  private error: Error | null = null;
+  private subscribers: Set<() => void> = new Set();
 
-  private url: string;
-  private options: PaginatedFetcherOptions;
-  private subscribers: Array<(state: PaginatedState<T>) => void> = [];
-
-  constructor(url: string, options: PaginatedFetcherOptions = {}) {
-    this.url = url;
-    this.options = {
-      pageSize: 20,
-      ...options,
-    };
+  constructor(baseUrl: string, options: PaginatedFetcherOptions = {}) {
+    this.baseUrl = baseUrl;
+    this.pageSize = options.pageSize || 20;
+    this.params = { ...options.initialParams };
   }
 
-  subscribe(callback: (state: PaginatedState<T>) => void) {
-    this.subscribers.push(callback);
-    return () => {
-      this.subscribers = this.subscribers.filter((sub) => sub !== callback);
-    };
+  subscribe(callback: () => void) {
+    this.subscribers.add(callback);
+    return () => this.subscribers.delete(callback);
   }
 
   private notify() {
-    this.subscribers.forEach((callback) => callback({ ...this.state }));
+    this.subscribers.forEach(callback => callback());
   }
 
-  private updateState(updates: Partial<PaginatedState<T>>) {
-    this.state = { ...this.state, ...updates };
-    this.notify();
-  }
-
-  async fetchPage(pageNo: number = 1, append: boolean = false): Promise<void> {
-    if (this.state.loading || !this.url) return;
-
-    this.updateState({
-      loading: true,
-      error: null,
-    });
-
-    try {
-      const params = new URLSearchParams();
-
-      // Add pagination params
-      params.append("pageNo", pageNo.toString());
-      if (this.options.pageSize) {
-        params.append("pageSize", this.options.pageSize.toString());
-      }
-
-      // Add initial params
-      if (this.options.initialParams) {
-        Object.entries(this.options.initialParams).forEach(([key, value]) => {
-          params.append(key, value.toString());
-        });
-      }
-
-      const response: PaginatedResponse<T> = await fetchWithToken(
-        `${this.url}?${params.toString()}`,
-      );
-
-      const newData = append
-        ? [...this.state.data, ...response.data]
-        : response.data;
-
-      this.updateState({
-        data: newData,
-        currentPage: response.pageNo,
-        totalPages: response.totalPages,
-        totalRecords: response.totalRecords,
-        hasMore: response.pageNo < response.totalPages,
-        loading: false,
-      });
-    } catch (error) {
-      this.updateState({
-        loading: false,
-        error: error instanceof Error ? error.message : "Failed to fetch data",
-      });
-    }
-  }
-
-  async loadMore(): Promise<void> {
-    if (!this.state.hasMore || this.state.loading) return;
-    await this.fetchPage(this.state.currentPage + 1, true);
-  }
-
-  async refresh(): Promise<void> {
-    await this.fetchPage(1, false);
-  }
-
-  updateParams(newParams: Record<string, string | number>) {
-    this.options.initialParams = {
-      ...this.options.initialParams,
-      ...newParams,
-    };
-  }
-
-  updateParamsAndReset(newParams: Record<string, string | number>) {
-    this.updateParams(newParams);
+  updateParams(newParams: Record<string, any>) {
+    this.params = { ...this.params, ...newParams };
     this.reset();
   }
 
-  reset() {
-    this.updateState({
-      data: [],
-      currentPage: 0,
-      totalPages: 1,
-      totalRecords: 0,
-      hasMore: true,
-      loading: false,
-      error: null,
-    });
+  private reset() {
+    this.data = [];
+    this.currentPage = 1;
+    this.totalPages = 1;
+    this.totalRecords = 0;
+    this.hasMore = true;
+    this.error = null;
   }
 
-  getState(): PaginatedState<T> {
-    return { ...this.state };
+  async refresh() {
+    this.reset();
+    return this.loadPage(1);
+  }
+
+  async loadMore() {
+    if (this.isLoading || !this.hasMore) return;
+    return this.loadPage(this.currentPage + 1);
+  }
+
+  private async loadPage(page: number) {
+    if (this.isLoading) return;
+
+    this.isLoading = true;
+    this.error = null;
+    this.notify();
+
+    try {
+      const queryParams = new URLSearchParams({
+        ...this.params,
+        pageNo: page.toString(),
+        pageSize: this.pageSize.toString(),
+      });
+
+      const url = `${this.baseUrl}?${queryParams.toString()}`;
+      const response: PaginatedResponse<T> = await fetchWithToken(url);
+
+      if (page === 1) {
+        this.data = response.data || [];
+      } else {
+        this.data = [...this.data, ...(response.data || [])];
+      }
+
+      this.currentPage = response.pageNo || page;
+      this.totalPages = response.totalPages || 1;
+      this.totalRecords = response.totalRecords || 0;
+      this.hasMore = this.currentPage < this.totalPages;
+
+    } catch (error) {
+      this.error = error instanceof Error ? error : new Error('Failed to fetch data');
+      if (page === 1) {
+        this.data = [];
+      }
+    } finally {
+      this.isLoading = false;
+      this.notify();
+    }
+  }
+
+  getState() {
+    return {
+      data: this.data,
+      loading: this.isLoading,
+      error: this.error,
+      hasMore: this.hasMore,
+      currentPage: this.currentPage,
+      totalPages: this.totalPages,
+      totalRecords: this.totalRecords,
+    };
   }
 }
 
-// Hook for React components
-import { useState, useEffect, useRef, useCallback } from "react";
-
-// Define types for the hook's return value
-interface UsePaginatedFetcherReturn<T> {
-  data: T[];
-  loading: boolean;
-  error: string | null;
-  hasMore: boolean;
-  loadMore: () => void;
-}
-
-export const usePaginatedFetcher = <T>(
-  baseUrl: string | null,
-  options: PaginatedFetcherOptions = {},
-): UsePaginatedFetcherReturn<T> => {
-  const fetcherRef = useRef<PaginatedFetcher<T> | null>(null);
-  const [state, setState] = useState<PaginatedState<T>>({
-    data: [],
-    currentPage: 0,
+export function usePaginatedFetcher<T>(
+  baseUrl: string,
+  options: PaginatedFetcherOptions = {}
+) {
+  const [state, setState] = useState({
+    data: [] as T[],
+    loading: false,
+    error: null as Error | null,
+    hasMore: true,
+    currentPage: 1,
     totalPages: 1,
     totalRecords: 0,
-    hasMore: true,
-    loading: false,
-    error: null,
   });
 
-  // Create a stable reference for options to prevent unnecessary re-creation
-  const optionsRef = useRef(options);
-  optionsRef.current = options;
-
-  // Only re-create fetcher when baseUrl changes
-  useEffect(() => {
-    if (!baseUrl) {
-      fetcherRef.current = null;
-      setState({
-        data: [],
-        currentPage: 0,
-        totalPages: 1,
-        totalRecords: 0,
-        hasMore: true,
-        loading: false,
-        error: null,
-      });
-      return;
-    }
-
-    // Create new fetcher instance
-    fetcherRef.current = new PaginatedFetcher<T>(baseUrl, optionsRef.current);
-
-    // Subscribe to state changes
-    const unsubscribe = fetcherRef.current.subscribe((newState) => {
-      setState(newState);
-    });
-
-    // Initial fetch
-    fetcherRef.current.fetchPage(1, false);
-
-    return unsubscribe;
+  // Create fetcher instance only when baseUrl changes
+  const fetcher = useMemo(() => {
+    return new PaginatedFetcher<T>(baseUrl, options);
   }, [baseUrl]);
 
-  // Update params without re-creating the fetcher
+  // Update params when options change without recreating fetcher
   useEffect(() => {
-    if (fetcherRef.current && options.initialParams) {
-      fetcherRef.current.updateParams(options.initialParams);
-      fetcherRef.current.refresh();
+    if (options.initialParams) {
+      fetcher.updateParams(options.initialParams);
     }
-  }, [JSON.stringify(options.initialParams)]);
+  }, [fetcher, JSON.stringify(options.initialParams)]);
+
+  // Subscribe to fetcher state changes
+  useEffect(() => {
+    const updateState = () => {
+      setState(fetcher.getState());
+    };
+
+    const unsubscribe = fetcher.subscribe(updateState);
+    
+    // Initial load
+    fetcher.refresh();
+
+    return unsubscribe;
+  }, [fetcher]);
 
   const loadMore = useCallback(() => {
-    if (fetcherRef.current && !state.loading && state.hasMore) {
-      fetcherRef.current.loadMore();
-    }
-  }, [state.loading, state.hasMore]);
+    return fetcher.loadMore();
+  }, [fetcher]);
+
+  const refresh = useCallback(() => {
+    return fetcher.refresh();
+  }, [fetcher]);
 
   return {
     data: state.data,
     loading: state.loading,
     error: state.error,
     hasMore: state.hasMore,
+    currentPage: state.currentPage,
+    totalPages: state.totalPages,
+    totalRecords: state.totalRecords,
     loadMore,
+    refresh,
   };
-};
+}

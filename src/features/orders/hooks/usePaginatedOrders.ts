@@ -45,7 +45,7 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
     JSON.stringify(settings)
   ]);
 
-  const { data, loading, error, hasMore, loadMore } = usePaginatedFetcher<any>(
+  const { data, loading, error, hasMore, loadMore, refresh } = usePaginatedFetcher<any>(
     config.endpoints.orders,
     {
       pageSize: 20,
@@ -65,5 +65,6 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
     error,
     hasMore,
     loadMore,
+    refresh,
   };
 };

@@ -120,6 +120,7 @@ export default function DashboardScreen() {
         const settings: FilterSettings = JSON.parse(savedSettings);
         sources = settings.sources;
       } else {
+        // Use default sources if no settings saved
         sources = [
           "Shopify",
           "Tapin2",
@@ -189,33 +190,27 @@ export default function DashboardScreen() {
   const loadReadyForPickupCount = async (): Promise<number> => {
     try {
       const savedSettings = await AsyncStorage.getItem("orderFilterSettings");
-      let sources: string[] = [];
+      let sourceParam = "";
 
       if (savedSettings) {
         const settings: FilterSettings = JSON.parse(savedSettings);
-        sources = settings.sources;
-      } else {
-        sources = [
-          "Shopify",
-          "Tapin2",
-          "Breakaway",
-          "bigcommerce",
-          "Ecwid",
-          "PHONE ORDER",
-          "DELIVERY",
-          "BAR TAB",
-          "TIKT",
-          "TABLE",
-          "OTHER",
-          "MANUAL",
-          "FanVista",
-          "QSR",
+        const allSources = [
+          "Shopify", "Tapin2", "Breakaway", "bigcommerce", "Ecwid", 
+          "PHONE ORDER", "DELIVERY", "BAR TAB", "TIKT", "TABLE", 
+          "OTHER", "MANUAL", "FanVista", "QSR"
         ];
+        
+        // Only add source parameter if user hasn't selected all sources
+        const hasAllSources = settings.sources.length === allSources.length && 
+          allSources.every(source => settings.sources.includes(source));
+        
+        if (!hasAllSources && settings.sources.length > 0) {
+          sourceParam = `&source=${encodeURIComponent(settings.sources.join(","))}`;
+        }
       }
 
       const config = getConfig();
-      const sourceParam = sources.join(",");
-      const url = `${config.endpoints.orders}?pageNo=1&pageSize=20&hasFulfilmentJob=true&expand=item%2Cbin%2Clocation_hint%2Cpayment&pagination=true&source=${encodeURIComponent(sourceParam)}&status=Ready&paymentStatus=PAID%2CUNPAID`;
+      const url = `${config.endpoints.orders}?pageNo=1&pageSize=20&hasFulfilmentJob=true&expand=item%2Cbin%2Clocation_hint%2Cpayment&pagination=true${sourceParam}&status=Ready&paymentStatus=PAID%2CUNPAID`;
       const response = await fetchWithToken(url);
       return response?.totalRecords || 0;
     } catch (error) {

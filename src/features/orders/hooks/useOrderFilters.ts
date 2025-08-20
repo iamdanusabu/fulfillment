@@ -54,10 +54,31 @@ export const useOrderFilters = () => {
 
   // Convert settings to API parameters
   const getFilterParams = () => {
+    // Only include parameters if user has made specific selections (not all defaults)
+    const allSources = [
+      'Shopify', 'Tapin2', 'Breakaway', 'bigcommerce', 'Ecwid', 
+      'PHONE ORDER', 'DELIVERY', 'BAR TAB', 'TIKT', 'TABLE', 
+      'OTHER', 'MANUAL', 'FanVista', 'QSR'
+    ];
+    const allStatuses = ['Initiated', 'Sent for Processing'];
+    const allPaymentStatuses = ['PAID', 'UNPAID'];
+
+    // Check if user has selected all sources (default state)
+    const hasAllSources = settings.sources.length === allSources.length && 
+      allSources.every(source => settings.sources.includes(source));
+    
+    // Check if user has selected all statuses (default state)
+    const hasAllStatuses = settings.statuses.length === allStatuses.length && 
+      allStatuses.every(status => settings.statuses.includes(status));
+    
+    // Check if user has selected all payment statuses (default state)
+    const hasAllPaymentStatuses = settings.paymentStatuses.length === allPaymentStatuses.length && 
+      allPaymentStatuses.every(status => settings.paymentStatuses.includes(status));
+
     return {
-      source: settings.sources.length > 0 ? settings.sources.join(',') : undefined,
-      status: settings.statuses.length > 0 ? settings.statuses.join(',') : undefined,
-      paymentStatus: settings.paymentStatuses.length > 0 ? settings.paymentStatuses.join(',') : undefined
+      source: !hasAllSources && settings.sources.length > 0 ? settings.sources.join(',') : undefined,
+      status: !hasAllStatuses && settings.statuses.length > 0 ? settings.statuses.join(',') : undefined,
+      paymentStatus: !hasAllPaymentStatuses && settings.paymentStatuses.length > 0 ? settings.paymentStatuses.join(',') : undefined
     };
   };
 

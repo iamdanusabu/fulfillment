@@ -26,23 +26,22 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
       pagination: 'true',
     };
 
-    // Add filter params if they exist (user has made selections)
-    if (filterParams.source) {
-      result.source = filterParams.source;
-    }
-    if (filterParams.status) {
-      result.status = filterParams.status;
-    }
-    if (filterParams.paymentStatus) {
-      result.paymentStatus = filterParams.paymentStatus;
-    }
-
-    // Override with URL params if provided (URL params take precedence)
+    // Only add filter params if they're not the default "all" selections
+    // URL params take precedence over settings
     if (params.source) {
       result.source = params.source;
+    } else if (filterParams.source) {
+      result.source = filterParams.source;
     }
+    
     if (params.status) {
       result.status = params.status;
+    } else if (filterParams.status) {
+      result.status = filterParams.status;
+    }
+    
+    if (filterParams.paymentStatus) {
+      result.paymentStatus = filterParams.paymentStatus;
     }
 
     return result;

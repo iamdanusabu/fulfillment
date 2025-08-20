@@ -225,9 +225,18 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      
+      {/* Order Sources */}
+      <View style={styles.filterSection}>
+        <View style={styles.filterSectionHeader}>
+          <View style={styles.filterTitleRow}>
+            <MaterialIcons name="filter-list" size={24} color="#007AFF" />
+            <Text style={styles.filterSectionTitle}>Order Filters</Text>
+          </View>
+          <Text style={styles.filterSectionSubtitle}>
+            Configure which order sources and statuses to display
+          </Text>
+        </View>
 
-        {/* Order Sources */}
         <View style={styles.filterCategory}>
           <View style={styles.filterCategoryHeader}>
             <Text style={styles.filterCategoryTitle}>Order Sources</Text>
@@ -266,11 +275,7 @@ export default function SettingsScreen() {
             ))}
           </View>
         </View>
-
-        
       </View>
-
-      
 
       {/* Account Section */}
       <View style={styles.section}>

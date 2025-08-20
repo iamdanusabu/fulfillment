@@ -38,7 +38,6 @@ export default function LocationSelectionScreen() {
           <Text style={[styles.locationType, activeTab === 'stores' ? styles.storeType : styles.warehouseType]}>
             {activeTab === 'stores' ? 'Store' : 'Warehouse'}
           </Text>
-          <Text style={styles.locationAddress}>{item.address}</Text>
         </View>
         <View style={styles.radioContainer}>
           <MaterialIcons
@@ -243,10 +242,6 @@ const styles = StyleSheet.create({
   warehouseType: {
     color: '#6f42c1',
     backgroundColor: '#e2d9f3',
-  },
-  locationAddress: {
-    fontSize: 14,
-    color: '#666',
   },
   radioContainer: {
     padding: 4,

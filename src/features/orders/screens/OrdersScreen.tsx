@@ -177,10 +177,11 @@ export default function OrdersScreen() {
   const filteredOrders = useMemo(() => {
     if (!searchText.trim()) return orders;
 
+    const searchLower = searchText.toLowerCase();
     return orders.filter(order => 
-      (order.orderNumber || '').toLowerCase().includes(searchText.toLowerCase()) ||
-      (order.customer || '').toLowerCase().includes(searchText.toLowerCase()) ||
-      (order.source || '').toLowerCase().includes(searchText.toLowerCase())
+      (order.orderNumber || '').toLowerCase().includes(searchLower) ||
+      (order.customer || '').toLowerCase().includes(searchLower) ||
+      (order.source || '').toLowerCase().includes(searchLower)
     );
   }, [orders, searchText]);
 

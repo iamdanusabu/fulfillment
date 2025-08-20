@@ -42,40 +42,44 @@ export const useOrderFiltersModal = () => {
 
     if (filters.dateRange) {
       const today = new Date();
-      const todayStr = today.toISOString().split('T')[0];
 
       switch (filters.dateRange) {
         case 'today':
-          apiFilters.startDate = todayStr;
-          apiFilters.endDate = todayStr;
+          const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+          const todayEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59);
+          apiFilters.createdFrom = todayStart.toISOString();
+          apiFilters.createdTo = todayEnd.toISOString();
           break;
         case 'yesterday':
           const yesterday = new Date(today);
           yesterday.setDate(yesterday.getDate() - 1);
-          const yesterdayStr = yesterday.toISOString().split('T')[0];
-          apiFilters.startDate = yesterdayStr;
-          apiFilters.endDate = yesterdayStr;
+          const yesterdayStart = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate());
+          const yesterdayEnd = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate(), 23, 59, 59);
+          apiFilters.createdFrom = yesterdayStart.toISOString();
+          apiFilters.createdTo = yesterdayEnd.toISOString();
           break;
         case 'currentMonth':
           const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-          const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-          apiFilters.startDate = firstDay.toISOString().split('T')[0];
-          apiFilters.endDate = lastDay.toISOString().split('T')[0];
+          const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59);
+          apiFilters.createdFrom = firstDay.toISOString();
+          apiFilters.createdTo = lastDay.toISOString();
           break;
         case 'previousMonth':
           const prevMonth = today.getMonth() === 0 ? 11 : today.getMonth() - 1;
           const prevYear = today.getMonth() === 0 ? today.getFullYear() - 1 : today.getFullYear();
           const prevFirstDay = new Date(prevYear, prevMonth, 1);
-          const prevLastDay = new Date(prevYear, prevMonth + 1, 0);
-          apiFilters.startDate = prevFirstDay.toISOString().split('T')[0];
-          apiFilters.endDate = prevLastDay.toISOString().split('T')[0];
+          const prevLastDay = new Date(prevYear, prevMonth + 1, 0, 23, 59, 59);
+          apiFilters.createdFrom = prevFirstDay.toISOString();
+          apiFilters.createdTo = prevLastDay.toISOString();
           break;
         case 'custom':
           if (filters.customDateStart) {
-            apiFilters.startDate = filters.customDateStart;
+            const startDate = new Date(filters.customDateStart);
+            apiFilters.createdFrom = startDate.toISOString();
           }
           if (filters.customDateEnd) {
-            apiFilters.endDate = filters.customDateEnd;
+            const endDate = new Date(filters.customDateEnd + 'T23:59:59');
+            apiFilters.createdTo = endDate.toISOString();
           }
           break;
       }

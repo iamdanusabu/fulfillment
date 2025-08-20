@@ -25,21 +25,6 @@ import { useOrderFiltersModal } from '../hooks/useOrderFiltersModal';
 export default function OrdersScreen() {
   const params = useLocalSearchParams();
   const router = useRouter();
-  const { 
-    orders, 
-    loading, 
-    hasMore, 
-    totalRecords,
-    currentPage,
-    totalPages,
-    loadMore, 
-    refresh 
-  } = usePaginatedOrders({ 
-    source: params.source as string,
-    status: params.status as string,
-    hasFulfilmentJob: params.hasFulfilmentJob as string,
-    additionalFilters: getAPIFilters()
-  });
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
   const [isPicklistMode, setIsPicklistMode] = useState(false);
   const [searchText, setSearchText] = useState('');
@@ -59,6 +44,22 @@ export default function OrdersScreen() {
     getActiveFilterCount,
     getAPIFilters,
   } = useOrderFiltersModal();
+
+  const { 
+    orders, 
+    loading, 
+    hasMore, 
+    totalRecords,
+    currentPage,
+    totalPages,
+    loadMore, 
+    refresh 
+  } = usePaginatedOrders({ 
+    source: params.source as string,
+    status: params.status as string,
+    hasFulfilmentJob: params.hasFulfilmentJob as string,
+    additionalFilters: getAPIFilters()
+  });
 
   useEffect(() => {
     setIsPicklistMode(params.mode === 'picklist');

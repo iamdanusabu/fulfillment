@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -24,7 +23,7 @@ export const useOrderFilters = () => {
 
   useEffect(() => {
     loadSettings();
-    
+
     // Add listener for storage changes to react to settings updates
     const checkStorageChange = setInterval(() => {
       loadSettings();
@@ -55,11 +54,30 @@ export const useOrderFilters = () => {
 
   // Convert settings to API parameters
   const getFilterParams = () => {
-    return {
-      source: settings.sources.length > 0 ? settings.sources.join(',') : undefined,
-      status: settings.statuses.length > 0 ? settings.statuses.join(',') : undefined,
-      paymentStatus: settings.paymentStatuses.length > 0 ? settings.paymentStatuses.join(',') : undefined
-    };
+    const params: Record<string, string> = {};
+
+    // Only add filter params if user has made specific selections
+    // (not the default "all sources" selection)
+    const hasSpecificSourceSelection = settings.sources.length > 0 && 
+      settings.sources.length < DEFAULT_SETTINGS.sources.length;
+
+    const hasSpecificStatusSelection = settings.statuses.length > 0 && 
+      settings.statuses.length < DEFAULT_SETTINGS.statuses.length;
+
+    const hasSpecificPaymentSelection = settings.paymentStatuses.length > 0 && 
+      settings.paymentStatuses.length < DEFAULT_SETTINGS.paymentStatuses.length;
+
+    if (hasSpecificSourceSelection) {
+      params.source = settings.sources.join(',');
+    }
+    if (hasSpecificStatusSelection) {
+      params.status = settings.statuses.join(',');
+    }
+    if (hasSpecificPaymentSelection) {
+      params.paymentStatus = settings.paymentStatuses.join(',');
+    }
+
+    return params;
   };
 
   // Helper function to verify current filter settings

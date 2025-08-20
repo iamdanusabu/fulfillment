@@ -3,10 +3,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface FilterSettings {
   sources: string[];
+  statuses: string[];
+  paymentStatuses: string[];
 }
 
 const DEFAULT_SETTINGS: FilterSettings = {
-  sources: []
+  sources: [
+    'Shopify', 'Tapin2', 'Breakaway', 'bigcommerce', 'Ecwid', 
+    'PHONE ORDER', 'DELIVERY', 'BAR TAB', 'TIKT', 'TABLE', 
+    'OTHER', 'MANUAL', 'FanVista', 'QSR'
+  ],
+  statuses: ['Initiated', 'Sent for Processing'],
+  paymentStatuses: ['PAID', 'UNPAID']
 };
 
 export const useOrderFilters = () => {
@@ -29,14 +37,16 @@ export const useOrderFilters = () => {
       const savedSettings = await AsyncStorage.getItem('orderFilterSettings');
       if (savedSettings) {
         const parsedSettings = JSON.parse(savedSettings);
-        setSettings(parsedSettings);
-      } else {
-        // If no saved settings, use default empty arrays
-        setSettings(DEFAULT_SETTINGS);
+        setSettings(prevSettings => {
+          // Only update if settings actually changed
+          if (JSON.stringify(prevSettings) !== JSON.stringify(parsedSettings)) {
+            return parsedSettings;
+          }
+          return prevSettings;
+        });
       }
     } catch (error) {
       console.error('Error loading filter settings:', error);
-      setSettings(DEFAULT_SETTINGS);
     } finally {
       setLoading(false);
     }
@@ -46,6 +56,8 @@ export const useOrderFilters = () => {
   const getFilterParams = () => {
     return {
       source: settings.sources.length > 0 ? settings.sources.join(',') : undefined,
+      status: settings.statuses.length > 0 ? settings.statuses.join(',') : undefined,
+      paymentStatus: settings.paymentStatuses.length > 0 ? settings.paymentStatuses.join(',') : undefined
     };
   };
 

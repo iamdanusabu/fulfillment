@@ -14,7 +14,7 @@ interface UsePaginatedOrdersParams {
 export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
   const { settings, getFilterParams } = useOrderFilters();
 
-  // Build initial params once
+  // Build initial params once with stable dependencies
   const initialParams = React.useMemo(() => {
     const filterParams = getFilterParams();
     
@@ -36,7 +36,12 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
     }
 
     return apiParams;
-  }, [params.source, params.status, params.hasFulfilmentJob, settings]);
+  }, [
+    params.source, 
+    params.status, 
+    params.hasFulfilmentJob, 
+    JSON.stringify(settings) // Stringify to prevent object reference changes
+  ]);
 
   const config = getConfig();
   

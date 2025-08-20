@@ -186,10 +186,10 @@ export const usePaginatedFetcher = <T>(
         error: null,
       });
     }
-  }, [baseUrl, JSON.stringify({...params, pageNo: undefined})]);
+  }, [baseUrl, JSON.stringify(params)]);
 
   const loadMore = useCallback(() => {
-    if (fetcherRef.current) {
+    if (fetcherRef.current && !fetcherRef.current.getState().loading) {
       return fetcherRef.current.loadMore().then(() => {
         setState(fetcherRef.current!.getState());
       });

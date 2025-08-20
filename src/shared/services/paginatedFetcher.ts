@@ -1,5 +1,5 @@
-import { fetchWithToken } from './fetchWithToken';
-import { PaginatedResponse } from '../types';
+import { fetchWithToken } from "./fetchWithToken";
+import { PaginatedResponse } from "../types";
 
 interface PaginatedFetcherOptions {
   pageSize?: number;
@@ -42,12 +42,12 @@ export class PaginatedFetcher<T> {
   subscribe(callback: (state: PaginatedState<T>) => void) {
     this.subscribers.push(callback);
     return () => {
-      this.subscribers = this.subscribers.filter(sub => sub !== callback);
+      this.subscribers = this.subscribers.filter((sub) => sub !== callback);
     };
   }
 
   private notify() {
-    this.subscribers.forEach(callback => callback({ ...this.state }));
+    this.subscribers.forEach((callback) => callback({ ...this.state }));
   }
 
   private updateState(updates: Partial<PaginatedState<T>>) {
@@ -58,18 +58,18 @@ export class PaginatedFetcher<T> {
   async fetchPage(pageNo: number = 1, append: boolean = false): Promise<void> {
     if (this.state.loading || !this.url) return;
 
-    this.updateState({ 
-      loading: true, 
-      error: null 
+    this.updateState({
+      loading: true,
+      error: null,
     });
 
     try {
       const params = new URLSearchParams();
 
       // Add pagination params
-      params.append('pageNo', pageNo.toString());
+      params.append("pageNo", pageNo.toString());
       if (this.options.pageSize) {
-        params.append('pageSize', this.options.pageSize.toString());
+        params.append("pageSize", this.options.pageSize.toString());
       }
 
       // Add initial params
@@ -80,10 +80,10 @@ export class PaginatedFetcher<T> {
       }
 
       const response: PaginatedResponse<T> = await fetchWithToken(
-        `${this.url}?${params.toString()}`
+        `${this.url}?${params.toString()}`,
       );
 
-      const newData = append 
+      const newData = append
         ? [...this.state.data, ...response.data]
         : response.data;
 
@@ -95,11 +95,10 @@ export class PaginatedFetcher<T> {
         hasMore: response.pageNo < response.totalPages,
         loading: false,
       });
-
     } catch (error) {
       this.updateState({
         loading: false,
-        error: error instanceof Error ? error.message : 'Failed to fetch data',
+        error: error instanceof Error ? error.message : "Failed to fetch data",
       });
     }
   }
@@ -114,7 +113,10 @@ export class PaginatedFetcher<T> {
   }
 
   updateParams(newParams: Record<string, string | number>) {
-    this.options.initialParams = { ...this.options.initialParams, ...newParams };
+    this.options.initialParams = {
+      ...this.options.initialParams,
+      ...newParams,
+    };
   }
 
   updateParamsAndReset(newParams: Record<string, string | number>) {
@@ -140,7 +142,7 @@ export class PaginatedFetcher<T> {
 }
 
 // Hook for React components
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from "react";
 
 // Define types for the hook's return value to match the original structure
 type PaginatedFetcherState<T> = PaginatedState<T>;
@@ -153,7 +155,7 @@ interface PaginatedFetcherActions {
 
 export const usePaginatedFetcher = <T>(
   baseUrl: string | null,
-  options: PaginatedFetcherOptions = {}
+  options: PaginatedFetcherOptions = {},
 ): PaginatedFetcherState<T> & PaginatedFetcherActions => {
   const fetcherRef = useRef<PaginatedFetcher<T> | null>(null);
   const [state, setState] = useState<PaginatedState<T>>({
@@ -166,11 +168,16 @@ export const usePaginatedFetcher = <T>(
     error: null,
   });
 
-  const [params, setParams] = useState<Record<string, string | number>>(options.initialParams || {});
+  const [params, setParams] = useState<Record<string, string | number>>(
+    options.initialParams || {},
+  );
 
   useEffect(() => {
     if (baseUrl) {
-      fetcherRef.current = new PaginatedFetcher<T>(baseUrl, { ...options, initialParams: params });
+      fetcherRef.current = new PaginatedFetcher<T>(baseUrl, {
+        ...options,
+        initialParams: params,
+      });
       fetcherRef.current.fetchPage(1, false).then(() => {
         setState(fetcherRef.current!.getState());
       });
@@ -204,24 +211,28 @@ export const usePaginatedFetcher = <T>(
     }
   }, []);
 
-  const updateParamsAndFetch = useCallback((newParams: Record<string, string | number>) => {
-    setParams(prevParams => {
-      const updatedParams = { ...prevParams, ...newParams };
-      if (fetcherRef.current) {
-        fetcherRef.current.updateParams(updatedParams);
-        // Reset pagination and refresh for filter changes
-        fetcherRef.current.refresh().then(() => {
-          setState(fetcherRef.current!.getState());
-        });
-      }
-      return updatedParams;
-    });
-  }, []);
+  const updateParamsAndFetch = useCallback(
+    (newParams: Record<string, string | number>) => {
+      setParams((prevParams) => {
+        const updatedParams = { ...prevParams, ...newParams };
+        if (fetcherRef.current) {
+          fetcherRef.current.updateParams(updatedParams);
+          // Reset pagination and refresh for filter changes
+          fetcherRef.current.refresh().then(() => {
+            setState(fetcherRef.current!.getState());
+          });
+        }
+        return updatedParams;
+      });
+    },
+    [],
+  );
 
   const resetFetcher = useCallback(() => {
     if (fetcherRef.current) {
       fetcherRef.current.reset();
-      setState({ // Also reset local state
+      setState({
+        // Also reset local state
         data: [],
         currentPage: 0,
         totalPages: 1,

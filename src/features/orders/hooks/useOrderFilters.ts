@@ -3,14 +3,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface FilterSettings {
   sources: string[];
-  statuses: string[];
-  paymentStatuses: string[];
 }
 
 const DEFAULT_SETTINGS: FilterSettings = {
-  sources: [],
-  statuses: [],
-  paymentStatuses: []
+  sources: []
 };
 
 export const useOrderFilters = () => {
@@ -49,9 +45,7 @@ export const useOrderFilters = () => {
   // Convert settings to API parameters
   const getFilterParams = () => {
     return {
-      source: settings.sources.length > 0 ? settings.sources.join(',') : undefined,
-      status: settings.statuses.length > 0 ? settings.statuses.join(',') : undefined,
-      paymentStatus: settings.paymentStatuses.length > 0 ? settings.paymentStatuses.join(',') : undefined
+      source: settings.sources.length > 0 ? settings.sources.join(',') : undefined
     };
   };
 

@@ -34,8 +34,6 @@ import { FanVistaIcon } from '../../../shared/components/FanVistaIcon';
 
 interface FilterSettings {
   sources: string[];
-  statuses: string[];
-  paymentStatuses: string[];
 }
 
 interface SourceCount {

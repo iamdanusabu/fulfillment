@@ -23,14 +23,27 @@ export const useOrderFilters = () => {
 
   useEffect(() => {
     loadSettings();
-    // Removed the settings change listener to prevent automatic API calls
+    
+    // Add listener for storage changes to react to settings updates
+    const checkStorageChange = setInterval(() => {
+      loadSettings();
+    }, 1000); // Check every second for changes
+
+    return () => clearInterval(checkStorageChange);
   }, []);
 
   const loadSettings = async () => {
     try {
       const savedSettings = await AsyncStorage.getItem('orderFilterSettings');
       if (savedSettings) {
-        setSettings(JSON.parse(savedSettings));
+        const parsedSettings = JSON.parse(savedSettings);
+        setSettings(prevSettings => {
+          // Only update if settings actually changed
+          if (JSON.stringify(prevSettings) !== JSON.stringify(parsedSettings)) {
+            return parsedSettings;
+          }
+          return prevSettings;
+        });
       }
     } catch (error) {
       console.error('Error loading filter settings:', error);

@@ -16,14 +16,11 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
   const { settings, getFilterParams } = useOrderFilters();
   const config = getConfig();
 
-  // Use useRef to store the last params to prevent unnecessary changes
-  const lastParamsRef = React.useRef<Record<string, string | number> | null>(null);
-
-  // Build initial params only when they actually change
-  const initialParams = React.useMemo(() => {
+  // Build parameters that react to filter settings changes
+  const apiParams = React.useMemo(() => {
     const filterParams = getFilterParams();
     
-    const apiParams: Record<string, string | number> = {
+    const result: Record<string, string | number> = {
       hasFulfilmentJob: params.hasFulfilmentJob || 'false',
       expand: 'item,bin,location_hint,payment',
       pagination: 'true',
@@ -31,38 +28,31 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
 
     // Add filter params if they exist
     if (filterParams.source) {
-      apiParams.source = filterParams.source;
+      result.source = filterParams.source;
     }
     if (filterParams.status) {
-      apiParams.status = filterParams.status;
+      result.status = filterParams.status;
     }
     if (filterParams.paymentStatus) {
-      apiParams.paymentStatus = filterParams.paymentStatus;
+      result.paymentStatus = filterParams.paymentStatus;
     }
 
-    // Override with URL params if provided
+    // Override with URL params if provided (URL params take precedence)
     if (params.source) {
-      apiParams.source = params.source;
+      result.source = params.source;
     }
     if (params.status) {
-      apiParams.status = params.status;
+      result.status = params.status;
     }
 
-    // Check if params actually changed
-    const paramsString = JSON.stringify(apiParams);
-    if (lastParamsRef.current && JSON.stringify(lastParamsRef.current) === paramsString) {
-      return lastParamsRef.current;
-    }
-    
-    lastParamsRef.current = apiParams;
-    return apiParams;
+    return result;
   }, [settings, params.source, params.status, params.hasFulfilmentJob, getFilterParams]);
 
   const paginatedState = usePaginatedFetcher<any>(
     config.endpoints.orders,
     {
       pageSize: 20,
-      initialParams,
+      initialParams: apiParams,
     }
   );
 

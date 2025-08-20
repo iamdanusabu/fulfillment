@@ -180,22 +180,35 @@ export const usePaginatedFetcher = <T>(
 
   // Create a stable string representation of params to prevent unnecessary re-renders
   const paramsString = React.useMemo(() => JSON.stringify(params), [params]);
+  const prevParamsRef = useRef<string>('');
 
   useEffect(() => {
     if (baseUrl) {
-      // Only recreate fetcher if URL or params actually changed
+      // Check if params actually changed
+      const paramsChanged = paramsString !== prevParamsRef.current;
+      
+      // Only recreate fetcher if URL changed
       if (!fetcherRef.current || fetcherRef.current['url'] !== baseUrl) {
         fetcherRef.current = new PaginatedFetcher<T>(baseUrl, { ...options, initialParams: params });
-      } else {
-        // Just update params without recreating fetcher
+        prevParamsRef.current = paramsString;
+        
+        fetcherRef.current.fetchPage(1, false).then(() => {
+          setState(fetcherRef.current!.getState());
+        });
+      } else if (paramsChanged) {
+        // Update params and refresh data
         fetcherRef.current.updateParams(params);
+        prevParamsRef.current = paramsString;
+        
+        // Reset and fetch with new params
+        fetcherRef.current.reset();
+        fetcherRef.current.fetchPage(1, false).then(() => {
+          setState(fetcherRef.current!.getState());
+        });
       }
-
-      fetcherRef.current.fetchPage(1, false).then(() => {
-        setState(fetcherRef.current!.getState());
-      });
     } else {
       fetcherRef.current = null;
+      prevParamsRef.current = '';
       setState({
         data: [],
         currentPage: 0,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -266,6 +266,7 @@ export default function OrdersScreen() {
     );
   };
 
+  const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
   const isTablet = width >= 768;
 
@@ -310,7 +311,7 @@ export default function OrdersScreen() {
         />
 
         {renderFilterSummary()}
-      
+
       {/* Search Bar */}
       <View style={styles.searchContainer}>
         <MaterialIcons name="search" size={16} color="#666" style={styles.searchIcon} />

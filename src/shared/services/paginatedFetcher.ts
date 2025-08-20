@@ -117,6 +117,11 @@ export class PaginatedFetcher<T> {
     this.options.initialParams = { ...this.options.initialParams, ...newParams };
   }
 
+  updateParamsAndReset(newParams: Record<string, string | number>) {
+    this.updateParams(newParams);
+    this.reset();
+  }
+
   reset() {
     this.updateState({
       data: [],
@@ -181,7 +186,7 @@ export const usePaginatedFetcher = <T>(
         error: null,
       });
     }
-  }, [baseUrl, JSON.stringify(params)]);
+  }, [baseUrl, JSON.stringify({...params, pageNo: undefined})]);
 
   const loadMore = useCallback(() => {
     if (fetcherRef.current) {
@@ -204,7 +209,10 @@ export const usePaginatedFetcher = <T>(
       const updatedParams = { ...prevParams, ...newParams };
       if (fetcherRef.current) {
         fetcherRef.current.updateParams(updatedParams);
-        fetcherRef.current.refresh();
+        // Reset pagination and refresh for filter changes
+        fetcherRef.current.refresh().then(() => {
+          setState(fetcherRef.current!.getState());
+        });
       }
       return updatedParams;
     });

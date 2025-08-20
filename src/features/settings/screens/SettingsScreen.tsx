@@ -225,17 +225,7 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      {/* Dashboard Filters Section */}
-      <View style={styles.filterSection}>
-        <View style={styles.filterSectionHeader}>
-          <View style={styles.filterTitleRow}>
-            <MaterialIcons name="dashboard" size={24} color="#007AFF" />
-            <Text style={styles.filterSectionTitle}>Dashboard View Filters</Text>
-          </View>
-          <Text style={styles.filterSectionSubtitle}>
-            Control which order sources and statuses are displayed on your dashboard
-          </Text>
-        </View>
+      
 
         {/* Order Sources */}
         <View style={styles.filterCategory}>

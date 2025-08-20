@@ -10,8 +10,6 @@ import {
   RefreshControl,
   useWindowDimensions,
   ActivityIndicator,
-  Modal,
-  Button,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
@@ -21,89 +19,6 @@ import { picklistApi } from '../../picklist/api/picklistApi';
 import { QRCodeScanner } from '../components/QRCodeScanner';
 import { useQRScanner } from '../hooks/useQRScanner';
 import { AppToolbar } from '../../../components/layout/AppToolbar';
-import { ordersApi } from '../api/ordersApi';
-import { usePaginatedSearch } from '../hooks/usePaginatedSearch';
-
-const OrderSearchModal = ({ visible, onClose, onOrderSelect }) => {
-  const [orderIdInput, setOrderIdInput] = useState('');
-  const { 
-    data: searchResults, 
-    loading: searchLoading, 
-    error: searchError, 
-    fetchData: searchOrders 
-  } = usePaginatedSearch({ 
-    searchMode: 'contains', 
-    searchFields: 'orderID',
-    query: orderIdInput,
-    searchOnMount: false,
-  });
-
-  const handleSearch = () => {
-    if (orderIdInput.trim()) {
-      searchOrders(orderIdInput);
-    } else {
-      Alert.alert("Input Error", "Please enter an Order ID to search.");
-    }
-  };
-
-  const handleOrderPress = (order) => {
-    onOrderSelect(order);
-    onClose();
-    setOrderIdInput(''); // Clear input after selection
-  };
-
-  return (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={visible}
-      onRequestClose={onClose}
-    >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Search Order</Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <MaterialIcons name="close" size={24} color="#333" />
-            </TouchableOpacity>
-          </View>
-          <View style={styles.searchForm}>
-            <TextInput
-              style={styles.searchInputModal}
-              placeholder="Enter Order ID"
-              value={orderIdInput}
-              onChangeText={setOrderIdInput}
-              keyboardType="default"
-            />
-            <TouchableOpacity onPress={handleSearch} style={styles.searchButtonModal}>
-              <Text style={styles.searchButtonModalText}>Search</Text>
-            </TouchableOpacity>
-          </View>
-
-          {searchLoading && <ActivityIndicator size="large" color="#007AFF" style={styles.modalLoader} />}
-          {searchError && <Text style={styles.errorText}>Error: {searchError}</Text>}
-
-          {!searchLoading && !searchError && searchResults && searchResults.length > 0 && (
-            <FlatList
-              data={searchResults}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <TouchableOpacity onPress={() => handleOrderPress(item)} style={styles.resultItem}>
-                  <Text style={styles.resultText}>#{item.orderNumber} - {item.customer}</Text>
-                  <Text style={styles.resultSubText}>ID: {item.orderID} • {item.source}</Text>
-                </TouchableOpacity>
-              )}
-              style={styles.resultsList}
-            />
-          )}
-          {!searchLoading && !searchError && orderIdInput.length > 0 && searchResults && searchResults.length === 0 && (
-            <Text style={styles.noResultsText}>No orders found for this Order ID.</Text>
-          )}
-        </View>
-      </View>
-    </Modal>
-  );
-};
 
 export default function OrdersScreen() {
   const params = useLocalSearchParams();
@@ -126,7 +41,6 @@ export default function OrdersScreen() {
   const [isPicklistMode, setIsPicklistMode] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [refreshing, setRefreshing] = useState(false);
-  const [showSearchModal, setShowSearchModal] = useState(false);
 
   // QR Scanner integration
   const { isScanning, isLoading: qrLoading, startScanning, stopScanning, handleScan } = useQRScanner();
@@ -135,22 +49,7 @@ export default function OrdersScreen() {
     setIsPicklistMode(params.mode === 'picklist');
   }, [params.mode]);
 
-  const handleSearchModalOpen = () => {
-    setShowSearchModal(true);
-  };
-
-  const handleSearchModalClose = () => {
-    setShowSearchModal(false);
-    // Reset search input and results when modal is closed
-    // (handled within the modal component itself now)
-  };
-
-  const handleOrderSelect = (order: Order) => {
-    setShowSearchModal(false);
-    // Navigate to order details using the correct orderID
-    router.push(`/orders/${order.orderID}`);
-  };
-
+  // Removed aggressive refresh on focus - let users manually refresh via pull-to-refresh
 
   const toggleOrderSelection = (orderId: string) => {
     if (!isPicklistMode) return;
@@ -302,12 +201,13 @@ export default function OrdersScreen() {
       {/* Search Bar */}
       <View style={styles.searchContainer}>
         <MaterialIcons name="search" size={16} color="#666" style={styles.searchIcon} />
-        <TouchableOpacity 
+        <TextInput
           style={styles.searchInput}
-          onPress={handleSearchModalOpen}
-        >
-          <Text style={styles.searchPlaceholder}>Search orders...</Text>
-        </TouchableOpacity>
+          placeholder="Search orders..."
+          value={searchText}
+          onChangeText={setSearchText}
+          clearButtonMode="while-editing"
+        />
         <TouchableOpacity 
           style={styles.qrButton} 
           onPress={startScanning}
@@ -324,11 +224,7 @@ export default function OrdersScreen() {
         onScan={handleScan}
       />
 
-      <OrderSearchModal
-        visible={showSearchModal}
-        onClose={handleSearchModalClose}
-        onOrderSelect={handleOrderSelect}
-      />
+
 
       <FlatList
         data={filteredOrders}
@@ -411,18 +307,9 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 14,
-    paddingVertical: 8,
-    justifyContent: 'center',
-  },
-  searchPlaceholder: {
-    fontSize: 14,
-    color: '#666',
+    paddingVertical: 0,
   },
   qrButton: {
-    padding: 4,
-    marginLeft: 6,
-  },
-  searchButton: {
     padding: 4,
     marginLeft: 6,
   },
@@ -574,96 +461,5 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '600',
     fontSize: 16,
-  },
-
-  // Modal styles
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 8,
-    width: '90%',
-    maxHeight: '80%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  closeButton: {
-    padding: 5,
-  },
-  searchForm: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 15,
-    gap: 10,
-  },
-  searchInputModal: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 4,
-    fontSize: 14,
-  },
-  searchButtonModal: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderRadius: 4,
-  },
-  searchButtonModalText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  modalLoader: {
-    marginTop: 20,
-  },
-  errorText: {
-    color: 'red',
-    textAlign: 'center',
-    marginTop: 10,
-  },
-  resultItem: {
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  resultText: {
-    fontSize: 14,
-    color: '#333',
-    fontWeight: '600',
-    marginBottom: 2,
-  },
-  resultSubText: {
-    fontSize: 12,
-    color: '#666',
-  },
-  resultsList: {
-    maxHeight: 300,
-  },
-  noResultsText: {
-    textAlign: 'center',
-    color: '#666',
-    marginTop: 20,
   },
 });

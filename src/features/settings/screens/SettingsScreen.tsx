@@ -314,6 +314,48 @@ export default function SettingsScreen() {
         ))}
       </View>
 
+      {/* App Settings */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Notifications</Text>
+        <View style={styles.settingItem}>
+          <Text style={styles.settingLabel}>Enable Notifications</Text>
+          <Switch
+            value={settings.notifications}
+            onValueChange={(value) => updateSetting('notifications', value)}
+          />
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Data & Sync</Text>
+        <View style={styles.settingItem}>
+          <Text style={styles.settingLabel}>Auto Refresh</Text>
+          <Switch
+            value={settings.autoRefresh}
+            onValueChange={(value) => updateSetting('autoRefresh', value)}
+          />
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Appearance</Text>
+        <TouchableOpacity style={styles.settingItem}>
+          <Text style={styles.settingLabel}>Theme</Text>
+          <View style={styles.settingValue}>
+            <Text style={styles.settingValueText}>{settings.theme === 'light' ? 'Light' : 'Dark'}</Text>
+            <MaterialIcons name="chevron-right" size={20} color="#666" />
+          </View>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Account</Text>
+        <TouchableOpacity style={styles.settingItem} onPress={handleLogout}>
+          <Text style={[styles.settingLabel, styles.logoutText]}>Logout</Text>
+          <MaterialIcons name="logout" size={20} color="#dc3545" style={styles.logoutIcon} />
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>About</Text>
         <View style={styles.settingItem}>

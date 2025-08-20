@@ -74,21 +74,6 @@ export const ordersApi = {
     });
   },
 
-  // Create a paginated fetcher for order search
-  createOrderSearchFetcher(orderNumber: string) {
-    const config = getConfig();
-    return new PaginatedFetcher<any>(config.endpoints.orderSearch, {
-      pageSize: 25,
-      initialParams: {
-        searchMode: 'MATCH_WITH',
-        matchWith: 'any',
-        orderID: orderNumber,
-        expand: 'item,bin,location_hint,payment',
-        pagination: 'true',
-      },
-    });
-  },
-
   // Create a paginated fetcher for a single order
   createSingleOrderFetcher(orderId: string) {
     const config = getConfig();

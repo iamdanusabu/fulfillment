@@ -21,6 +21,8 @@ interface Settings {
 
 interface FilterSettings {
   sources: string[];
+  statuses: string[];
+  paymentStatuses: string[];
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -35,7 +37,9 @@ const DEFAULT_FILTER_SETTINGS: FilterSettings = {
     'Shopify', 'Tapin2', 'Breakaway', 'bigcommerce', 'Ecwid', 
     'PHONE ORDER', 'DELIVERY', 'BAR TAB', 'TIKT', 'TABLE', 
     'OTHER', 'MANUAL', 'FanVista', 'QSR'
-  ]
+  ],
+  statuses: ['Initiated', 'Sent for Processing'],
+  paymentStatuses: ['PAID', 'UNPAID']
 };
 
 const ALL_SOURCES = [
@@ -68,7 +72,11 @@ const capitalizeSourceName = (source: string): string => {
   ).join(' ');
 };
 
+const ALL_STATUSES = [
+  'Initiated', 'Sent for Processing'
+];
 
+const ALL_PAYMENT_STATUSES = ['PAID', 'UNPAID'];
 
 export default function SettingsScreen() {
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
@@ -135,7 +143,23 @@ export default function SettingsScreen() {
     saveFilterSettings(newFilterSettings);
   };
 
-  
+  const toggleStatus = (status: string) => {
+    const newStatuses = filterSettings.statuses.includes(status)
+      ? filterSettings.statuses.filter(s => s !== status)
+      : [...filterSettings.statuses, status];
+
+    const newFilterSettings = { ...filterSettings, statuses: newStatuses };
+    saveFilterSettings(newFilterSettings);
+  };
+
+  const togglePaymentStatus = (paymentStatus: string) => {
+    const newPaymentStatuses = filterSettings.paymentStatuses.includes(paymentStatus)
+      ? filterSettings.paymentStatuses.filter(s => s !== paymentStatus)
+      : [...filterSettings.paymentStatuses, paymentStatus];
+
+    const newFilterSettings = { ...filterSettings, paymentStatuses: newPaymentStatuses };
+    saveFilterSettings(newFilterSettings);
+  };
 
   const selectAllSources = () => {
     const newFilterSettings = { ...filterSettings, sources: [...ALL_SOURCES] };
@@ -147,7 +171,25 @@ export default function SettingsScreen() {
     saveFilterSettings(newFilterSettings);
   };
 
-  
+  const selectAllStatuses = () => {
+    const newFilterSettings = { ...filterSettings, statuses: [...ALL_STATUSES] };
+    saveFilterSettings(newFilterSettings);
+  };
+
+  const deselectAllStatuses = () => {
+    const newFilterSettings = { ...filterSettings, statuses: [] };
+    saveFilterSettings(newFilterSettings);
+  };
+
+  const selectAllPaymentStatuses = () => {
+    const newFilterSettings = { ...filterSettings, paymentStatuses: [...ALL_PAYMENT_STATUSES] };
+    saveFilterSettings(newFilterSettings);
+  };
+
+  const deselectAllPaymentStatuses = () => {
+    const newFilterSettings = { ...filterSettings, paymentStatuses: [] };
+    saveFilterSettings(newFilterSettings);
+  };
 
   const handleLogout = async () => {
     Alert.alert(
@@ -216,6 +258,62 @@ export default function SettingsScreen() {
               name={filterSettings.sources.includes(source) ? "check-box" : "check-box-outline-blank"} 
               size={24} 
               color={filterSettings.sources.includes(source) ? "#007AFF" : "#ccc"} 
+            />
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Order Status (Dashboard)</Text>
+          <View style={styles.selectButtons}>
+            <TouchableOpacity onPress={selectAllStatuses} style={styles.selectButton}>
+              <Text style={styles.selectButtonText}>All</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={deselectAllStatuses} style={styles.selectButton}>
+              <Text style={styles.selectButtonText}>None</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        {ALL_STATUSES.map((status) => (
+          <TouchableOpacity
+            key={status}
+            style={styles.filterItem}
+            onPress={() => toggleStatus(status)}
+          >
+            <Text style={styles.filterLabel}>{status}</Text>
+            <MaterialIcons 
+              name={filterSettings.statuses.includes(status) ? "check-box" : "check-box-outline-blank"} 
+              size={24} 
+              color={filterSettings.statuses.includes(status) ? "#007AFF" : "#ccc"} 
+            />
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Payment Status (Dashboard)</Text>
+          <View style={styles.selectButtons}>
+            <TouchableOpacity onPress={selectAllPaymentStatuses} style={styles.selectButton}>
+              <Text style={styles.selectButtonText}>All</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={deselectAllPaymentStatuses} style={styles.selectButton}>
+              <Text style={styles.selectButtonText}>None</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        {ALL_PAYMENT_STATUSES.map((paymentStatus) => (
+          <TouchableOpacity
+            key={paymentStatus}
+            style={styles.filterItem}
+            onPress={() => togglePaymentStatus(paymentStatus)}
+          >
+            <Text style={styles.filterLabel}>{paymentStatus}</Text>
+            <MaterialIcons 
+              name={filterSettings.paymentStatuses.includes(paymentStatus) ? "check-box" : "check-box-outline-blank"} 
+              size={24} 
+              color={filterSettings.paymentStatuses.includes(paymentStatus) ? "#007AFF" : "#ccc"} 
             />
           </TouchableOpacity>
         ))}

@@ -19,6 +19,8 @@ import { picklistApi } from '../../picklist/api/picklistApi';
 import { QRCodeScanner } from '../components/QRCodeScanner';
 import { useQRScanner } from '../hooks/useQRScanner';
 import { AppToolbar } from '../../../components/layout/AppToolbar';
+import OrderFilterModal from '../components/OrderFilterModal';
+import { useOrderFiltersModal } from '../hooks/useOrderFiltersModal';
 
 export default function OrdersScreen() {
   const params = useLocalSearchParams();
@@ -35,7 +37,8 @@ export default function OrdersScreen() {
   } = usePaginatedOrders({ 
     source: params.source as string,
     status: params.status as string,
-    hasFulfilmentJob: params.hasFulfilmentJob as string
+    hasFulfilmentJob: params.hasFulfilmentJob as string,
+    additionalFilters: getAPIFilters()
   });
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
   const [isPicklistMode, setIsPicklistMode] = useState(false);
@@ -45,9 +48,28 @@ export default function OrdersScreen() {
   // QR Scanner integration
   const { isScanning, isLoading: qrLoading, startScanning, stopScanning, handleScan } = useQRScanner();
 
+  // Filter modal integration
+  const {
+    filters: filterModalFilters,
+    isVisible: isFilterModalVisible,
+    openModal: openFilterModal,
+    closeModal: closeFilterModal,
+    applyFilters,
+    hasActiveFilters,
+    getActiveFilterCount,
+    getAPIFilters,
+  } = useOrderFiltersModal();
+
   useEffect(() => {
     setIsPicklistMode(params.mode === 'picklist');
   }, [params.mode]);
+
+  // Refresh orders when filters change
+  useEffect(() => {
+    if (orders.length > 0) {
+      refresh();
+    }
+  }, [filterModalFilters]);
 
   // Refresh orders when returning from detail screen to ensure up-to-date status
   useFocusEffect(
@@ -223,6 +245,21 @@ export default function OrdersScreen() {
         >
           <MaterialIcons name="qr-code-scanner" size={16} color="#007AFF" />
         </TouchableOpacity>
+        <TouchableOpacity 
+          style={[styles.filterButton, hasActiveFilters() && styles.filterButtonActive]} 
+          onPress={openFilterModal}
+        >
+          <MaterialIcons 
+            name="filter-list" 
+            size={16} 
+            color={hasActiveFilters() ? "#fff" : "#007AFF"} 
+          />
+          {hasActiveFilters() && (
+            <View style={styles.filterBadge}>
+              <Text style={styles.filterBadgeText}>{getActiveFilterCount()}</Text>
+            </View>
+          )}
+        </TouchableOpacity>
       </View>
 
       {/* QR Code Scanner Modal */}
@@ -230,6 +267,14 @@ export default function OrdersScreen() {
         visible={isScanning}
         onClose={stopScanning}
         onScan={handleScan}
+      />
+
+      {/* Order Filter Modal */}
+      <OrderFilterModal
+        visible={isFilterModalVisible}
+        onClose={closeFilterModal}
+        onApplyFilters={applyFilters}
+        currentFilters={filterModalFilters}
       />
 
 
@@ -320,6 +365,32 @@ const styles = StyleSheet.create({
   qrButton: {
     padding: 4,
     marginLeft: 6,
+  },
+  filterButton: {
+    padding: 4,
+    marginLeft: 6,
+    position: 'relative',
+    borderRadius: 4,
+  },
+  filterButtonActive: {
+    backgroundColor: '#007AFF',
+    paddingHorizontal: 8,
+  },
+  filterBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: '#dc3545',
+    borderRadius: 8,
+    minWidth: 16,
+    height: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  filterBadgeText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: 'bold',
   },
   resultsText: {
     paddingHorizontal: 16,

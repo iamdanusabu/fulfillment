@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { usePaginatedFetcher } from '../../../shared/services/paginatedFetcher';
 import { Order } from '../../../shared/types';
@@ -10,6 +9,7 @@ interface UsePaginatedOrdersParams {
   source?: string;
   status?: string;
   hasFulfilmentJob?: string;
+  additionalFilters?: Record<string, string | number>; // Added for additional filters
 }
 
 export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
@@ -19,7 +19,7 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
   // Build parameters that react to filter settings changes
   const apiParams = React.useMemo(() => {
     const filterParams = getFilterParams();
-    
+
     const result: Record<string, string | number> = {
       hasFulfilmentJob: params.hasFulfilmentJob || 'false',
       expand: 'item,bin,location_hint,payment',
@@ -45,8 +45,13 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
       result.status = params.status;
     }
 
+    // Apply additional filters from params
+    if (params.additionalFilters) {
+      Object.assign(result, params.additionalFilters);
+    }
+
     return result;
-  }, [settings, params.source, params.status, params.hasFulfilmentJob, getFilterParams]);
+  }, [settings, params.source, params.status, params.hasFulfilmentJob, getFilterParams, params.additionalFilters]);
 
   const paginatedState = usePaginatedFetcher<any>(
     config.endpoints.orders,

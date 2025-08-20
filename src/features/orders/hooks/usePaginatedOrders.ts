@@ -26,14 +26,14 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
       pagination: 'true',
     };
 
-    // Add filter params if they exist
-    if (filterParams.source) {
+    // Add filter params if they exist and user has selected sources
+    if (filterParams.source && settings.sources.length > 0) {
       result.source = filterParams.source;
     }
-    if (filterParams.status) {
+    if (filterParams.status && settings.statuses.length > 0) {
       result.status = filterParams.status;
     }
-    if (filterParams.paymentStatus) {
+    if (filterParams.paymentStatus && settings.paymentStatuses.length > 0) {
       result.paymentStatus = filterParams.paymentStatus;
     }
 

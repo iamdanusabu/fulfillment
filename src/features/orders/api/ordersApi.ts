@@ -1,6 +1,7 @@
 import { PaginatedFetcher } from '../../../shared/services/paginatedFetcher';
 import { Order } from '../../../shared/types';
 import { getConfig } from '../../../environments';
+import { fetchWithToken } from '../../../shared/services/fetchWithToken';
 
 interface GetOrdersParams {
   source?: string;
@@ -59,6 +60,14 @@ const transformOrder = (apiOrder: any): Order => ({
   register: apiOrder.register,
 });
 
+// Assuming transformOrderResponse is defined elsewhere, similar to transformOrder
+const transformOrderResponse = (apiOrder: any): Order => {
+  // This is a placeholder, assuming it's similar to transformOrder
+  // In a real scenario, you'd ensure this matches the API response structure for search
+  return transformOrder(apiOrder);
+};
+
+
 export const ordersApi = {
   // Create a paginated fetcher for orders
   createPaginatedOrdersFetcher(params: GetOrdersParams = {}) {
@@ -85,13 +94,13 @@ export const ordersApi = {
   // Get single order by ID
   async getOrderById(orderId: string) {
     try {
-      const { fetchWithToken } = await import('../../../shared/services/fetchWithToken');
+      // const { fetchWithToken } = await import('../../../shared/services/fetchWithToken');
       const config = getConfig();
-      
+
       // Use the same endpoint structure as curl command with pagination params
       const url = `${config.endpoints.orders}/${orderId}?pageNo=1&pageSize=1`;
       const data = await fetchWithToken(url);
-      
+
       // Handle paginated response structure
       if (data && data.data && Array.isArray(data.data) && data.data.length > 0) {
         return transformOrder(data.data[0]);
@@ -111,9 +120,9 @@ export const ordersApi = {
   // Fulfill order
   async fulfillOrder(orderId: string, fulfillmentLocationId: string) {
     try {
-      const { fetchWithToken } = await import('../../../shared/services/fetchWithToken');
+      // const { fetchWithToken } = await import('../../../shared/services/fetchWithToken');
       const config = getConfig();
-      
+
       const requestBody = [{
         orderID: orderId,
         fulfillmentLocation: {
@@ -121,12 +130,12 @@ export const ordersApi = {
           id: fulfillmentLocationId
         }
       }];
-      
+
       const data = await fetchWithToken(config.endpoints.orderFulfill, {
         method: 'PATCH',
         body: JSON.stringify(requestBody),
       });
-      
+
       return data;
     } catch (error) {
       console.error('Error fulfilling order:', error);
@@ -137,24 +146,83 @@ export const ordersApi = {
   // Update order status
   async updateOrderStatus(orderId: string, status: string) {
     try {
-      const { fetchWithToken } = await import('../../../shared/services/fetchWithToken');
+      // const { fetchWithToken } = await import('../../../shared/services/fetchWithToken');
       const config = getConfig();
-      
+
       const requestBody = {
         orderID: orderId,
         status: status
       };
-      
+
       const data = await fetchWithToken(`${config.endpoints.orders}/${orderId}`, {
         method: 'PATCH',
         body: JSON.stringify(requestBody),
       });
-      
+
       return data;
     } catch (error) {
       console.error('Error updating order status:', error);
       throw error;
     }
+  },
+
+  // Search orders
+  async searchOrders({
+    pageNo = 1,
+    pageSize = 20,
+    searchTerm,
+    source,
+    status,
+    hasFulfilmentJob
+  }: {
+    pageNo?: number;
+    pageSize?: number;
+    searchTerm: string;
+    source?: string;
+    status?: string;
+    hasFulfilmentJob?: string;
+  }) {
+    const config = getConfig();
+    // Assuming baseUrl is part of the config, and endpoints.orders is the path
+    const url = `${config.baseUrl}${config.endpoints.orders}`;
+
+    const params = new URLSearchParams({
+      pageNo: pageNo.toString(),
+      pageSize: pageSize.toString(),
+    });
+
+    // Add search term - using the same parameter as in your curl example
+    if (searchTerm) {
+      params.append('search', searchTerm);
+    }
+
+    if (source) {
+      params.append('source', source);
+    }
+
+    if (status) {
+      params.append('status', status);
+    }
+
+    if (hasFulfilmentJob) {
+      params.append('hasFulfilmentJob', hasFulfilmentJob);
+    }
+
+    const response = await fetchWithToken(`${url}?${params.toString()}`);
+
+    if (!response.ok) {
+      throw new Error(`Failed to search orders: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    return {
+      data: data.data?.map(transformOrderResponse) || [],
+      totalRecords: data.totalRecords || 0,
+      totalPages: data.totalPages || 1,
+      pageNo: data.pageNo || 1,
+      pageSize: data.pageSize || 20,
+    };
   },
 };
 

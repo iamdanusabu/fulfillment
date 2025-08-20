@@ -225,7 +225,22 @@ export default function OrdersScreen() {
           value={searchTerm}
           onChangeText={setSearchTerm}
           clearButtonMode="while-editing"
+          returnKeyType="search"
+          onSubmitEditing={() => {
+            if (searchTerm.trim()) {
+              refreshSearch();
+            }
+          }}
         />
+        {searchTerm.trim() && (
+          <TouchableOpacity 
+            style={styles.searchButton} 
+            onPress={() => refreshSearch()}
+            disabled={searchLoading}
+          >
+            <MaterialIcons name="search" size={16} color="#007AFF" />
+          </TouchableOpacity>
+        )}
         <TouchableOpacity 
           style={styles.qrButton} 
           onPress={startScanning}
@@ -326,6 +341,10 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     paddingVertical: 0,
+  },
+  searchButton: {
+    padding: 4,
+    marginLeft: 6,
   },
   qrButton: {
     padding: 4,

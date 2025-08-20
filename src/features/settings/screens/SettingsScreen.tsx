@@ -315,62 +315,60 @@ export default function SettingsScreen() {
       <Modal
         visible={showFilterModal}
         animationType="slide"
-        transparent={true}
+        presentationStyle="formSheet"
         onRequestClose={() => setShowFilterModal(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            {/* Modal Header */}
-            <View style={styles.modalHeader}>
-              <TouchableOpacity 
-                style={styles.headerButton}
-                onPress={() => setShowFilterModal(false)}
-                activeOpacity={0.7}
-              >
-                <MaterialIcons name="close" size={20} color="#666" />
-              </TouchableOpacity>
-              <Text style={styles.modalTitle}>{getFilterTitle()}</Text>
-              <View style={styles.headerButton} />
-            </View>
-
-            {/* Quick Actions */}
-            <View style={styles.quickActions}>
-              <TouchableOpacity 
-                style={[styles.quickActionButton, styles.primaryButton]}
-                onPress={selectAllFilters}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.primaryButtonText}>All</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.quickActionButton, styles.secondaryButton]}
-                onPress={clearAllFilters}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.secondaryButtonText}>None</Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Filter Options */}
-            <View style={styles.listContainer}>
-              <FlatList
-                data={getFilterOptions()}
-                keyExtractor={(item) => item}
-                renderItem={renderFilterOption}
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={styles.listContent}
-                ItemSeparatorComponent={() => <View style={styles.separator} />}
-              />
-            </View>
-
-            {/* Selection Summary */}
-            <View style={styles.selectionSummary}>
-              <Text style={styles.summaryText}>
-                {filterSettings[activeFilterType].length}/{getFilterOptions().length} selected
-              </Text>
-            </View>
+        <SafeAreaView style={styles.modalContainer}>
+          {/* Modal Header */}
+          <View style={styles.modalHeader}>
+            <TouchableOpacity 
+              style={styles.headerButton}
+              onPress={() => setShowFilterModal(false)}
+              activeOpacity={0.7}
+            >
+              <MaterialIcons name="close" size={24} color="#666" />
+            </TouchableOpacity>
+            <Text style={styles.modalTitle}>{getFilterTitle()}</Text>
+            <View style={styles.headerButton} />
           </View>
-        </View>
+
+          {/* Quick Actions */}
+          <View style={styles.quickActions}>
+            <TouchableOpacity 
+              style={[styles.quickActionButton, styles.primaryButton]}
+              onPress={selectAllFilters}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.primaryButtonText}>Select All</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.quickActionButton, styles.secondaryButton]}
+              onPress={clearAllFilters}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.secondaryButtonText}>Clear All</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Filter Options */}
+          <View style={styles.listContainer}>
+            <FlatList
+              data={getFilterOptions()}
+              keyExtractor={(item) => item}
+              renderItem={renderFilterOption}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.listContent}
+              ItemSeparatorComponent={() => <View style={styles.separator} />}
+            />
+          </View>
+
+          {/* Selection Summary */}
+          <View style={styles.selectionSummary}>
+            <Text style={styles.summaryText}>
+              {filterSettings[activeFilterType].length} of {getFilterOptions().length} selected
+            </Text>
+          </View>
+        </SafeAreaView>
       </Modal>
     </ScrollView>
   );
@@ -465,56 +463,41 @@ const styles = StyleSheet.create({
   },
 
   // Modal Styles
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
   modalContainer: {
+    flex: 1,
     backgroundColor: '#fff',
-    borderRadius: 16,
-    width: '100%',
-    maxWidth: 400,
-    maxHeight: height * 0.7,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-    elevation: 10,
   },
   modalHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#e5e5ea',
   },
   headerButton: {
-    width: 28,
-    height: 28,
+    width: 32,
+    height: 32,
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalTitle: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
     color: '#1a1a1a',
   },
   quickActions: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    gap: 12,
   },
   quickActionButton: {
     flex: 1,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
     alignItems: 'center',
   },
   primaryButton: {
@@ -524,33 +507,31 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f0f0',
   },
   primaryButtonText: {
-    fontSize: 13,
+    fontSize: 15,
     color: '#fff',
     fontWeight: '600',
   },
   secondaryButtonText: {
-    fontSize: 13,
+    fontSize: 15,
     color: '#333',
     fontWeight: '600',
   },
   listContainer: {
     flex: 1,
-    paddingHorizontal: 16,
-    minHeight: 200,
-    maxHeight: 300,
+    paddingHorizontal: 20,
   },
   listContent: {
-    paddingVertical: 4,
+    paddingVertical: 8,
   },
   filterOption: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 10,
+    paddingVertical: 14,
     paddingHorizontal: 4,
   },
   filterOptionText: {
-    fontSize: 15,
+    fontSize: 16,
     color: '#1a1a1a',
     fontWeight: '400',
     flex: 1,
@@ -560,9 +541,9 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   checkbox: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     borderWidth: 2,
     borderColor: '#d1d1d6',
     backgroundColor: '#fff',
@@ -579,14 +560,14 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   selectionSummary: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: '#e5e5ea',
     alignItems: 'center',
   },
   summaryText: {
-    fontSize: 13,
+    fontSize: 14,
     color: '#8e8e93',
     fontWeight: '500',
   },

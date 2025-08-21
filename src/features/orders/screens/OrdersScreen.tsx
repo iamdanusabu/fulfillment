@@ -85,7 +85,7 @@ export default function OrdersScreen() {
       (order.customer || '').toLowerCase().includes(searchLower) ||
       (order.orderNumber || '').toLowerCase().includes(searchLower) ||
       order.orderID.toString().toLowerCase().includes(searchLower) ||
-      (order.externalOrderKey || '').toLowerCase().includes(searchLower) ||
+      (order.externalOrderKey ? order.externalOrderKey.toString().toLowerCase() : '').includes(searchLower) ||
       (order.source || '').toLowerCase().includes(searchLower)
     );
   }, [orders, searchText]);

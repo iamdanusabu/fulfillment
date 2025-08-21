@@ -302,43 +302,47 @@ export default function DashboardScreen() {
 
         {/* Key Metrics Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Key Metrics</Text>
-          <View style={[
-            styles.keyMetricsContainer,
-            { flexDirection: isTablet || isLandscape ? 'row' : 'column' }
-          ]}>
+          <View style={styles.keyMetricsGrid}>
             <TouchableOpacity
-              style={[styles.keyMetricCard, styles.totalOrdersCard, isTablet || isLandscape ? { flex: 1 } : {}]}
+              style={styles.metricCard}
               onPress={() => navigateToOrders()}
             >
-              <MaterialIcons name="shopping-cart" size={32} color="#fff" />
-              <View style={styles.metricContent}>
-                <Text style={styles.metricNumber}>{stats.totalOrdersCount}</Text>
+              <View style={styles.metricInfo}>
                 <Text style={styles.metricLabel}>Total Orders</Text>
+                <Text style={styles.metricNumber}>{stats.totalOrdersCount}</Text>
               </View>
+              <MaterialIcons name="shopping-cart" size={24} color="#666" />
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.keyMetricCard, styles.readyForPickupCard, isTablet || isLandscape ? { flex: 1 } : {}]}
+              style={styles.metricCard}
               onPress={() => router.push('/orders?hasFulfilmentJob=true&status=Ready')}
             >
-              <MaterialIcons name="local-shipping" size={32} color="#fff" />
-              <View style={styles.metricContent}>
-                <Text style={styles.metricNumber}>{stats.readyForPickupCount}</Text>
+              <View style={styles.metricInfo}>
                 <Text style={styles.metricLabel}>Ready for Pickup</Text>
+                <Text style={styles.metricNumber}>{stats.readyForPickupCount}</Text>
               </View>
+              <MaterialIcons name="inventory-2" size={24} color="#666" />
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.keyMetricCard, styles.activePicklistsCard, isTablet || isLandscape ? { flex: 1 } : {}]}
+              style={styles.metricCard}
               onPress={() => router.push('/picklist')}
             >
-              <MaterialIcons name="inventory" size={32} color="#fff" />
-              <View style={styles.metricContent}>
-                <Text style={styles.metricNumber}>{stats.activePicklistsCount}</Text>
+              <View style={styles.metricInfo}>
                 <Text style={styles.metricLabel}>Active Picklists</Text>
+                <Text style={styles.metricNumber}>{stats.activePicklistsCount}</Text>
               </View>
+              <MaterialIcons name="list-alt" size={24} color="#666" />
             </TouchableOpacity>
+
+            <View style={styles.metricCard}>
+              <View style={styles.metricInfo}>
+                <Text style={styles.metricLabel}>Total Sources</Text>
+                <Text style={styles.metricNumber}>{stats.sourceCounts.length}</Text>
+              </View>
+              <MaterialIcons name="hub" size={24} color="#666" />
+            </View>
           </View>
         </View>
 
@@ -355,17 +359,17 @@ export default function DashboardScreen() {
                     style={styles.sourceCard}
                     onPress={() => navigateToOrders(sourceCount.name)}
                   >
-                    <View style={styles.sourceHeader}>
-                      <View style={styles.sourceIconContainer}>
-                        {typeof sourceInfo.icon === 'string' ? (
-                          <Text style={styles.sourceIcon}>{sourceInfo.icon}</Text>
-                        ) : (
-                          sourceInfo.icon
-                        )}
-                      </View>
+                    <View style={styles.sourceInfo}>
+                      <Text style={styles.sourceLabel}>{sourceInfo.displayName}</Text>
                       <Text style={styles.sourceNumber}>{sourceCount.count}</Text>
                     </View>
-                    <Text style={styles.sourceLabel}>{sourceInfo.displayName}</Text>
+                    <View style={styles.sourceIconContainer}>
+                      {typeof sourceInfo.icon === 'string' ? (
+                        <Text style={styles.sourceIcon}>{sourceInfo.icon}</Text>
+                      ) : (
+                        sourceInfo.icon
+                      )}
+                    </View>
                   </TouchableOpacity>
                 );
               })}
@@ -461,50 +465,47 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 18,
+    fontWeight: '600',
     color: '#1a1a1a',
     marginBottom: 16,
   },
-  keyMetricsContainer: {
+  keyMetricsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 12,
   },
-  keyMetricCard: {
+  metricCard: {
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 12,
+    flex: 1,
+    minWidth: '22%',
+    maxWidth: '48%',
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
-    borderRadius: 16,
-    marginBottom: 12,
-    elevation: 2,
+    elevation: 1,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    borderWidth: 1,
+    borderColor: '#f0f0f0',
   },
-  totalOrdersCard: {
-    backgroundColor: '#2563EB',
-  },
-  readyForPickupCard: {
-    backgroundColor: '#16A34A',
-  },
-  activePicklistsCard: {
-    backgroundColor: '#0891B2',
-  },
-  metricContent: {
-    marginLeft: 16,
+  metricInfo: {
     flex: 1,
   },
-  metricNumber: {
-    fontSize: 32,
-    fontWeight: "800",
-    color: '#fff',
-    lineHeight: 38,
-  },
   metricLabel: {
-    fontSize: 16,
-    color: '#fff',
+    fontSize: 12,
+    color: '#666',
     fontWeight: '500',
-    opacity: 0.9,
+    marginBottom: 4,
+  },
+  metricNumber: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: '#1a1a1a',
   },
   sourcesGrid: {
     flexDirection: "row",
@@ -518,6 +519,9 @@ const styles = StyleSheet.create({
     minWidth: 120,
     flex: 1,
     maxWidth: '48%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     elevation: 1,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
@@ -526,11 +530,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#f0f0f0',
   },
-  sourceHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 8,
+  sourceInfo: {
+    flex: 1,
   },
   sourceIconContainer: {
     width: 28,
@@ -541,15 +542,16 @@ const styles = StyleSheet.create({
   sourceIcon: {
     fontSize: 28,
   },
+  sourceLabel: {
+    fontSize: 12,
+    color: "#666",
+    fontWeight: '500',
+    marginBottom: 4,
+  },
   sourceNumber: {
     fontSize: 24,
     fontWeight: "bold",
     color: "#1a1a1a",
-  },
-  sourceLabel: {
-    fontSize: 14,
-    color: "#666",
-    fontWeight: '500',
   },
   errorSectionHeader: {
     flexDirection: 'row',

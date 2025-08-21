@@ -34,13 +34,6 @@ export const useOrderFilters = () => {
 
   useEffect(() => {
     loadSettings();
-    
-    // Add listener for storage changes to react to settings updates
-    const checkStorageChange = setInterval(() => {
-      loadSettings();
-    }, 1000); // Check every second for changes
-
-    return () => clearInterval(checkStorageChange);
   }, []);
 
   const loadSettings = async () => {

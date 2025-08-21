@@ -19,6 +19,8 @@ import { picklistApi } from '../../picklist/api/picklistApi';
 import { QRCodeScanner } from '../components/QRCodeScanner';
 import { useQRScanner } from '../hooks/useQRScanner';
 import { AppToolbar } from '../../../components/layout/AppToolbar';
+import { FilterModal } from '../components/FilterModal';
+import { useOrderFilters } from '../hooks/useOrderFilters';
 
 export default function OrdersScreen() {
   const params = useLocalSearchParams();
@@ -41,9 +43,13 @@ export default function OrdersScreen() {
   const [isPicklistMode, setIsPicklistMode] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+  const [showFilterModal, setShowFilterModal] = useState(false);
 
   // QR Scanner integration
   const { isScanning, isLoading: qrLoading, startScanning, stopScanning, handleScan } = useQRScanner();
+  
+  // Filter integration
+  const { settings: filterSettings, refreshSettings } = useOrderFilters();
 
   useEffect(() => {
     setIsPicklistMode(params.mode === 'picklist');
@@ -209,7 +215,13 @@ export default function OrdersScreen() {
           clearButtonMode="while-editing"
         />
         <TouchableOpacity 
-          style={styles.qrButton} 
+          style={styles.iconButton} 
+          onPress={() => setShowFilterModal(true)}
+        >
+          <MaterialIcons name="filter-list" size={16} color="#007AFF" />
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={styles.iconButton} 
           onPress={startScanning}
           disabled={qrLoading}
         >
@@ -222,6 +234,17 @@ export default function OrdersScreen() {
         visible={isScanning}
         onClose={stopScanning}
         onScan={handleScan}
+      />
+
+      {/* Filter Modal */}
+      <FilterModal
+        visible={showFilterModal}
+        onClose={() => setShowFilterModal(false)}
+        currentSettings={filterSettings}
+        onApply={(newSettings) => {
+          refreshSettings();
+          refresh(); // Refresh orders with new filters
+        }}
       />
 
 
@@ -309,7 +332,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     paddingVertical: 0,
   },
-  qrButton: {
+  iconButton: {
     padding: 4,
     marginLeft: 6,
   },

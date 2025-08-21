@@ -86,9 +86,10 @@ export class PaginatedFetcher<T> {
         });
       }
 
-      const response: PaginatedResponse<T> = await fetchWithToken(
-        `${this.url}?${params.toString()}`
-      );
+      const finalUrl = `${this.url}?${params.toString()}`;
+      console.log('Final API URL being called:', finalUrl);
+      
+      const response: PaginatedResponse<T> = await fetchWithToken(finalUrl);
 
       const newData = append 
         ? [...this.state.data, ...response.data]
@@ -185,13 +186,8 @@ export const usePaginatedFetcher = <T>(
 
   useEffect(() => {
     if (baseUrl) {
-      // Only recreate fetcher if URL or params actually changed
-      if (!fetcherRef.current || fetcherRef.current['url'] !== baseUrl) {
-        fetcherRef.current = new PaginatedFetcher<T>(baseUrl, { ...options, initialParams: params });
-      } else {
-        // Just update params without recreating fetcher
-        fetcherRef.current.updateParams(params);
-      }
+      // Always recreate fetcher when params change to ensure fresh parameters
+      fetcherRef.current = new PaginatedFetcher<T>(baseUrl, { ...options, initialParams: params });
       
       fetcherRef.current.fetchPage(1, false).then(() => {
         setState(fetcherRef.current!.getState());

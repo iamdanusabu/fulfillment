@@ -73,18 +73,20 @@ export default function CreatePicklistScreen() {
     try {
       const orderIds = (params.orderIds as string).split(',');
       const locationId = params.locationId as string;
-      let result;
+      let fulfillmentId: string;
 
       if (params.fulfillmentId) {
         // Update existing fulfillment using PUT
-        result = await picklistApi.updateFulfillment(params.fulfillmentId as string, items, fulfillmentData);
+        await picklistApi.updateFulfillment(params.fulfillmentId as string, items, fulfillmentData);
+        fulfillmentId = params.fulfillmentId as string;
       } else {
         // Create new fulfillment
-        result = await picklistApi.createFulfillment(orderIds, locationId, items);
+        const result = await picklistApi.createFulfillment(orderIds, locationId, items);
+        fulfillmentId = result.id.toString();
       }
 
-      // Navigate to packing screen with fulfillment ID from response
-      router.push(`/picklist/packing?fulfillmentId=${result.id || params.fulfillmentId}&orderIds=${params.orderIds}`);
+      // Navigate to packing screen with the correct fulfillment ID
+      router.push(`/picklist/packing?fulfillmentId=${fulfillmentId}&orderIds=${params.orderIds}&locationId=${params.locationId}`);
     } catch (error) {
       console.error('Failed to process fulfillment:', error);
     }

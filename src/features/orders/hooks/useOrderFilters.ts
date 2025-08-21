@@ -8,7 +8,22 @@ export interface FilterSettings {
 }
 
 const DEFAULT_SETTINGS: FilterSettings = {
-  sources: [],
+  sources: [
+    "Shopify",
+    "Tapin2", 
+    "Breakaway",
+    "bigcommerce",
+    "Ecwid",
+    "PHONE ORDER",
+    "DELIVERY", 
+    "BAR TAB",
+    "TIKT",
+    "TABLE",
+    "OTHER",
+    "MANUAL",
+    "FanVista",
+    "QSR"
+  ],
   statuses: [],
   paymentStatuses: []
 };

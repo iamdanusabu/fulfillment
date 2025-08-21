@@ -80,7 +80,9 @@ export class PaginatedFetcher<T> {
       // Add initial params
       if (this.options.initialParams) {
         Object.entries(this.options.initialParams).forEach(([key, value]) => {
-          params.append(key, value.toString());
+          if (value !== undefined && value !== null && value !== '') {
+            params.append(key, value.toString());
+          }
         });
       }
 

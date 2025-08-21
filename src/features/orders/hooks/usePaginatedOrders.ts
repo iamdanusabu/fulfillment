@@ -45,6 +45,9 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
       result.status = params.status;
     }
 
+    // Debug log to see what parameters are being sent
+    console.log('API Parameters being sent:', result);
+
     return result;
   }, [settings, params.source, params.status, params.hasFulfilmentJob, getFilterParams]);
 

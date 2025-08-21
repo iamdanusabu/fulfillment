@@ -72,14 +72,52 @@ export default function DashboardScreen() {
     loadDashboardData();
   }, []);
 
+  const loadCachedData = async () => {
+    try {
+      const cachedData = await AsyncStorage.getItem('dashboard_cache');
+      if (cachedData) {
+        const parsedData = JSON.parse(cachedData);
+        setStats({
+          ...parsedData,
+          loading: false,
+          error: null,
+        });
+        return true; // Indicates cached data was loaded
+      }
+    } catch (error) {
+      console.error("Failed to load cached data:", error);
+    }
+    return false; // No cached data found
+  };
+
+  const saveCachedData = async (data: any) => {
+    try {
+      const cacheData = {
+        sourceCounts: data.sourceCounts,
+        readyForPickupCount: data.readyForPickupCount,
+        activePicklistsCount: data.activePicklistsCount,
+        totalOrdersCount: data.totalOrdersCount,
+        lastUpdated: Date.now(),
+      };
+      await AsyncStorage.setItem('dashboard_cache', JSON.stringify(cacheData));
+    } catch (error) {
+      console.error("Failed to save cached data:", error);
+    }
+  };
+
   const loadDashboardData = async (isRefresh = false) => {
     try {
-      if (isRefresh) {
-        setRefreshing(true);
+      // Load cached data first if not refreshing
+      if (!isRefresh) {
+        const hasCachedData = await loadCachedData();
+        if (!hasCachedData) {
+          setStats(prev => ({ ...prev, loading: true, error: null }));
+        }
       } else {
-        setStats(prev => ({ ...prev, loading: true, error: null }));
+        setRefreshing(true);
       }
 
+      // Load fresh data from API
       const [sourceCounts, readyForPickupCount, activePicklistsCount, totalOrdersCount] = await Promise.all([
         loadSourceCounts(),
         loadReadyForPickupCount(),
@@ -87,14 +125,21 @@ export default function DashboardScreen() {
         loadTotalOrdersCount(),
       ]);
 
-      setStats({
+      const newData = {
         sourceCounts,
         readyForPickupCount,
         activePicklistsCount,
         totalOrdersCount,
         loading: false,
         error: null,
-      });
+      };
+
+      // Update state with fresh data
+      setStats(newData);
+      
+      // Save fresh data to cache
+      await saveCachedData(newData);
+
     } catch (error) {
       console.error("Failed to load dashboard data:", error);
       setStats(prev => ({
@@ -231,7 +276,7 @@ export default function DashboardScreen() {
     return sourceMap[sourceName] || { displayName: sourceName, icon: '📦' };
   };
 
-  if (stats.loading) {
+  if (stats.loading && stats.sourceCounts.length === 0) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#007AFF" />

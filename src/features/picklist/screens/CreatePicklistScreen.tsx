@@ -206,14 +206,12 @@ export default function CreatePicklistScreen() {
         </View>
         
         <View style={styles.headerRight}>
-          <View style={styles.progressContainer}>
-            <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: `${progressPercentage}%` }]} />
-            </View>
-            <Text style={styles.progressText}>
-              {pickedItemsCount} of {totalItemsCount} items picked
-            </Text>
+          <View style={styles.progressBar}>
+            <View style={[styles.progressFill, { width: `${progressPercentage}%` }]} />
           </View>
+          <Text style={styles.progressText}>
+            {pickedItemsCount} of {totalItemsCount} items picked
+          </Text>
         </View>
       </View>
 
@@ -284,19 +282,15 @@ const styles = StyleSheet.create({
   },
   headerRight: {
     alignItems: 'flex-end',
-  },
-  progressContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 4,
+    minWidth: 120,
   },
   progressBar: {
     height: 6,
+    width: 120,
     backgroundColor: '#e0e0e0',
     borderRadius: 3,
     overflow: 'hidden',
-    flex: 1,
+    marginBottom: 4,
   },
   progressFill: {
     height: '100%',

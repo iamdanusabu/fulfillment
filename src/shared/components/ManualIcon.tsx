@@ -1,20 +1,42 @@
 import React from 'react';
+import { View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 interface ManualIconProps {
   width?: number;
   height?: number;
+  iconColor?: string;
+  backgroundColor?: string;
 }
 
-export const ManualIcon: React.FC<ManualIconProps> = ({ width = 24, height = 24 }) => {
+export const ManualIcon: React.FC<ManualIconProps> = ({ 
+  width = 24, 
+  height = 24,
+  iconColor = '#2563EB',
+  backgroundColor = '#f8f9fa'
+}) => {
+  const containerSize = width * 1.8;
+  const borderRadius = width * 0.2;
+
   return (
-    <Svg width={width} height={height} viewBox="0 0 256 222" fill="none">
+    <View 
+      style={{
+        width: containerSize,
+        height: containerSize,
+        backgroundColor: backgroundColor,
+        borderRadius: borderRadius,
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
+    >
+      <Svg width={width} height={height} viewBox="0 0 256 222" fill="none">
       <Path 
         fillRule="evenodd" 
         clipRule="evenodd" 
         d="M60.1236 0.506836C49.1303 0.506836 39.736 7.68749 36.163 17.5336H220.282C216.704 7.68749 207.298 0.506835 196.304 0.506836H60.1236ZM26.07 34.577C12.068 34.577 0.47998 46.1485 0.47998 60.1504V196.331C0.47998 210.333 12.068 221.921 26.07 221.921H230.375C244.377 221.921 255.882 210.333 255.882 196.331V60.1504C255.882 46.1485 244.377 34.577 230.375 34.577H26.07ZM128.064 68.5142C132.891 68.4234 136.818 72.3504 136.727 77.1772V158.769L156.282 139.265C157.045 138.374 157.984 137.65 159.04 137.139C160.097 136.628 161.247 136.341 162.42 136.296C163.592 136.251 164.761 136.449 165.854 136.877C166.946 137.305 167.939 137.954 168.768 138.784C169.598 139.613 170.247 140.605 170.675 141.698C171.103 142.79 171.301 143.96 171.256 145.132C171.21 146.305 170.923 147.455 170.413 148.511C169.902 149.568 169.178 150.507 168.287 151.27L134.217 185.34C132.621 186.926 130.463 187.816 128.214 187.816C125.965 187.816 123.807 186.926 122.211 185.34L88.1579 151.27C86.9931 150.14 86.1758 148.7 85.8021 147.121C85.4283 145.541 85.5139 143.888 86.0486 142.355C86.5833 140.823 87.5449 139.475 88.82 138.471C90.0952 137.467 91.6308 136.848 93.246 136.688C94.5184 136.571 95.8009 136.742 96.9983 137.188C98.1958 137.634 99.2774 138.344 100.163 139.265L119.701 158.819V77.1772C119.612 72.4736 123.361 68.6107 128.064 68.5142Z" 
-        fill="#2563EB"
+        fill={iconColor}
       />
-    </Svg>
+      </Svg>
+    </View>
   );
 };

@@ -1,21 +1,42 @@
 
 import React from 'react';
+import { View } from 'react-native';
 import Svg, { G, Path, Defs, ClipPath, Rect } from 'react-native-svg';
 
 interface BigCommerceIconProps {
   width?: number;
   height?: number;
+  iconColor?: string;
+  backgroundColor?: string;
 }
 
-export const BigCommerceIcon: React.FC<BigCommerceIconProps> = ({ width = 24, height = 24 }) => {
+export const BigCommerceIcon: React.FC<BigCommerceIconProps> = ({ 
+  width = 24, 
+  height = 24,
+  iconColor = '#2563EB',
+  backgroundColor = '#f8f9fa'
+}) => {
+  const containerSize = width * 1.8;
+  const borderRadius = width * 0.2;
+
   return (
-    <Svg width={width} height={height} viewBox="0 0 305 306">
+    <View 
+      style={{
+        width: containerSize,
+        height: containerSize,
+        backgroundColor: backgroundColor,
+        borderRadius: borderRadius,
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
+    >
+      <Svg width={width} height={height} viewBox="0 0 305 306">
       <G clipPath="url(#clip0_4125_1519)">
         <Path 
           fillRule="evenodd" 
           clipRule="evenodd" 
           d="M300.298 0.672267L186.882 114.563H205.379C234.373 114.563 251.433 132.831 251.433 152.904C251.433 168.614 240.851 180.193 229.67 185.246C227.869 186.057 227.933 188.533 229.77 189.261C242.795 194.42 252.179 208.147 252.179 224.185C252.179 246.97 237.113 265.017 207.895 265.017H127.548C126.286 265.017 125.264 264.005 125.264 262.759V176.439L0.784365 301.438C-0.888573 303.117 0.29161 306 2.65502 306H302.133C303.261 306 304.171 305.079 304.171 303.944V2.29408C304.171 0.256106 301.731 -0.76594 300.298 0.672267ZM159.96 236.816H199.676C211.773 236.816 219.076 230.501 219.076 219.674C219.076 210.207 212.235 202.529 199.676 202.529H159.96C158.698 202.529 157.676 203.539 157.676 204.787V234.558C157.676 235.807 158.698 236.816 159.96 236.816ZM157.676 172.078V145.013C157.676 143.767 158.698 142.754 159.96 142.754H198.307C209.263 142.754 216.11 149.294 216.11 158.544C216.11 168.241 209.263 174.334 198.307 174.334H159.96C158.698 174.334 157.676 173.324 157.676 172.078Z" 
-          fill="#2563EB"
+          fill={iconColor}
         />
       </G>
       <Defs>
@@ -23,6 +44,7 @@ export const BigCommerceIcon: React.FC<BigCommerceIconProps> = ({ width = 24, he
           <Rect width="304.171" height="306" fill="white"/>
         </ClipPath>
       </Defs>
-    </Svg>
+      </Svg>
+    </View>
   );
 };

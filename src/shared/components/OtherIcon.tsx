@@ -1,31 +1,53 @@
 
 import React from 'react';
+import { View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 interface OtherIconProps {
   width?: number;
   height?: number;
+  iconColor?: string;
+  backgroundColor?: string;
 }
 
-export const OtherIcon: React.FC<OtherIconProps> = ({ width = 24, height = 24 }) => {
+export const OtherIcon: React.FC<OtherIconProps> = ({ 
+  width = 24, 
+  height = 24,
+  iconColor = '#2563EB',
+  backgroundColor = '#f8f9fa'
+}) => {
+  const containerSize = width * 1.8;
+  const borderRadius = width * 0.2;
+
   return (
-    <Svg width={width} height={height} viewBox="0 0 320 320" fill="none">
+    <View 
+      style={{
+        width: containerSize,
+        height: containerSize,
+        backgroundColor: backgroundColor,
+        borderRadius: borderRadius,
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
+    >
+      <Svg width={width} height={height} viewBox="0 0 320 320" fill="none">
       <Path 
         d="M20 50V115.625C20 132.168 33.457 145.625 50 145.625H115.625C132.168 145.625 145.625 132.168 145.625 115.625V50C145.625 33.457 132.168 20 115.625 20H50C33.457 20 20 33.457 20 50Z" 
         fill="#2563EB"
       />
       <Path 
         d="M20 270C20 286.543 33.457 300 50 300H115.625C132.168 300 145.625 286.543 145.625 270V204.375C145.625 187.832 132.168 174.375 115.625 174.375H50C33.457 174.375 20 187.832 20 204.375V270Z" 
-        fill="#2563EB"
+        fill={iconColor}
       />
       <Path 
         d="M270 174.375H204.375C187.832 174.375 174.375 187.832 174.375 204.375V270C174.375 286.543 187.832 300 204.375 300H270C286.543 300 300 286.543 300 270V204.375C300 187.832 286.543 174.375 270 174.375Z" 
-        fill="#2563EB"
+        fill={iconColor}
       />
       <Path 
         d="M290 72.8125H247.188V30C247.188 24.4727 242.71 20 237.188 20C231.665 20 227.188 24.4727 227.188 30V72.8125H184.375C178.853 72.8125 174.375 77.2852 174.375 82.8125C174.375 88.3398 178.853 92.8125 184.375 92.8125H227.188V135.625C227.188 141.152 231.665 145.625 237.188 145.625C242.71 145.625 247.188 141.152 247.188 135.625V92.8125H290C295.522 92.8125 300 88.3398 300 82.8125C300 77.2852 295.522 72.8125 290 72.8125Z" 
-        fill="#2563EB"
+        fill={iconColor}
       />
-    </Svg>
+      </Svg>
+    </View>
   );
 };

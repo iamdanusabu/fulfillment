@@ -195,22 +195,25 @@ export default function CreatePicklistScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Picklist</Text>
-        <View style={styles.headerInfo}>
-          <Text style={styles.infoText}>Orders: {orderIds.length}</Text>
-          <Text style={styles.infoText}>Items: {totalItemsCount}</Text>
-          <Text style={styles.infoText}>Store: Fly LLC</Text>
-          <Text style={styles.infoText}>ID: 1</Text>
+        <View style={styles.headerLeft}>
+          <Text style={styles.title}>Picklist</Text>
+          <View style={styles.headerInfo}>
+            <Text style={styles.infoText}>Orders: {orderIds.length}</Text>
+            <Text style={styles.infoText}>Items: {totalItemsCount}</Text>
+            <Text style={styles.infoText}>Store: Fly LLC</Text>
+            <Text style={styles.infoText}>ID: 1</Text>
+          </View>
         </View>
         
-        {/* Progress Bar */}
-        <View style={styles.progressContainer}>
-          <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: `${progressPercentage}%` }]} />
+        <View style={styles.headerRight}>
+          <View style={styles.progressContainer}>
+            <View style={styles.progressBar}>
+              <View style={[styles.progressFill, { width: `${progressPercentage}%` }]} />
+            </View>
+            <Text style={styles.progressText}>
+              {pickedItemsCount} of {totalItemsCount} items picked
+            </Text>
           </View>
-          <Text style={styles.progressText}>
-            {pickedItemsCount} of {totalItemsCount} items picked
-          </Text>
         </View>
       </View>
 
@@ -253,33 +256,40 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   header: {
-    padding: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 12,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#e9ecef',
   },
+  headerLeft: {
+    flex: 1,
+  },
   title: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 6,
+    marginBottom: 4,
   },
   headerInfo: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginBottom: 10,
   },
   infoText: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#666',
     marginRight: 12,
-    marginBottom: 2,
+  },
+  headerRight: {
+    alignItems: 'flex-end',
   },
   progressContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 4,
     gap: 8,
+    marginBottom: 4,
   },
   progressBar: {
     height: 6,
@@ -294,10 +304,10 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   progressText: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#666',
     fontWeight: '500',
-    minWidth: 80,
+    textAlign: 'right',
   },
   itemsList: {
     flex: 1,

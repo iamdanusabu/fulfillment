@@ -282,11 +282,11 @@ const styles = StyleSheet.create({
   },
   headerRight: {
     alignItems: 'flex-end',
-    minWidth: 120,
+    minWidth: 200,
   },
   progressBar: {
     height: 6,
-    width: 120,
+    width: 200,
     backgroundColor: '#e0e0e0',
     borderRadius: 3,
     overflow: 'hidden',

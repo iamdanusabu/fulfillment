@@ -45,18 +45,7 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true, onQRSca
       );
     }
 
-    // Add refresh button on dashboard
-    if (pathname === '/dashboard') {
-      actions.push(
-        <TouchableOpacity
-          key="refresh"
-          style={[styles.iconButton, isSmallMobile && styles.smallIconButton]}
-          onPress={() => window.location.reload()}
-        >
-          <MaterialIcons name="refresh" size={isSmallMobile ? 20 : 24} color="#007AFF" />
-        </TouchableOpacity>
-      );
-    }
+    
 
     // Add create picklist button on picklist page
     if (pathname === '/picklist') {

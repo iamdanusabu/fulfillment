@@ -76,11 +76,11 @@ export default function CreatePicklistScreen() {
       let fulfillmentId: string;
 
       if (params.fulfillmentId) {
-        // Update existing fulfillment using PUT
+        // Update existing fulfillment using PUT - never create new one if fulfillmentId exists
         await picklistApi.updateFulfillment(params.fulfillmentId as string, items, fulfillmentData);
         fulfillmentId = params.fulfillmentId as string;
       } else {
-        // Create new fulfillment
+        // Create new fulfillment only if no fulfillmentId is provided
         const result = await picklistApi.createFulfillment(orderIds, locationId, items);
         fulfillmentId = result.id.toString();
       }

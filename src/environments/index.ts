@@ -15,6 +15,7 @@ export const COMMON_ENDPOINTS = {
   dashboard: "/api/dashboard",
   orderFulfill: "/console/transactions/orders/fulfill",
   activePicklists: "/inventory/fulfillments",
+  picklists: "/console/catalog/picklists",
 };
 
 export const getConfig = () => {

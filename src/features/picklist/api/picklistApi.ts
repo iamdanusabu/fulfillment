@@ -138,27 +138,59 @@ export const picklistApi = {
   async updateFulfillment(fulfillmentId: string, items: PicklistItem[], fulfillmentData?: any) {
     const config = getConfig();
     
-    // Format items with picked count
-    const formattedItems = items.map(item => ({
-      id: item.id,
-      item: {
-        itemID: item.productId,
-        id: item.productId
+    // Format items with picked count - only include items that have been picked
+    const formattedItems = items
+      .filter(item => item.pickedQuantity > 0)
+      .map((item, index) => ({
+        id: index + 1, // Sequential ID for items
+        fulfillment: {
+          id: parseInt(fulfillmentId),
+          name: fulfillmentData?.name || `Picklist ${fulfillmentId}`
+        },
+        item: {
+          itemID: item.productId,
+          id: item.productId
+        },
+        bin: item.bin ? {
+          id: item.bin.id,
+          name: item.bin.name
+        } : { id: 1, name: "Bin A" },
+        pickedCount: item.pickedQuantity,
+        returnedCount: 0,
+        createdBy: fulfillmentData?.createdBy || {
+          userID: 2,
+          name: "Financial",
+          pinEncrypted: false,
+          id: 2
+        },
+        createdOn: fulfillmentData?.createdOn || new Date().toISOString(),
+        modifiedBy: fulfillmentData?.modifiedBy || {
+          userID: 2,
+          name: "Financial",
+          pinEncrypted: false,
+          id: 2
+        },
+        modifiedOn: new Date().toISOString(),
+        modifiedTime: new Date().toISOString().replace('T', ' ').substring(0, 19)
+      }));
+    
+    // Format sources from fulfillmentData or create default structure
+    const formattedSources = fulfillmentData?.sources?.map((source: any) => ({
+      fulfillment: {
+        id: parseInt(fulfillmentId),
+        name: fulfillmentData?.name || `Picklist ${fulfillmentId}`
       },
-      bin: item.bin ? {
-        id: item.bin.id,
-        name: item.bin.name
-      } : { id: 1, name: "Bin A" },
-      pickedCount: item.pickedQuantity,
-      returnedCount: 0,
-      createdBy: fulfillmentData?.createdBy || {
+      type: source.type || "ORDER",
+      typeID: source.typeID,
+      status: source.status || "OPEN",
+      createdBy: source.createdBy || {
         userID: 2,
         name: "Financial",
         pinEncrypted: false,
         id: 2
       },
-      createdOn: fulfillmentData?.createdOn || new Date().toISOString(),
-      modifiedBy: fulfillmentData?.modifiedBy || {
+      createdOn: source.createdOn || new Date().toISOString(),
+      modifiedBy: source.modifiedBy || {
         userID: 2,
         name: "Financial",
         pinEncrypted: false,
@@ -166,14 +198,14 @@ export const picklistApi = {
       },
       modifiedOn: new Date().toISOString(),
       modifiedTime: new Date().toISOString().replace('T', ' ').substring(0, 19)
-    }));
+    })) || [];
     
     const requestBody = {
       id: parseInt(fulfillmentId),
       name: fulfillmentData?.name || `Picklist ${fulfillmentId}`,
       status: "Active",
       requestKey: fulfillmentData?.requestKey || `A101-${fulfillmentId}`,
-      sources: fulfillmentData?.sources || [],
+      sources: formattedSources,
       items: formattedItems,
       createdBy: fulfillmentData?.createdBy || {
         userID: 2,
@@ -192,7 +224,8 @@ export const picklistApi = {
       modifiedTime: new Date().toISOString().replace('T', ' ').substring(0, 19)
     };
     
-    return await fetchWithToken(`${config.endpoints.inventoryFulfillments}/${fulfillmentId}`, {
+    // Use the correct PUT endpoint structure from your curl example
+    return await fetchWithToken(`${config.endpoints.picklists}/${fulfillmentId}`, {
       method: 'PUT',
       body: JSON.stringify(requestBody),
     });

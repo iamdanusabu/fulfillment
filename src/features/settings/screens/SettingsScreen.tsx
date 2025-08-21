@@ -19,12 +19,6 @@ interface Settings {
   refreshInterval: number;
 }
 
-interface FilterSettings {
-  sources: string[];
-  statuses: string[];
-  paymentStatuses: string[];
-}
-
 const DEFAULT_SETTINGS: Settings = {
   notifications: true,
   autoRefresh: false,
@@ -32,55 +26,8 @@ const DEFAULT_SETTINGS: Settings = {
   refreshInterval: 30,
 };
 
-const DEFAULT_FILTER_SETTINGS: FilterSettings = {
-  sources: [
-    'Shopify', 'Tapin2', 'Breakaway', 'bigcommerce', 'Ecwid', 
-    'PHONE ORDER', 'DELIVERY', 'BAR TAB', 'TIKT', 'TABLE', 
-    'OTHER', 'MANUAL', 'FanVista', 'QSR'
-  ],
-  statuses: ['Initiated', 'Sent for Processing'],
-  paymentStatuses: ['PAID', 'UNPAID']
-};
-
-const ALL_SOURCES = [
-  'Shopify', 'Tapin2', 'Breakaway', 'bigcommerce', 'Ecwid', 
-  'PHONE ORDER', 'DELIVERY', 'BAR TAB', 'TIKT', 'TABLE', 
-  'OTHER', 'MANUAL', 'FanVista', 'QSR'
-];
-
-const capitalizeSourceName = (source: string): string => {
-  // Handle special cases
-  const specialCases: { [key: string]: string } = {
-    'bigcommerce': 'BigCommerce',
-    'PHONE ORDER': 'Phone Order',
-    'DELIVERY': 'Delivery',
-    'BAR TAB': 'Bar Tab',
-    'TIKT': 'TIKT',
-    'TABLE': 'Table',
-    'OTHER': 'Other',
-    'MANUAL': 'Manual',
-    'QSR': 'QSR'
-  };
-
-  if (specialCases[source]) {
-    return specialCases[source];
-  }
-
-  // For other sources, capitalize first letter of each word
-  return source.split(' ').map(word => 
-    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-  ).join(' ');
-};
-
-const ALL_STATUSES = [
-  'Initiated', 'Sent for Processing'
-];
-
-const ALL_PAYMENT_STATUSES = ['PAID', 'UNPAID'];
-
 export default function SettingsScreen() {
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
-  const [filterSettings, setFilterSettings] = useState<FilterSettings>(DEFAULT_FILTER_SETTINGS);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -90,17 +37,10 @@ export default function SettingsScreen() {
 
   const loadSettings = async () => {
     try {
-      const [savedSettings, savedFilterSettings] = await Promise.all([
-        AsyncStorage.getItem('app_settings'),
-        AsyncStorage.getItem('orderFilterSettings')
-      ]);
+      const savedSettings = await AsyncStorage.getItem('app_settings');
 
       if (savedSettings) {
         setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(savedSettings) });
-      }
-
-      if (savedFilterSettings) {
-        setFilterSettings({ ...DEFAULT_FILTER_SETTINGS, ...JSON.parse(savedFilterSettings) });
       }
     } catch (error) {
       console.error('Error loading settings:', error);
@@ -119,76 +59,9 @@ export default function SettingsScreen() {
     }
   };
 
-  const saveFilterSettings = async (newFilterSettings: FilterSettings) => {
-    try {
-      await AsyncStorage.setItem('orderFilterSettings', JSON.stringify(newFilterSettings));
-      setFilterSettings(newFilterSettings);
-    } catch (error) {
-      console.error('Error saving filter settings:', error);
-      Alert.alert('Error', 'Failed to save filter settings. Please try again.');
-    }
-  };
-
   const updateSetting = <K extends keyof Settings>(key: K, value: Settings[K]) => {
     const newSettings = { ...settings, [key]: value };
     saveSettings(newSettings);
-  };
-
-  const toggleSource = (source: string) => {
-    const newSources = filterSettings.sources.includes(source)
-      ? filterSettings.sources.filter(s => s !== source)
-      : [...filterSettings.sources, source];
-
-    const newFilterSettings = { ...filterSettings, sources: newSources };
-    saveFilterSettings(newFilterSettings);
-  };
-
-  const toggleStatus = (status: string) => {
-    const newStatuses = filterSettings.statuses.includes(status)
-      ? filterSettings.statuses.filter(s => s !== status)
-      : [...filterSettings.statuses, status];
-
-    const newFilterSettings = { ...filterSettings, statuses: newStatuses };
-    saveFilterSettings(newFilterSettings);
-  };
-
-  const togglePaymentStatus = (paymentStatus: string) => {
-    const newPaymentStatuses = filterSettings.paymentStatuses.includes(paymentStatus)
-      ? filterSettings.paymentStatuses.filter(s => s !== paymentStatus)
-      : [...filterSettings.paymentStatuses, paymentStatus];
-
-    const newFilterSettings = { ...filterSettings, paymentStatuses: newPaymentStatuses };
-    saveFilterSettings(newFilterSettings);
-  };
-
-  const selectAllSources = () => {
-    const newFilterSettings = { ...filterSettings, sources: [...ALL_SOURCES] };
-    saveFilterSettings(newFilterSettings);
-  };
-
-  const deselectAllSources = () => {
-    const newFilterSettings = { ...filterSettings, sources: [] };
-    saveFilterSettings(newFilterSettings);
-  };
-
-  const selectAllStatuses = () => {
-    const newFilterSettings = { ...filterSettings, statuses: [...ALL_STATUSES] };
-    saveFilterSettings(newFilterSettings);
-  };
-
-  const deselectAllStatuses = () => {
-    const newFilterSettings = { ...filterSettings, statuses: [] };
-    saveFilterSettings(newFilterSettings);
-  };
-
-  const selectAllPaymentStatuses = () => {
-    const newFilterSettings = { ...filterSettings, paymentStatuses: [...ALL_PAYMENT_STATUSES] };
-    saveFilterSettings(newFilterSettings);
-  };
-
-  const deselectAllPaymentStatuses = () => {
-    const newFilterSettings = { ...filterSettings, paymentStatuses: [] };
-    saveFilterSettings(newFilterSettings);
   };
 
   const handleLogout = async () => {
@@ -229,91 +102,6 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      {/* Order Filter Settings */}
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Order Sources</Text>
-          <View style={styles.selectButtons}>
-            <TouchableOpacity onPress={selectAllSources} style={styles.selectButton}>
-              <Text style={styles.selectButtonText}>All</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={deselectAllSources} style={styles.selectButton}>
-              <Text style={styles.selectButtonText}>None</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-        {ALL_SOURCES.map((source) => (
-          <TouchableOpacity
-            key={source}
-            style={styles.filterItem}
-            onPress={() => toggleSource(source)}
-          >
-            <Text style={styles.filterLabel}>{capitalizeSourceName(source)}</Text>
-            <MaterialIcons 
-              name={filterSettings.sources.includes(source) ? "check-box" : "check-box-outline-blank"} 
-              size={24} 
-              color={filterSettings.sources.includes(source) ? "#007AFF" : "#ccc"} 
-            />
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Order Status</Text>
-          <View style={styles.selectButtons}>
-            <TouchableOpacity onPress={selectAllStatuses} style={styles.selectButton}>
-              <Text style={styles.selectButtonText}>All</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={deselectAllStatuses} style={styles.selectButton}>
-              <Text style={styles.selectButtonText}>None</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-        {ALL_STATUSES.map((status) => (
-          <TouchableOpacity
-            key={status}
-            style={styles.filterItem}
-            onPress={() => toggleStatus(status)}
-          >
-            <Text style={styles.filterLabel}>{status}</Text>
-            <MaterialIcons 
-              name={filterSettings.statuses.includes(status) ? "check-box" : "check-box-outline-blank"} 
-              size={24} 
-              color={filterSettings.statuses.includes(status) ? "#007AFF" : "#ccc"} 
-            />
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Payment Status</Text>
-          <View style={styles.selectButtons}>
-            <TouchableOpacity onPress={selectAllPaymentStatuses} style={styles.selectButton}>
-              <Text style={styles.selectButtonText}>All</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={deselectAllPaymentStatuses} style={styles.selectButton}>
-              <Text style={styles.selectButtonText}>None</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-        {ALL_PAYMENT_STATUSES.map((paymentStatus) => (
-          <TouchableOpacity
-            key={paymentStatus}
-            style={styles.filterItem}
-            onPress={() => togglePaymentStatus(paymentStatus)}
-          >
-            <Text style={styles.filterLabel}>{paymentStatus}</Text>
-            <MaterialIcons 
-              name={filterSettings.paymentStatuses.includes(paymentStatus) ? "check-box" : "check-box-outline-blank"} 
-              size={24} 
-              color={filterSettings.paymentStatuses.includes(paymentStatus) ? "#007AFF" : "#ccc"} 
-            />
-          </TouchableOpacity>
-        ))}
-      </View>
-
       {/* App Settings */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Notifications</Text>
@@ -383,48 +171,14 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     paddingVertical: 16,
   },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    marginBottom: 12,
-  },
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: '#333',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-  },
-  selectButtons: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  selectButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: '#007AFF',
-    borderRadius: 4,
-  },
-  selectButtonText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  filterItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#e9ecef',
-  },
-  filterLabel: {
-    fontSize: 16,
-    color: '#333',
-    flex: 1,
+    marginBottom: 12,
   },
   settingItem: {
     flexDirection: 'row',

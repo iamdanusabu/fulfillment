@@ -377,45 +377,7 @@ export default function DashboardScreen() {
           </View>
         )}
 
-        {/* Bottom Section with Quick Order Lookup and Quick Actions */}
-        <View style={[
-          styles.bottomSection,
-          { flexDirection: isTablet || isLandscape ? 'row' : 'column' }
-        ]}>
-          {/* Quick Order Lookup */}
-          <View style={[styles.quickSection, isTablet || isLandscape ? { flex: 1, marginRight: 16 } : {}]}>
-            <Text style={styles.sectionTitle}>Quick Order Lookup</Text>
-            <TouchableOpacity
-              style={styles.scanButton}
-              onPress={startScanning}
-            >
-              <MaterialIcons name="qr-code-scanner" size={24} color="#007AFF" />
-              <Text style={styles.scanButtonText}>Scan QR Code</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Quick Actions */}
-          <View style={[styles.quickSection, isTablet || isLandscape ? { flex: 1 } : {}]}>
-            <Text style={styles.sectionTitle}>Quick Actions</Text>
-            <View style={styles.actionButtonsRow}>
-              <TouchableOpacity
-                style={[styles.actionButton, { flex: 1, marginRight: 8 }]}
-                onPress={() => router.push('/orders')}
-              >
-                <MaterialIcons name="receipt-long" size={20} color="#fff" />
-                <Text style={styles.actionButtonText}>View Orders</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.actionButton, { flex: 1, marginLeft: 8 }]}
-                onPress={() => router.push('/picklist')}
-              >
-                <MaterialIcons name="list-alt" size={20} color="#fff" />
-                <Text style={styles.actionButtonText}>Manage Picklists</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
+        
 
         {/* QR Code Scanner Modal */}
         <QRCodeScanner
@@ -588,55 +550,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontStyle: 'italic',
   },
-  bottomSection: {
-    marginHorizontal: 20,
-    marginTop: 24,
-    marginBottom: 32,
-    gap: 16,
-  },
-  quickSection: {
-    marginBottom: 16,
-  },
-  scanButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: '#e8f2ff',
-    borderStyle: 'dashed',
-  },
-  scanButtonText: {
-    color: '#007AFF',
-    fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 8,
-  },
-  actionButtonsRow: {
-    flexDirection: 'row',
-    gap: 0,
-  },
-  actionButton: {
-    backgroundColor: '#007AFF',
-    padding: 16,
-    borderRadius: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  actionButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
-    marginLeft: 8,
-  },
+  
   actionIcon: {
     marginBottom: 8,
     selfAlign: 'center',

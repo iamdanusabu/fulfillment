@@ -365,7 +365,12 @@ const styles = StyleSheet.create({
   quantityContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 0,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+    padding: 4,
+    gap: 4,
   },
   quantityDisplay: {
     backgroundColor: '#f8f9fa',
@@ -374,6 +379,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     minWidth: 50,
     alignItems: 'center',
+    marginHorizontal: 4,
   },
   fullyPickedQuantity: {
     backgroundColor: '#e9ecef',
@@ -387,9 +393,9 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   quantityButton: {
-    width: 30,
-    height: 30,
-    borderRadius: 4,
+    width: 32,
+    height: 32,
+    borderRadius: 6,
     justifyContent: 'center',
     alignItems: 'center',
   },

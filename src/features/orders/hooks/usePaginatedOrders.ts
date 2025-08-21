@@ -13,11 +13,16 @@ interface UsePaginatedOrdersParams {
 }
 
 export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
-  const { settings, getFilterParams } = useOrderFilters();
+  const { settings, getFilterParams, loading: filtersLoading } = useOrderFilters();
   const config = getConfig();
 
   // Build parameters that react to filter settings changes
   const apiParams = React.useMemo(() => {
+    // Don't build params until filter settings are loaded
+    if (filtersLoading || !settings) {
+      return null;
+    }
+
     const filterParams = getFilterParams();
     
     const result: Record<string, string | number> = {
@@ -47,15 +52,16 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
 
     // Debug log to see what parameters are being sent
     console.log('API Parameters being sent:', result);
+    console.log('Filter settings loaded:', settings);
 
     return result;
-  }, [settings, params.source, params.status, params.hasFulfilmentJob, getFilterParams]);
+  }, [settings, params.source, params.status, params.hasFulfilmentJob, getFilterParams, filtersLoading]);
 
   const paginatedState = usePaginatedFetcher<any>(
-    config.endpoints.orders,
+    apiParams ? config.endpoints.orders : null, // Don't start fetching until params are ready
     {
       pageSize: 20,
-      initialParams: apiParams,
+      initialParams: apiParams || {},
     }
   );
 
@@ -67,7 +73,7 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
 
   return {
     orders: transformedOrders,
-    loading: paginatedState.loading || (!settings),
+    loading: paginatedState.loading || filtersLoading || (!settings),
     error: paginatedState.error,
     hasMore: paginatedState.hasMore,
     totalRecords: paginatedState.totalRecords,

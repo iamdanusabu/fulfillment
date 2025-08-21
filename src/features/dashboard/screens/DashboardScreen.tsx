@@ -32,6 +32,7 @@ import { TableIcon } from '../../../shared/components/TableIcon';
 import { ManualIcon } from '../../../shared/components/ManualIcon';
 import { FanVistaIcon } from '../../../shared/components/FanVistaIcon';
 import { ShoppingCartIcon } from '../../../shared/components/ShoppingCartIcon';
+import { ClipboardIcon } from '../../../shared/components/ClipboardIcon';
 
 
 
@@ -334,7 +335,7 @@ export default function DashboardScreen() {
                 <Text style={styles.metricLabel}>Active Picklists</Text>
                 <Text style={styles.metricNumber}>{stats.activePicklistsCount}</Text>
               </View>
-              <MaterialIcons name="list-alt" size={24} color="#666" />
+              <ClipboardIcon size={24} />
             </TouchableOpacity>
 
             <View style={styles.metricCard}>

@@ -62,17 +62,7 @@ export function AppToolbar({ title, onMenuToggle, showMenuButton = true, onQRSca
     }
 
     // Add filter/search buttons on orders page
-    if (pathname === '/orders') {
-      actions.push(
-        <TouchableOpacity
-          key="filter"
-          style={[styles.iconButton, isSmallMobile && styles.smallIconButton]}
-          onPress={() => {/* Add filter functionality */}}
-        >
-          <MaterialIcons name="filter-list" size={isSmallMobile ? 20 : 24} color="#007AFF" />
-        </TouchableOpacity>
-      );
-    }
+    // Filter button removed per user request
 
     return actions.length > 0 ? actions : null;
   };

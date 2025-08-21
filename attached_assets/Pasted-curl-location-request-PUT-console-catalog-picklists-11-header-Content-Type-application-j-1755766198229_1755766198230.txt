@@ -1,0 +1,85 @@
+curl --location --request PUT/console/catalog/picklists/11' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer AAAAawAHdGVtcC12MaK7RTz-q4grdMDbrZ7DV7YAUIBOn0YINUiV4hwNphHPD2HLH6fyrNb0Q16rWjwVJ_xsdzKA_cl1PwSpjm8gL-qsEx8tPvv2cgZzq1uE-6MFCvSdlv0OjdhYiwro9mbjWSLW' \
+--data '{
+    "id": 11,
+    "name": "Picklist 2",
+    "status": "Active",
+    "requestKey": "A101-10",
+    "sources": [
+        {
+            "fulfillment": {
+                "id": 11,
+                "name": "Picklist 1"
+            },
+            "type": "ORDER",
+            "typeID": "1308763742777303040",
+            "status": "OPEN",
+            "createdBy": {
+                "userID": 2,
+                "name": "Financial",
+                "pinEncrypted": false,
+                "id": 2
+            },
+            "createdOn": "2024-11-27T04:44:00-08:00",
+            "modifiedBy": {
+                "userID": 2,
+                "name": "Financial",
+                "pinEncrypted": false,
+                "id": 2
+            },
+            "modifiedOn": "2024-11-27T04:44:00-08:00",
+            "modifiedTime": "2024-11-27 12:45:29"
+        }
+    ],
+    "items": [
+        {
+            "id": 1,
+            "fulfillment": {
+                "id": 11,
+                "name": "Picklist 1"
+            },
+            "item": {
+                "itemID": "1800159",
+                "id": "1800159"
+            },
+            "bin": {
+                "id": 1,
+                "name": "Bin A"
+            },
+            "pickedCount": 1,
+            "returnedCount": 0,
+            "createdBy": {
+                "userID": 2,
+                "name": "Financial",
+                "pinEncrypted": false,
+                "id": 2
+            },
+            "createdOn": "2024-11-27T04:44:00-08:00",
+            "modifiedBy": {
+                "userID": 2,
+                "name": "Financial",
+                "pinEncrypted": false,
+                "id": 2
+            },
+            "modifiedOn": "2024-11-27T04:44:00-08:00",
+            "modifiedTime": "2024-11-27 12:45:30"
+        }
+    ],
+    "createdBy": {
+        "userID": 2,
+        "name": "Financial",
+        "pinEncrypted": false,
+        "id": 2
+    },
+    "createdOn": "2024-11-27T04:44:00-08:00",
+    "modifiedBy": {
+        "userID": 2,
+        "name": "Financial",
+        "pinEncrypted": false,
+        "id": 2
+    },
+    "modifiedOn": "2024-11-27T04:44:00-08:00",
+    "modifiedTime": "2024-11-27 12:44:03"
+}'
+

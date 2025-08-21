@@ -81,22 +81,14 @@ export class PaginatedFetcher<T> {
       if (this.options.initialParams) {
         Object.entries(this.options.initialParams).forEach(([key, value]) => {
           if (value !== undefined && value !== null && value !== '') {
-            // Handle source parameter as comma-separated values to be sent as separate array parameters
-            if (key === 'source' && typeof value === 'string' && value.includes(',')) {
-              const sources = value.split(',').map(s => s.trim()).filter(s => s);
-              sources.forEach((source, index) => {
-                params.append(`sources[${index}]`, source);
-              });
-            } else {
-              params.append(key, value.toString());
-            }
+            params.append(key, value.toString());
           }
         });
       }
 
       const finalUrl = `${this.url}?${params.toString()}`;
       console.log('Final API URL being called:', finalUrl);
-
+      
       const response: PaginatedResponse<T> = await fetchWithToken(finalUrl);
 
       const newData = append 
@@ -122,7 +114,7 @@ export class PaginatedFetcher<T> {
 
   async loadMore(): Promise<void> {
     if (!this.state.hasMore || this.state.loading) return;
-
+    
     // Only load the next page if we haven't already loaded it
     const nextPage = this.state.currentPage + 1;
     if (nextPage <= this.state.totalPages) {
@@ -188,7 +180,7 @@ export const usePaginatedFetcher = <T>(
   });
 
   const [params, setParams] = useState<Record<string, string | number>>(options.initialParams || {});
-
+  
   // Create a stable string representation of params to prevent unnecessary re-renders
   const paramsString = React.useMemo(() => JSON.stringify(params), [params]);
 
@@ -196,7 +188,7 @@ export const usePaginatedFetcher = <T>(
     if (baseUrl) {
       // Always recreate fetcher when params change to ensure fresh parameters
       fetcherRef.current = new PaginatedFetcher<T>(baseUrl, { ...options, initialParams: params });
-
+      
       fetcherRef.current.fetchPage(1, false).then(() => {
         setState(fetcherRef.current!.getState());
       });
@@ -233,12 +225,12 @@ export const usePaginatedFetcher = <T>(
   const updateParamsAndFetch = useCallback((newParams: Record<string, string | number>) => {
     setParams(prevParams => {
       const updatedParams = { ...prevParams, ...newParams };
-
+      
       // Only update fetcher if params actually changed
       const hasChanged = Object.keys(updatedParams).some(key => 
         updatedParams[key] !== prevParams[key]
       );
-
+      
       if (hasChanged && fetcherRef.current) {
         fetcherRef.current.updateParams(updatedParams);
         // Reset pagination and refresh for filter changes

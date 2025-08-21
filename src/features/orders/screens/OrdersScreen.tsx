@@ -23,16 +23,16 @@ import { AppToolbar } from '../../../components/layout/AppToolbar';
 export default function OrdersScreen() {
   const params = useLocalSearchParams();
   const router = useRouter();
-  const { 
-    orders, 
-    loading, 
-    hasMore, 
+  const {
+    orders,
+    loading,
+    hasMore,
     totalRecords,
     currentPage,
     totalPages,
-    loadMore, 
-    refresh 
-  } = usePaginatedOrders({ 
+    loadMore,
+    refresh
+  } = usePaginatedOrders({
     source: params.source as string,
     status: params.status as string,
     hasFulfilmentJob: params.hasFulfilmentJob as string
@@ -54,8 +54,8 @@ export default function OrdersScreen() {
   const toggleOrderSelection = (orderId: string) => {
     if (!isPicklistMode) return;
 
-    setSelectedOrders(prev => 
-      prev.includes(orderId) 
+    setSelectedOrders(prev =>
+      prev.includes(orderId)
         ? prev.filter(id => id !== orderId)
         : [...prev, orderId]
     );
@@ -76,13 +76,17 @@ export default function OrdersScreen() {
     router.push(`/picklist/location-selection?orderIds=${orderIdsParam}`);
   };
 
-  const filteredOrders = useMemo(() => {
+  // Filter orders based on search text
+  const filteredOrders = React.useMemo(() => {
     if (!searchText.trim()) return orders;
 
-    return orders.filter(order => 
-      (order.orderNumber || '').toLowerCase().includes(searchText.toLowerCase()) ||
-      (order.customer || '').toLowerCase().includes(searchText.toLowerCase()) ||
-      (order.source || '').toLowerCase().includes(searchText.toLowerCase())
+    const searchLower = searchText.toLowerCase();
+    return orders.filter(order =>
+      (order.customer || '').toLowerCase().includes(searchLower) ||
+      (order.orderNumber || '').toLowerCase().includes(searchLower) ||
+      order.orderID.toString().toLowerCase().includes(searchLower) ||
+      (order.externalOrderKey && order.externalOrderKey.toLowerCase().includes(searchLower)) ||
+      (order.source || '').toLowerCase().includes(searchLower)
     );
   }, [orders, searchText]);
 
@@ -208,8 +212,8 @@ export default function OrdersScreen() {
           onChangeText={setSearchText}
           clearButtonMode="while-editing"
         />
-        <TouchableOpacity 
-          style={styles.qrButton} 
+        <TouchableOpacity
+          style={styles.qrButton}
           onPress={startScanning}
           disabled={qrLoading}
         >

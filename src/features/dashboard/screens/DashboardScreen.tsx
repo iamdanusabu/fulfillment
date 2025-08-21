@@ -34,6 +34,7 @@ import { FanVistaIcon } from '../../../shared/components/FanVistaIcon';
 import { ShoppingCartIcon } from '../../../shared/components/ShoppingCartIcon';
 import { ClipboardIcon } from '../../../shared/components/ClipboardIcon';
 import { PackageIcon } from '../../../shared/components/PackageIcon';
+import { HubIcon } from '../../../shared/components/HubIcon';
 
 
 
@@ -344,7 +345,7 @@ export default function DashboardScreen() {
                 <Text style={styles.metricLabel}>Total Sources</Text>
                 <Text style={styles.metricNumber}>{stats.sourceCounts.length}</Text>
               </View>
-              <MaterialIcons name="hub" size={24} color="#666" />
+              <HubIcon size={24} />
             </View>
           </View>
         </View>

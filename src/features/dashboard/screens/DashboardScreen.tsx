@@ -33,6 +33,7 @@ import { ManualIcon } from '../../../shared/components/ManualIcon';
 import { FanVistaIcon } from '../../../shared/components/FanVistaIcon';
 import { ShoppingCartIcon } from '../../../shared/components/ShoppingCartIcon';
 import { ClipboardIcon } from '../../../shared/components/ClipboardIcon';
+import { PackageIcon } from '../../../shared/components/PackageIcon';
 
 
 
@@ -324,7 +325,7 @@ export default function DashboardScreen() {
                 <Text style={styles.metricLabel}>Ready for Pickup</Text>
                 <Text style={styles.metricNumber}>{stats.readyForPickupCount}</Text>
               </View>
-              <MaterialIcons name="inventory-2" size={24} color="#666" />
+              <PackageIcon size={24} />
             </TouchableOpacity>
 
             <TouchableOpacity

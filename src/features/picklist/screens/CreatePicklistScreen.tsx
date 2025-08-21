@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -62,6 +63,12 @@ export default function CreatePicklistScreen() {
     );
   };
 
+  const markAllPicked = () => {
+    setItems(prev =>
+      prev.map(item => ({ ...item, pickedQuantity: item.requiredQuantity }))
+    );
+  };
+
   const handleFulfillment = async () => {
     try {
       const orderIds = (params.orderIds as string).split(',');
@@ -87,7 +94,7 @@ export default function CreatePicklistScreen() {
     const groups: { [binName: string]: PicklistItem[] } = {};
 
     items.forEach(item => {
-      const binName = item.bin?.name || 'No Bin Assigned';
+      const binName = item.bin?.name || 'Unassigned Bin';
       if (!groups[binName]) {
         groups[binName] = [];
       }
@@ -97,58 +104,65 @@ export default function CreatePicklistScreen() {
     return groups;
   }, [items]);
 
-  const renderPicklistItem = ({ item }: { item: PicklistItem }) => (
-    <View style={styles.itemCard}>
-      <View style={styles.itemInfo}>
-        <Text style={styles.productName}>{item.productName}</Text>
-        <Text style={styles.upc}>UPC: {item.upc}</Text>
-        <Text style={styles.location}>Location: {item.location}</Text>
-        <Text style={styles.requiredQty}>Required: {item.requiredQuantity}</Text>
-
-        {item.locationHints && item.locationHints.length > 0 && (
-          <View style={styles.hintsContainer}>
-            <Text style={styles.hintsTitle}>💡 Hints:</Text>
-            {item.locationHints.map((hint, index) => (
-              <Text key={index} style={styles.hintText}>• {hint.hint}</Text>
-            ))}
+  const renderPicklistItem = ({ item }: { item: PicklistItem }) => {
+    const isPicked = item.pickedQuantity > 0;
+    const isFullyPicked = item.pickedQuantity === item.requiredQuantity;
+    
+    return (
+      <View style={styles.itemCard}>
+        <View style={styles.itemInfo}>
+          <Text style={styles.productName}>{item.productName}</Text>
+          <Text style={styles.sku}>SKU: {item.upc}</Text>
+          <View style={styles.inventoryInfo}>
+            <Text style={styles.inventoryText}>Available: {item.availableQuantity || 0}</Text>
+            <Text style={styles.inventoryText}>QOH: {item.requiredQuantity}</Text>
           </View>
-        )}
-      </View>
-
-      <View style={styles.quantityControls}>
-        <TouchableOpacity
-          onPress={() => updatePickedQuantity(item.id, item.pickedQuantity - 1)}
-          style={styles.quantityButton}
-        >
-          <MaterialIcons name="remove" size={20} color="#666" />
-        </TouchableOpacity>
-
-        <View style={styles.quantityInputContainer}>
-          <TextInput
-            style={styles.quantityInput}
-            value={item.pickedQuantity.toString()}
-            onChangeText={(text) => updatePickedQuantity(item.id, parseInt(text) || 0)}
-            keyboardType="numeric"
-          />
-          <Text style={styles.requiredQtyLabel}>/ {item.requiredQuantity}</Text>
         </View>
 
-        <TouchableOpacity
-          onPress={() => updatePickedQuantity(item.id, item.pickedQuantity + 1)}
-          style={styles.quantityButton}
-        >
-          <MaterialIcons name="add" size={20} color="#666" />
-        </TouchableOpacity>
+        <View style={styles.quantitySection}>
+          <View style={styles.quantityDisplay}>
+            <Text style={styles.quantityText}>
+              {item.pickedQuantity}/{item.requiredQuantity}
+            </Text>
+            <View style={styles.quantityControls}>
+              <TouchableOpacity
+                onPress={() => updatePickedQuantity(item.id, item.pickedQuantity - 1)}
+                style={[styles.quantityButton, styles.decrementButton]}
+              >
+                <Text style={styles.quantityButtonText}>-</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                onPress={() => updatePickedQuantity(item.id, item.pickedQuantity + 1)}
+                style={[styles.quantityButton, styles.incrementButton]}
+              >
+                <Text style={styles.quantityButtonText}>+</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+          
+          {isFullyPicked ? (
+            <View style={styles.pickedBadge}>
+              <Text style={styles.pickedText}>Picked</Text>
+            </View>
+          ) : (
+            <TouchableOpacity 
+              style={styles.pickButton}
+              onPress={() => updatePickedQuantity(item.id, item.requiredQuantity)}
+            >
+              <Text style={styles.pickButtonText}>Pick</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   const renderBinSection = (binName: string, binItems: PicklistItem[]) => (
     <View key={binName} style={styles.binSection}>
       <View style={styles.binHeader}>
-        <MaterialIcons name="inventory" size={20} color="#007AFF" />
+        <MaterialIcons name="inventory-2" size={20} color="#333" />
         <Text style={styles.binName}>{binName}</Text>
-        <Text style={styles.binItemCount}>({binItems.length} items)</Text>
       </View>
       {binItems.map(item => (
         <View key={item.id}>
@@ -173,19 +187,26 @@ export default function CreatePicklistScreen() {
   const hasPickedItems = items.some(item => item.pickedQuantity > 0);
   const allItemsPicked = items.every(item => item.pickedQuantity === item.requiredQuantity);
 
+  const orderIds = (params.orderIds as string).split(',');
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.subtitle}>{totalItemsCount} items to pick</Text>
-
+        <Text style={styles.title}>Picklist</Text>
+        <View style={styles.headerInfo}>
+          <Text style={styles.infoText}>Orders: {orderIds.length}</Text>
+          <Text style={styles.infoText}>Items: {totalItemsCount}</Text>
+          <Text style={styles.infoText}>Store: Fly LLC</Text>
+          <Text style={styles.infoText}>ID: 1</Text>
+        </View>
+        
         {/* Progress Bar */}
         <View style={styles.progressContainer}>
           <View style={styles.progressBar}>
             <View style={[styles.progressFill, { width: `${progressPercentage}%` }]} />
           </View>
           <Text style={styles.progressText}>
-            {pickedItemsCount} / {totalItemsCount} items picked ({Math.round(progressPercentage)}%)
+            {pickedItemsCount} of {totalItemsCount} items picked
           </Text>
         </View>
       </View>
@@ -200,13 +221,18 @@ export default function CreatePicklistScreen() {
 
       <View style={styles.bottomBar}>
         <TouchableOpacity
-          style={[styles.fulfillButton, !hasPickedItems && styles.disabledButton]}
+          style={styles.markAllButton}
+          onPress={markAllPicked}
+        >
+          <Text style={styles.markAllText}>Mark All Picked</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          style={[styles.proceedButton, !hasPickedItems && styles.disabledButton]}
           onPress={handleFulfillment}
           disabled={!hasPickedItems}
         >
-          <Text style={styles.fulfillText}>
-            {params.fulfillmentId ? 'Update Picklist' : 'Create Picklist'}
-          </Text>
+          <Text style={styles.proceedText}>Proceed to Fulfillment</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -217,11 +243,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8f9fa',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    width: '100%',
-    maxWidth: '100%',
-    overflow: 'hidden',
   },
   loadingContainer: {
     flex: 1,
@@ -234,11 +255,43 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#e9ecef',
   },
-
-  subtitle: {
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 8,
+  },
+  headerInfo: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 16,
+  },
+  infoText: {
     fontSize: 14,
     color: '#666',
-    marginTop: 4,
+    marginRight: 16,
+    marginBottom: 4,
+  },
+  progressContainer: {
+    marginTop: 8,
+  },
+  progressBar: {
+    height: 8,
+    backgroundColor: '#e0e0e0',
+    borderRadius: 4,
+    overflow: 'hidden',
+    marginBottom: 8,
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#28a745',
+    borderRadius: 4,
+  },
+  progressText: {
+    fontSize: 14,
+    color: '#333',
+    textAlign: 'right',
+    fontWeight: '500',
   },
   itemsList: {
     flex: 1,
@@ -246,11 +299,30 @@ const styles = StyleSheet.create({
   itemsContent: {
     padding: 16,
   },
+  binSection: {
+    marginBottom: 20,
+  },
+  binHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+  },
+  binName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginLeft: 8,
+  },
   itemCard: {
     backgroundColor: '#fff',
     padding: 16,
     borderRadius: 8,
-    marginBottom: 12,
+    marginBottom: 8,
     borderWidth: 1,
     borderColor: '#e9ecef',
     flexDirection: 'row',
@@ -262,58 +334,111 @@ const styles = StyleSheet.create({
   },
   productName: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
     color: '#333',
+    marginBottom: 4,
   },
-  location: {
+  sku: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 8,
+  },
+  inventoryInfo: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  inventoryText: {
     fontSize: 12,
     color: '#666',
-    marginTop: 2,
   },
-  requiredQty: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 2,
+  quantitySection: {
+    alignItems: 'flex-end',
+  },
+  quantityDisplay: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  quantityText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginRight: 8,
+    minWidth: 40,
+    textAlign: 'center',
   },
   quantityControls: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   quantityButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#f0f0f0',
+    width: 28,
+    height: 28,
+    borderRadius: 4,
     justifyContent: 'center',
     alignItems: 'center',
+    marginHorizontal: 2,
   },
-  quantityInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: 8,
-  },
-  quantityInput: {
-    width: 50,
-    height: 32,
+  decrementButton: {
+    backgroundColor: '#f8f9fa',
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 4,
-    textAlign: 'center',
-    marginRight: 4,
+    borderColor: '#dee2e6',
   },
-  requiredQtyLabel: {
+  incrementButton: {
+    backgroundColor: '#007bff',
+  },
+  quantityButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  pickedBadge: {
+    backgroundColor: '#e9ecef',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 4,
+  },
+  pickedText: {
     fontSize: 14,
     color: '#666',
     fontWeight: '500',
   },
+  pickButton: {
+    backgroundColor: '#007bff',
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 4,
+  },
+  pickButtonText: {
+    fontSize: 14,
+    color: '#fff',
+    fontWeight: '500',
+  },
   bottomBar: {
+    flexDirection: 'row',
     padding: 16,
     backgroundColor: '#fff',
     borderTopWidth: 1,
     borderTopColor: '#e9ecef',
+    gap: 12,
   },
-  fulfillButton: {
-    backgroundColor: '#007AFF',
+  markAllButton: {
+    flex: 1,
+    backgroundColor: '#f8f9fa',
+    paddingVertical: 12,
+    borderRadius: 6,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#dee2e6',
+  },
+  markAllText: {
+    color: '#333',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  proceedButton: {
+    flex: 1,
+    backgroundColor: '#007bff',
     paddingVertical: 12,
     borderRadius: 6,
     alignItems: 'center',
@@ -321,79 +446,9 @@ const styles = StyleSheet.create({
   disabledButton: {
     backgroundColor: '#ccc',
   },
-  fulfillText: {
+  proceedText: {
     color: '#fff',
     fontWeight: '600',
     fontSize: 16,
-  },
-  // Styles for the progress bar
-  progressContainer: {
-    marginTop: 10,
-    width: '100%',
-  },
-  progressBar: {
-    height: 8,
-    backgroundColor: '#e0e0e0',
-    borderRadius: 4,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: '#007AFF',
-    borderRadius: 4,
-  },
-  progressText: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 4,
-    textAlign: 'center',
-  },
-  binSection: {
-    marginBottom: 20,
-  },
-  binHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f0f8ff',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 8,
-    borderLeftWidth: 4,
-    borderLeftColor: '#007AFF',
-  },
-  binName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#007AFF',
-    marginLeft: 8,
-    flex: 1,
-  },
-  binItemCount: {
-    fontSize: 12,
-    color: '#666',
-  },
-  upc: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 2,
-  },
-  hintsContainer: {
-    marginTop: 8,
-    padding: 8,
-    backgroundColor: '#fff9e6',
-    borderRadius: 4,
-    borderLeftWidth: 3,
-    borderLeftColor: '#ffc107',
-  },
-  hintsTitle: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#856404',
-    marginBottom: 4,
-  },
-  hintText: {
-    fontSize: 11,
-    color: '#856404',
-    marginLeft: 8,
   },
 });

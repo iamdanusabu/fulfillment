@@ -31,6 +31,7 @@ import { Tapin2Icon } from '../../../shared/components/Tapin2Icon';
 import { TableIcon } from '../../../shared/components/TableIcon';
 import { ManualIcon } from '../../../shared/components/ManualIcon';
 import { FanVistaIcon } from '../../../shared/components/FanVistaIcon';
+import { ShoppingCartIcon } from '../../../shared/components/ShoppingCartIcon';
 
 
 
@@ -311,7 +312,7 @@ export default function DashboardScreen() {
                 <Text style={styles.metricLabel}>Total Orders</Text>
                 <Text style={styles.metricNumber}>{stats.totalOrdersCount}</Text>
               </View>
-              <MaterialIcons name="shopping-cart" size={24} color="#666" />
+              <ShoppingCartIcon size={24} />
             </TouchableOpacity>
 
             <TouchableOpacity

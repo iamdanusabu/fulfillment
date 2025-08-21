@@ -54,7 +54,7 @@ export const usePaginatedOrders = (params: UsePaginatedOrdersParams = {}) => {
   const paginatedState = usePaginatedFetcher<any>(
     config.endpoints.orders,
     {
-      pageSize: 20,
+      pageSize: 50,
       initialParams: apiParams,
     }
   );

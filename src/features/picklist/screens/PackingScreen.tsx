@@ -78,6 +78,7 @@ export default function PackingScreen() {
         typeID: orderId
       }));
       
+      // Use finalize endpoint for existing fulfillments (PUT request)
       await picklistApi.finalizePacking(params.fulfillmentId as string, sources);
       
       // Navigate back to picklist index

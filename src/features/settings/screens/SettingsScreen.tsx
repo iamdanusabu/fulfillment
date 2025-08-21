@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   View, 
@@ -25,6 +26,8 @@ const DEFAULT_SETTINGS: Settings = {
   theme: 'light',
   refreshInterval: 30,
 };
+
+const APP_VERSION = '1.0.0';
 
 export default function SettingsScreen() {
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
@@ -80,11 +83,13 @@ export default function SettingsScreen() {
               await AsyncStorage.removeItem('refresh_token');
               await AsyncStorage.removeItem('token_expires_in');
               await AsyncStorage.removeItem('username');
+              await AsyncStorage.removeItem('domain');
 
               // Navigate to login screen
               router.replace('/login');
             } catch (error) {
               console.error('Error during logout:', error);
+              Alert.alert('Error', 'Failed to logout. Please try again.');
             }
           }
         },
@@ -102,6 +107,65 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView style={styles.container}>
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Preferences</Text>
+        
+        <View style={styles.settingItem}>
+          <Text style={styles.settingLabel}>Notifications</Text>
+          <Switch
+            value={settings.notifications}
+            onValueChange={(value) => updateSetting('notifications', value)}
+            trackColor={{ false: '#e9ecef', true: '#007AFF' }}
+            thumbColor={settings.notifications ? '#fff' : '#f4f3f4'}
+          />
+        </View>
+        
+        <View style={styles.settingItem}>
+          <Text style={styles.settingLabel}>Auto Refresh</Text>
+          <Switch
+            value={settings.autoRefresh}
+            onValueChange={(value) => updateSetting('autoRefresh', value)}
+            trackColor={{ false: '#e9ecef', true: '#007AFF' }}
+            thumbColor={settings.autoRefresh ? '#fff' : '#f4f3f4'}
+          />
+        </View>
+
+        <TouchableOpacity 
+          style={styles.settingItem}
+          onPress={() => {
+            const newTheme = settings.theme === 'light' ? 'dark' : 'light';
+            updateSetting('theme', newTheme);
+          }}
+        >
+          <Text style={styles.settingLabel}>Theme</Text>
+          <View style={styles.settingValue}>
+            <Text style={styles.settingValueText}>
+              {settings.theme === 'light' ? 'Light' : 'Dark'}
+            </Text>
+            <MaterialIcons name="chevron-right" size={20} color="#666" />
+          </View>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>About</Text>
+        
+        <View style={styles.settingItem}>
+          <Text style={styles.settingLabel}>Version</Text>
+          <Text style={styles.settingValueText}>{APP_VERSION}</Text>
+        </View>
+
+        <View style={styles.settingItem}>
+          <Text style={styles.settingLabel}>App Name</Text>
+          <Text style={styles.settingValueText}>OrderUp</Text>
+        </View>
+
+        <View style={styles.settingItem}>
+          <Text style={styles.settingLabel}>Build</Text>
+          <Text style={styles.settingValueText}>Production</Text>
+        </View>
+      </View>
+
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Account</Text>
         <TouchableOpacity style={styles.settingItem} onPress={handleLogout}>
@@ -165,6 +229,6 @@ const styles = StyleSheet.create({
     color: '#dc3545',
   },
   logoutIcon: {
-    marginRight: 15,
+    marginLeft: 8,
   },
 });

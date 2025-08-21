@@ -136,7 +136,7 @@ export default function DashboardScreen() {
 
       // Update state with fresh data
       setStats(newData);
-      
+
       // Save fresh data to cache
       await saveCachedData(newData);
 
@@ -181,7 +181,7 @@ export default function DashboardScreen() {
           const url = `${config.endpoints.orders}?source=${encodeURIComponent(source)}&pageNo=1&pageSize=1&hasFulfilmentJob=false&pagination=true`;
           const response = await fetchWithToken(url);
           const count = response?.totalRecords || 0;
-          
+
           // Only include sources with actual data
           if (count > 0) {
             sourcesWithData.push({
@@ -377,7 +377,7 @@ export default function DashboardScreen() {
           </View>
         )}
 
-        
+
 
         {/* QR Code Scanner Modal */}
         <QRCodeScanner
@@ -496,13 +496,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   sourceIconContainer: {
-    width: 28,
-    height: 28,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 8,
+    padding: 12,
+    marginRight: 12,
     justifyContent: 'center',
     alignItems: 'center',
+    width: 48,
+    height: 48,
   },
   sourceIcon: {
-    fontSize: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   sourceLabel: {
     fontSize: 12,
@@ -550,7 +555,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontStyle: 'italic',
   },
-  
+
   actionIcon: {
     marginBottom: 8,
     selfAlign: 'center',

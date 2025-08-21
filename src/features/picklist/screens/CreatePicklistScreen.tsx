@@ -76,7 +76,7 @@ export default function CreatePicklistScreen() {
       let fulfillmentId: string;
 
       if (params.fulfillmentId) {
-        // Update existing fulfillment using PUT - use the items with picked quantities
+        // Update existing fulfillment using PUT
         await picklistApi.updateFulfillment(params.fulfillmentId as string, items, fulfillmentData);
         fulfillmentId = params.fulfillmentId as string;
       } else {

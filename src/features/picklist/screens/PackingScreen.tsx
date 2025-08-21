@@ -16,11 +16,6 @@ export default function PackingScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
 
-  const goBackToPicklist = () => {
-    const fulfillmentParam = params.fulfillmentId ? `&fulfillmentId=${params.fulfillmentId}` : '';
-    router.push(`/picklist/create?orderIds=${params.orderIds}&locationId=${params.locationId}&locationType=STORE${fulfillmentParam}`);
-  };
-
   useEffect(() => {
     if (params.orderIds) {
       loadOrders();
@@ -178,9 +173,6 @@ export default function PackingScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={goBackToPicklist} style={styles.backButton}>
-          <MaterialIcons name="arrow-back" size={24} color="#007AFF" />
-        </TouchableOpacity>
         <Text style={styles.subtitle}>{orders.length} orders to pack</Text>
       </View>
 
@@ -218,16 +210,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
     padding: 20,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#e9ecef',
-  },
-  backButton: {
-    marginRight: 16,
-    padding: 4,
   },
   
   subtitle: {

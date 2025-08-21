@@ -120,39 +120,42 @@ export default function CreatePicklistScreen() {
         </View>
 
         <View style={styles.quantitySection}>
-          <View style={styles.quantityDisplay}>
-            <Text style={styles.quantityText}>
-              {item.pickedQuantity}/{item.requiredQuantity}
-            </Text>
-            <View style={styles.quantityControls}>
+          <View style={styles.quantityRow}>
+            <View style={styles.quantityContainer}>
               <TouchableOpacity
                 onPress={() => updatePickedQuantity(item.id, item.pickedQuantity - 1)}
                 style={[styles.quantityButton, styles.decrementButton]}
+                disabled={item.pickedQuantity === 0}
               >
-                <Text style={styles.quantityButtonText}>-</Text>
+                <Text style={[styles.quantityButtonText, item.pickedQuantity === 0 && styles.disabledButtonText]}>-</Text>
               </TouchableOpacity>
+              
+              <View style={[styles.quantityDisplay, isFullyPicked && styles.fullyPickedQuantity]}>
+                <Text style={[styles.quantityText, isFullyPicked && styles.fullyPickedText]}>
+                  {item.pickedQuantity}/{item.requiredQuantity}
+                </Text>
+              </View>
               
               <TouchableOpacity
                 onPress={() => updatePickedQuantity(item.id, item.pickedQuantity + 1)}
                 style={[styles.quantityButton, styles.incrementButton]}
+                disabled={item.pickedQuantity >= item.requiredQuantity}
               >
-                <Text style={styles.quantityButtonText}>+</Text>
+                <Text style={[styles.quantityButtonText, styles.incrementButtonText]}>+</Text>
               </TouchableOpacity>
             </View>
-          </View>
-          
-          {isFullyPicked ? (
-            <View style={styles.pickedBadge}>
+            
+            {isFullyPicked ? (
               <Text style={styles.pickedText}>Picked</Text>
-            </View>
-          ) : (
-            <TouchableOpacity 
-              style={styles.pickButton}
-              onPress={() => updatePickedQuantity(item.id, item.requiredQuantity)}
-            >
-              <Text style={styles.pickButtonText}>Pick</Text>
-            </TouchableOpacity>
-          )}
+            ) : (
+              <TouchableOpacity 
+                style={styles.pickButton}
+                onPress={() => updatePickedQuantity(item.id, item.requiredQuantity)}
+              >
+                <Text style={styles.pickButtonText}>Pick</Text>
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
       </View>
     );
@@ -354,30 +357,41 @@ const styles = StyleSheet.create({
   quantitySection: {
     alignItems: 'flex-end',
   },
-  quantityDisplay: {
+  quantityRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    gap: 12,
+  },
+  quantityContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 0,
+  },
+  quantityDisplay: {
+    backgroundColor: '#f8f9fa',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 4,
+    minWidth: 50,
+    alignItems: 'center',
+  },
+  fullyPickedQuantity: {
+    backgroundColor: '#e9ecef',
   },
   quantityText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     color: '#333',
-    marginRight: 8,
-    minWidth: 40,
-    textAlign: 'center',
   },
-  quantityControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  fullyPickedText: {
+    color: '#666',
   },
   quantityButton: {
-    width: 28,
-    height: 28,
+    width: 30,
+    height: 30,
     borderRadius: 4,
     justifyContent: 'center',
     alignItems: 'center',
-    marginHorizontal: 2,
   },
   decrementButton: {
     backgroundColor: '#f8f9fa',
@@ -390,13 +404,13 @@ const styles = StyleSheet.create({
   quantityButtonText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#666',
   },
-  pickedBadge: {
-    backgroundColor: '#e9ecef',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 4,
+  incrementButtonText: {
+    color: '#fff',
+  },
+  disabledButtonText: {
+    color: '#ccc',
   },
   pickedText: {
     fontSize: 14,
@@ -404,14 +418,12 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   pickButton: {
-    backgroundColor: '#007bff',
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 4,
   },
   pickButtonText: {
     fontSize: 14,
-    color: '#fff',
+    color: '#007bff',
     fontWeight: '500',
   },
   bottomBar: {
